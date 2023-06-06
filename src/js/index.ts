@@ -1,5 +1,5 @@
 import { writeColor } from "./color";
-import { ray, Ray } from "./ray";
+import { ray, Ray, rayAt2 } from './ray';
 import {
     color,
     vec3,
@@ -12,30 +12,44 @@ import {
     vec3Add2,
     vec3Sub2,
     vec3MulS2,
-    Point3, vec3Dot
+    Point3, vec3Dot, vec3DivS3
 } from './vec3';
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
-const hit_sphere = (center: Point3, radius: number, r: Ray): boolean => {
+const hit_sphere = (center: Point3, radius: number, r: Ray): number => {
     const oc = vec3Sub2(r.origin, center);
     const a = vec3Dot(r.direction, r.direction);
-    const b = 2 * vec3Dot(oc, r.direction);
+    const half_b = vec3Dot(oc, r.direction);
     const c = vec3Dot(oc, oc) - radius * radius;
-    const D = b * b - 4 * a * c;
-    return D > 0;
+    const D = half_b * half_b - a * c;
+    return D < 0
+        ? -1
+        : ( -half_b - Math.sqrt(D) ) / a;
 }
 
 const ray_color = (r: Ray): Color => {
-    if (hit_sphere(point3(0, 0, -1), 0.5, r)) {
-        return color(1, 0, 0);
+    {// sphere
+        const sphere_center = point3(0, 0, -1);
+        const sphere_radius = 0.5;
+        const t = hit_sphere(sphere_center, sphere_radius, r);
+        if (t > 0) {
+            const n = vec3Sub2(rayAt2(r, t), sphere_center);
+            vec3DivS3(n, n, sphere_radius);// make the normal have unit length
+
+
+            return vec3MulS2(color(n[0] + 1, n[1] + 1, n[2] + 1), 0.5);
+        }
     }
-    const unitDirection = r.direction.slice();
-    const t = 0.5 * (unitDirection[1] + 1);
-    vec3Mix4(unitDirection, color(1, 1, 1), color(0.5, 0.7, 1), t);
-    return unitDirection;
+
+    {// background
+        const unitDirection = r.direction.slice();
+        const t = 0.5 * (unitDirection[1] + 1);
+        vec3Mix4(unitDirection, color(1, 1, 1), color(0.5, 0.7, 1), t);
+        return unitDirection;
+    }
 };
 
 
