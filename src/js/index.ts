@@ -1,10 +1,11 @@
 import { writeColor } from "./color";
+import { Hittable } from "./hittable/hittable";
+import { HittableList } from "./hittable/hittable_list";
+import { Sphere } from "./hittable/sphere";
 import { ray, Ray, rayAt2 } from './ray';
 import {
     color,
     vec3,
-    vec3Mix3,
-    vec3Unit1,
     Color,
     vec3Mix4,
     point3,
@@ -19,27 +20,11 @@ const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
-const hit_sphere = (center: Point3, radius: number, r: Ray): number => {
-    const oc = vec3Sub2(r.origin, center);
-    const a = vec3Dot(r.direction, r.direction);
-    const half_b = vec3Dot(oc, r.direction);
-    const c = vec3Dot(oc, oc) - radius * radius;
-    const D = half_b * half_b - a * c;
-    return D < 0
-        ? -1
-        : ( -half_b - Math.sqrt(D) ) / a;
-}
-
-const ray_color = (r: Ray): Color => {
-    {// sphere
-        const sphere_center = point3(0, 0, -1);
-        const sphere_radius = 0.5;
-        const t = hit_sphere(sphere_center, sphere_radius, r);
-        if (t > 0) {
-            const n = vec3Sub2(rayAt2(r, t), sphere_center);
-            vec3DivS3(n, n, sphere_radius);// make the normal have unit length
-
-
+const ray_color = (r: Ray, world: Hittable): Color => {
+    {// world
+        const hit = world.hit(r, 0, Infinity);
+        if (hit !== null) {
+            const n = hit.normal;
             return vec3MulS2(color(n[0] + 1, n[1] + 1, n[2] + 1), 0.5);
         }
     }
@@ -52,6 +37,10 @@ const ray_color = (r: Ray): Color => {
     }
 };
 
+const world = new HittableList([
+    new Sphere(point3(0, 0, -1), 0.5),
+    new Sphere(point3(0, -100.5, -1), 100)
+]);
 
 
 const aspect_ratio = 16 / 9;
@@ -89,7 +78,7 @@ for (let j = 0; j < image_height; j++) {
 
         const r = ray(origin, vec3Sub2(vec3Add2(lower_left_corner, vec3Add2(vec3MulS2(horizontal, u), vec3MulS2(vertical, v))), origin));
 
-        const pixelColor = ray_color(r);
+        const pixelColor = ray_color(r, world);
         writeColor(imageData, x, y, pixelColor);
     }
 }

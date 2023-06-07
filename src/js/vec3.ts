@@ -85,3 +85,13 @@ export const vec3Mix4 = (result: Vec3, a: Vec3, b: Vec3, t: number): void => {
     result[1] = q * a[1] + t * b[1];
     result[2] = q * a[2] + t * b[2];
 };
+
+export const vec3Negate1 = (a: Vec3): Vec3 => {
+    return vec3(-a[0], -a[1], -a[2]);
+}
+
+export const vec3Negate2 = (result: Vec3, a: Vec3): void => {
+    result[0] = -a[0];
+    result[1] = -a[1];
+    result[2] = -a[2];
+}
