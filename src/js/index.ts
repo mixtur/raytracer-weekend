@@ -13,8 +13,10 @@ import {
     vec3Add2,
     vec3Sub2,
     vec3MulS2,
-    Point3, vec3Dot, vec3DivS3
+    Point3, vec3Dot, vec3DivS3, vec3Add3
 } from './vec3';
+import { Camera } from './camera';
+import { randomMinMax } from './random';
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
@@ -42,49 +44,41 @@ const world = new HittableList([
     new Sphere(point3(0, -100.5, -1), 100)
 ]);
 
+const camera = new Camera();
 
 const aspect_ratio = 16 / 9;
 const image_width = 400;
 const image_height = image_width / aspect_ratio;
-
-const viewport_height = 2;
-const viewport_width = viewport_height + aspect_ratio;
-const focal_length = 1;
-
-const origin = point3(0, 0, 0);
-const horizontal = vec3(viewport_width, 0, 0);
-const vertical = vec3(0, viewport_height, 0);
-const lower_left_corner = vec3Sub2(
-    origin,
-    vec3Add2(
-        vec3(0, 0, focal_length),
-        vec3Add2(
-            vec3DivS2(horizontal, 2),
-            vec3DivS2(vertical, 2)
-        )
-    )
-);
-
+const samples_per_pixel = 100;
 
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
-for (let j = 0; j < image_height; j++) {
-    console.log(`scanline remaining ${image_height - j}`);
-    for (let i = 0; i < image_width; i++) {
-        const x = i;
-        const y = image_height -1 - j;
 
-        const u = i / (image_width - 1);
-        const v = j / (image_height - 1);
+async function main() {
+    canvas.width = image_width;
+    canvas.height = image_height;
+    for (let j = 0; j < image_height; j++) {
+        console.log(`scanline remaining ${image_height - j}`);
+        for (let i = 0; i < image_width; i++) {
+            const x = i;
+            const y = image_height -1 - j;
 
-        const r = ray(origin, vec3Sub2(vec3Add2(lower_left_corner, vec3Add2(vec3MulS2(horizontal, u), vec3MulS2(vertical, v))), origin));
+            const pixelColor = color(0, 0, 0);
+            for (let s = 0; s < samples_per_pixel; s++) {
+                const u = (i + Math.random()) / (image_width - 1);
+                const v = (j + Math.random()) / (image_height - 1);
 
-        const pixelColor = ray_color(r, world);
-        writeColor(imageData, x, y, pixelColor);
+                const r = camera.get_ray(u, v);
+                vec3Add3(pixelColor, pixelColor, ray_color(r, world));
+            }
+            writeColor(imageData, x, y, pixelColor, samples_per_pixel);
+        }
+        await new Promise(resolve => setTimeout(resolve, 0));
+        ctx.putImageData(imageData, 0, 0);
     }
+    ctx.putImageData(imageData, 0, 0);
+    console.log('Done!');
 }
-console.log('Done!');
 
-canvas.width = image_width;
-canvas.height = image_height;
-ctx.putImageData(imageData, 0, 0);
-
+main().catch((e) => {
+    console.log(e);
+})

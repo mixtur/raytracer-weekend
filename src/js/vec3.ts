@@ -7,17 +7,17 @@ export const color = vec3;
 export const point3 = vec3;
 
 export const vec3Sub2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-export const vec3Sub3 = (a: Vec3, b: Vec3, c: Vec3): void => {
-    a[0] = b[0] - c[0];
-    a[1] = b[1] - c[1];
-    a[2] = b[2] - c[2];    
+export const vec3Sub3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+    result[0] = a[0] - b[0];
+    result[1] = a[1] - b[1];
+    result[2] = a[2] - b[2];
 };
 
 export const vec3Add2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] + b[0], a[1] + b[1], a[2] + b[2]);
-export const vec3Add3 = (a: Vec3, b: Vec3, c: Vec3): void => {
-    a[0] = b[0] + c[0];
-    a[1] = b[1] + c[1];
-    a[2] = b[2] + c[2];    
+export const vec3Add3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+    result[0] = a[0] + b[0];
+    result[1] = a[1] + b[1];
+    result[2] = a[2] + b[2];
 };
 
 export const vec3MulS2 = (a: Vec3, s: number): Vec3 => vec3(a[0] * s, a[1] * s, a[2] * s);
