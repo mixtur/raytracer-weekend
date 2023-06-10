@@ -1,10 +1,22 @@
 import { randomMinMax } from './random';
+import { GCVec3Allocator, Vec3Allocator } from './vec3_allocators';
 
 export type Vec3 = Float32Array;
 export type Color = Vec3;
 export type Point3 = Vec3;
 
-export const vec3 = (x: number, y: number, z: number): Vec3 => new Float32Array([x, y, z]);
+export const gcAllocator = new GCVec3Allocator();
+
+let allocator = gcAllocator;
+export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; }
+export const vec3AllocatorScope = (a: Vec3Allocator, f: () => void): void => {
+    const prevAllocator = allocator;
+    allocator = a;
+    f();
+    allocator = prevAllocator;
+}
+
+export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x, y, z);
 export const color = vec3;
 export const point3 = vec3;
 

@@ -6,11 +6,8 @@ export type Ray = {
 };
 
 export const ray = (origin: Vec3, direction: Vec3): Ray => {
-    const storage = new Float32Array(6);
-    const rayOrigin = new Float32Array(storage.buffer, 0, 3);
-    const rayDirection = new Float32Array(storage.buffer, storage.BYTES_PER_ELEMENT * 3, 3);
-    rayOrigin.set(origin);
-    rayDirection.set(direction);
+    const rayOrigin = vec3(origin[0], origin[1], origin[2]);
+    const rayDirection = vec3(direction[0], direction[1], direction[2]);
 
     return {
         origin: rayOrigin,
