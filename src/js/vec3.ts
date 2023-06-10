@@ -8,13 +8,13 @@ export type Point3 = Vec3;
 export const gcAllocator = new GCVec3Allocator();
 
 let allocator = gcAllocator;
-export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; }
+export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };
 export const vec3AllocatorScope = (a: Vec3Allocator, f: () => void): void => {
     const prevAllocator = allocator;
     allocator = a;
     f();
     allocator = prevAllocator;
-}
+};
 
 export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x, y, z);
 export const color = vec3;
@@ -80,7 +80,7 @@ export const vec3Cross3 = (a: Vec3, b: Vec3, c: Vec3): void => {
     a[1] = y;
 };
 
-export const vec3Unit1 = (a: Vec3): Vec3 => vec3DivS2(a, 1 / vec3Len(a));
+export const vec3Unit1 = (a: Vec3): Vec3 => vec3MulS2(a, 1 / vec3Len(a));
 
 export const vec3Unit2 = (result: Vec3, a: Vec3): void => vec3DivS3(result, a, 1 / vec3Len(a));
 
@@ -102,13 +102,13 @@ export const vec3Mix4 = (result: Vec3, a: Vec3, b: Vec3, t: number): void => {
 
 export const vec3Negate1 = (a: Vec3): Vec3 => {
     return vec3(-a[0], -a[1], -a[2]);
-}
+};
 
 export const vec3Negate2 = (result: Vec3, a: Vec3): void => {
     result[0] = -a[0];
     result[1] = -a[1];
     result[2] = -a[2];
-}
+};
 
 export const vec3Rand = (): Vec3 => vec3(Math.random(), Math.random(), Math.random());
 
@@ -120,26 +120,33 @@ export const vec3RandInUnitSphere = (): Vec3 => {
         if (vec3SqLen(p) >= 1) continue;
         return p;
     }
-}
+};
 
 export const vec3RandUnit = (): Vec3 => {
     return vec3Unit1(vec3RandInUnitSphere());
-}
+};
 export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {
     const in_unit_sphere = vec3RandInUnitSphere();
     return vec3Dot(in_unit_sphere, normal) < 0
         ? vec3Negate1(in_unit_sphere)
         : in_unit_sphere;
-}
+};
 
 export const vec3NearZero = (v: Vec3): boolean => {
     const eps = 1e-8;
     return Math.abs(v[0]) < eps && Math.abs(v[1]) < eps && Math.abs(v[2]) < eps;
-}
+};
 
 export const vec3Reflect = (v: Vec3, normal: Vec3): Vec3 => {
     const result = vec3MulS2(normal, 2 * vec3Dot(v, normal));
     vec3Sub3(result, v, result);
     return result;
-}
+};
 
+export const vec3Refract = (v: Vec3, normal: Vec3, ior: number): Vec3 => {
+    const cos_theta = -vec3Dot(normal, v);
+    const out_x = vec3MulS2(vec3Add2(v, vec3MulS2(normal, cos_theta)), ior);
+    const out_y = vec3MulS2(normal, -Math.sqrt(1 - vec3SqLen(out_x)));
+    vec3Add3(out_x, out_x, out_y);
+    return out_x;
+};

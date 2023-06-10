@@ -13,7 +13,7 @@ import {
 } from './vec3';
 import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
-import { Lambertian, Metal } from './material';
+import { Dielectric, Lambertian, Metal } from './material';
 import { clamp } from './utils';
 
 const canvas = document.createElement('canvas');
@@ -21,15 +21,16 @@ const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
 const material_ground = new Lambertian(color(0.8, 0.8, 0.0));
-const material_center = new Lambertian(color(0.7, 0.3, 0.3));
-const material_left   = new Metal(color(0.8, 0.8, 0.8), 0.3);
-const material_right  = new Metal(color(0.8, 0.6, 0.2), 1.0);
+const material_center = new Lambertian(color(0.1, 0.2, 0.5));
+const material_left   = new Dielectric(1.5);
+const material_right  = new Metal(color(0.8, 0.6, 0.2), 0.0);
 
 const world = new HittableList([]);
 
 world.objects.push(new Sphere(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
 world.objects.push(new Sphere(point3( 0.0,    0.0, -1.0),   0.5, material_center));
 world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0),  -0.4, material_left));
 world.objects.push(new Sphere(point3( 1.0,    0.0, -1.0),   0.5, material_right));
 
 

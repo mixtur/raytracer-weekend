@@ -1,5 +1,5 @@
 import { Ray } from "../ray";
-import { Point3, Vec3, vec3Dot, vec3Negate1 } from "../vec3";
+import { Point3, Vec3, vec3Dot, vec3Negate1, vec3Unit1 } from '../vec3';
 import { Material } from '../material';
 
 export interface HitRecord {
@@ -12,7 +12,7 @@ export interface HitRecord {
 
 export const set_face_normal = (rec: HitRecord, r: Ray, outward_normal: Vec3): void => {
     rec.front_face = vec3Dot(r.direction, outward_normal) < 0;
-    rec.normal = rec.front_face ? outward_normal : vec3Negate1(outward_normal);
+    rec.normal = vec3Unit1(rec.front_face ? outward_normal : vec3Negate1(outward_normal));
 };
 
 
