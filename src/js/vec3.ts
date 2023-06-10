@@ -132,3 +132,14 @@ export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {
         : in_unit_sphere;
 }
 
+export const vec3NearZero = (v: Vec3): boolean => {
+    const eps = 1e-8;
+    return Math.abs(v[0]) < eps && Math.abs(v[1]) < eps && Math.abs(v[2]) < eps;
+}
+
+export const vec3Reflect = (v: Vec3, normal: Vec3): Vec3 => {
+    const result = vec3MulS2(normal, 2 * vec3Dot(v, normal));
+    vec3Sub3(result, v, result);
+    return result;
+}
+

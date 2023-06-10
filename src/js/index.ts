@@ -2,44 +2,39 @@ import { writeColor } from "./color";
 import { Hittable } from "./hittable/hittable";
 import { HittableList } from "./hittable/hittable_list";
 import { Sphere } from "./hittable/sphere";
-import { ray, Ray, rayAt2 } from './ray';
+import { ray, Ray } from './ray';
 import {
     color,
-    vec3,
     Color,
     vec3Mix4,
     point3,
-    vec3DivS2,
     vec3Add2,
     vec3Sub2,
     vec3MulS2,
-    Point3,
-    vec3Dot,
-    vec3DivS3,
     vec3Add3,
-    vec3RandInUnitSphere,
     vec3RandUnit,
-    vec3SetAllocator,
-    gcAllocator,
-    vec3AllocatorScope
+    vec3AllocatorScope, vec3MulV2
 } from './vec3';
 import { Camera } from './camera';
-import { randomMinMax } from './random';
 import { ArenaVec3Allocator } from './vec3_allocators';
+import { Lambertian, Metal } from './material';
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
-const   ray_color = (r: Ray, world: Hittable, depth: number): Color => {
+const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
     if (depth <= 0) {
         return color(0, 0, 0);
     }
     {// world
         const hit = world.hit(r, 0.0001, Infinity);
         if (hit !== null) {
-            const target = vec3Add2(hit.p, vec3Add2(hit.normal, vec3RandUnit()));
-            return vec3MulS2(ray_color(ray(hit.p, vec3Sub2(target, hit.p)), world, depth - 1), 0.5);
+            const bounce = hit.material.scatter(r, hit);
+            if (bounce) {
+                return vec3MulV2(bounce.attenuation, ray_color(bounce.scattered, world, depth - 1));
+            }
+            return color(0, 0, 0);
         }
     }
 
@@ -50,10 +45,18 @@ const   ray_color = (r: Ray, world: Hittable, depth: number): Color => {
     }
 };
 
-const world = new HittableList([
-    new Sphere(point3(0, 0, -1), 0.5),
-    new Sphere(point3(0, -100.5, -1), 100)
-]);
+const material_ground = new Lambertian(color(0.8, 0.8, 0.0));
+const material_center = new Lambertian(color(0.7, 0.3, 0.3));
+const material_left   = new Metal(color(0.8, 0.8, 0.8), 0.3);
+const material_right  = new Metal(color(0.8, 0.6, 0.2), 1.0);
+
+const world = new HittableList([]);
+
+world.objects.push(new Sphere(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
+world.objects.push(new Sphere(point3( 0.0,    0.0, -1.0),   0.5, material_center));
+world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0),   0.5, material_left));
+world.objects.push(new Sphere(point3( 1.0,    0.0, -1.0),   0.5, material_right));
+
 
 const camera = new Camera();
 

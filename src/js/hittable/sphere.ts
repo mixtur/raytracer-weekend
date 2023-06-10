@@ -1,14 +1,16 @@
 import { Ray, rayAt2 } from "../ray";
 import { Point3, vec3Dot, vec3Sub2, vec3DivS2 } from "../vec3";
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
+import { Material } from '../material';
 
 export class Sphere implements Hittable {
     center: Point3;
     radius: number;
-    constructor(center: Point3, radius: number) {
+    material: Material;
+    constructor(center: Point3, radius: number, material: Material) {
         this.center = center;
         this.radius = radius;
-
+        this.material = material;
     }
     hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
         const {center, radius} = this;
@@ -33,7 +35,8 @@ export class Sphere implements Hittable {
             t,
             p,
             normal: vec3DivS2(vec3Sub2(p, center), radius),
-            front_face: false
+            front_face: false,
+            material: this.material
         };
 
         set_face_normal(hit, r, hit.normal);
