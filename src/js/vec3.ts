@@ -1,3 +1,5 @@
+import { randomMinMax } from './random';
+
 export type Vec3 = Float32Array;
 export type Color = Vec3;
 export type Point3 = Vec3;
@@ -95,3 +97,26 @@ export const vec3Negate2 = (result: Vec3, a: Vec3): void => {
     result[1] = -a[1];
     result[2] = -a[2];
 }
+
+export const vec3Rand = (): Vec3 => vec3(Math.random(), Math.random(), Math.random());
+
+export const vec3RandMinMax = (min: number, max: number): Vec3 => vec3(randomMinMax(min, max), randomMinMax(min, max), randomMinMax(min, max));
+
+export const vec3RandInUnitSphere = (): Vec3 => {
+    while (true) {
+        const p = vec3RandMinMax(-1, 1);
+        if (vec3SqLen(p) >= 1) continue;
+        return p;
+    }
+}
+
+export const vec3RandUnit = (): Vec3 => {
+    return vec3Unit1(vec3RandInUnitSphere());
+}
+export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {
+    const in_unit_sphere = vec3RandInUnitSphere();
+    return vec3Dot(in_unit_sphere, normal) < 0
+        ? vec3Negate1(in_unit_sphere)
+        : in_unit_sphere;
+}
+

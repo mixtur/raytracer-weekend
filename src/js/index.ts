@@ -13,7 +13,7 @@ import {
     vec3Add2,
     vec3Sub2,
     vec3MulS2,
-    Point3, vec3Dot, vec3DivS3, vec3Add3
+    Point3, vec3Dot, vec3DivS3, vec3Add3, vec3RandInUnitSphere, vec3RandUnit
 } from './vec3';
 import { Camera } from './camera';
 import { randomMinMax } from './random';
@@ -22,12 +22,15 @@ const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
 
-const ray_color = (r: Ray, world: Hittable): Color => {
+const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
+    if (depth <= 0) {
+        return color(0, 0, 0);
+    }
     {// world
-        const hit = world.hit(r, 0, Infinity);
+        const hit = world.hit(r, 0.0001, Infinity);
         if (hit !== null) {
-            const n = hit.normal;
-            return vec3MulS2(color(n[0] + 1, n[1] + 1, n[2] + 1), 0.5);
+            const target = vec3Add2(hit.p, vec3Add2(hit.normal, vec3RandUnit()));
+            return vec3MulS2(ray_color(ray(hit.p, vec3Sub2(target, hit.p)), world, depth - 1), 0.5);
         }
     }
 
@@ -50,6 +53,7 @@ const aspect_ratio = 16 / 9;
 const image_width = 400;
 const image_height = image_width / aspect_ratio;
 const samples_per_pixel = 100;
+const max_depth = 50;
 
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
 
@@ -68,7 +72,7 @@ async function main() {
                 const v = (j + Math.random()) / (image_height - 1);
 
                 const r = camera.get_ray(u, v);
-                vec3Add3(pixelColor, pixelColor, ray_color(r, world));
+                vec3Add3(pixelColor, pixelColor, ray_color(r, world, max_depth));
             }
             writeColor(imageData, x, y, pixelColor, samples_per_pixel);
         }
@@ -81,4 +85,4 @@ async function main() {
 
 main().catch((e) => {
     console.log(e);
-})
+});
