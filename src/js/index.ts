@@ -2,48 +2,23 @@ import { writeColor } from "./color";
 import { Hittable } from "./hittable/hittable";
 import { HittableList } from "./hittable/hittable_list";
 import { Sphere } from "./hittable/sphere";
-import { ray, Ray } from './ray';
+import { Ray } from './ray';
 import {
     color,
     Color,
     vec3Mix4,
     point3,
-    vec3Add2,
-    vec3Sub2,
-    vec3MulS2,
     vec3Add3,
-    vec3RandUnit,
     vec3AllocatorScope, vec3MulV2
 } from './vec3';
 import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { Lambertian, Metal } from './material';
+import { clamp } from './utils';
 
 const canvas = document.createElement('canvas');
 const ctx = canvas.getContext('2d');
 document.body.appendChild(canvas);
-
-const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
-    if (depth <= 0) {
-        return color(0, 0, 0);
-    }
-    {// world
-        const hit = world.hit(r, 0.0001, Infinity);
-        if (hit !== null) {
-            const bounce = hit.material.scatter(r, hit);
-            if (bounce) {
-                return vec3MulV2(bounce.attenuation, ray_color(bounce.scattered, world, depth - 1));
-            }
-            return color(0, 0, 0);
-        }
-    }
-
-    {// background
-        const t = 0.5 * (r.direction[1] + 1);
-        vec3Mix4(r.direction, color(1, 1, 1), color(0.5, 0.7, 1), t);
-        return r.direction;
-    }
-};
 
 const material_ground = new Lambertian(color(0.8, 0.8, 0.0));
 const material_center = new Lambertian(color(0.7, 0.3, 0.3));
@@ -69,6 +44,28 @@ const max_depth = 50;
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
 
 const rayArenaAllocator = new ArenaVec3Allocator(2048);
+
+const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
+    if (depth <= 0) {
+        return color(0, 0, 0);
+    }
+    {// world
+        const hit = world.hit(r, 0.0001, Infinity);
+        if (hit !== null) {
+            const bounce = hit.material.scatter(r, hit);
+            if (bounce) {
+                return vec3MulV2(bounce.attenuation, ray_color(bounce.scattered, world, depth - 1));
+            }
+            return color(0, 0, 0);
+        }
+    }
+
+    {// background
+        const t = clamp(0.5 * (r.direction[1] + 1), 0, 1);
+        vec3Mix4(r.direction, color(1, 1, 1), color(0.5, 0.7, 1), t);
+        return r.direction;
+    }
+};
 
 async function main() {
     canvas.width = image_width;
