@@ -13,13 +13,13 @@ import {
 } from './vec3';
 import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
-import { Dielectric, Lambertian, Metal } from './material';
 import { clamp } from './utils';
+import { world } from './world';
 
-const aspect_ratio = 16 / 9;
-const image_width = 400;
+const aspect_ratio = 3 / 2;
+const image_width = 840;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 100;
+const samples_per_pixel = 400;
 const max_depth = 50;
 
 const canvas = document.createElement('canvas');
@@ -28,37 +28,22 @@ canvas.width = image_width;
 canvas.height = image_height;
 document.body.appendChild(canvas);
 
-
-const R = Math.cos(Math.PI / 4);
-
-const material_ground = new Lambertian(color(0.8, 0.8, 0.0));
-const material_center = new Lambertian(color(0.1, 0.2, 0.5));
-const material_left   = new Dielectric(1.5);
-const material_right  = new Metal(color(0.8, 0.6, 0.2), 0.0);
-
-const world = new HittableList([]);
-world.objects.push(new Sphere(point3( 0.0, -100.5, -1.0), 100.0, material_ground));
-world.objects.push(new Sphere(point3( 0.0,    0.0, -1.0),   0.5, material_center));
-world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0),   0.5, material_left));
-world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0), -0.45, material_left));
-world.objects.push(new Sphere(point3( 1.0,    0.0, -1.0),   0.5, material_right));
-
-const look_from = point3(3, 3, 2);
-const look_at = point3(0, 0, -1);
+const look_from = point3(13, 2, 3);
+const look_at = point3(0, 0, 0);
 
 const cam = new Camera({
     look_from,
     look_at,
     v_up: vec3(0, 1, 0),
-    focus_dist: vec3Len(vec3Sub2(look_from, look_at)),
+    focus_dist: 10,
     aspect_ratio,
-    aperture: 1,
+    aperture: 0.1,
     y_fov: 20
 });
 
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
 
-const rayArenaAllocator = new ArenaVec3Allocator(2048);
+const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
 
 const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
     if (depth <= 0) {
