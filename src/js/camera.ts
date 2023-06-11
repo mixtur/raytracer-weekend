@@ -1,5 +1,18 @@
-import { point3, Point3, vec3, Vec3, vec3Add2, vec3Add3, vec3DivS2, vec3MulS2, vec3Sub2, vec3Sub3 } from './vec3';
+import {
+    point3,
+    Point3,
+    vec3,
+    Vec3,
+    vec3Add2,
+    vec3Add3, vec3Cross2,
+    vec3DivS2,
+    vec3MulS2, vec3MulV2,
+    vec3Sub2,
+    vec3Sub3,
+    vec3Unit1
+} from './vec3';
 import { ray, Ray } from './ray';
+import { degrees_to_radians } from './utils';
 
 export class Camera {
     origin: Point3;
@@ -7,15 +20,19 @@ export class Camera {
     vertical: Vec3;
     horizontal: Vec3;
 
-    constructor() {
-        const aspect_ratio = 16 / 9;
-        const viewport_height = 2;
+    constructor(look_from: Point3, look_at: Point3, v_up: Vec3, y_fov: number, aspect_ratio: number) {
+        const theta = degrees_to_radians(y_fov);
+        const h = Math.tan(theta / 2);
+        const viewport_height = 2 * h;
         const viewport_width = aspect_ratio * viewport_height;
-        const focal_length = 1.0;
 
-        this.origin = point3(0, 0, 0);
-        this.horizontal = vec3(viewport_width, 0, 0);
-        this.vertical = vec3(0, viewport_height, 0);
+        const w = vec3Unit1(vec3Sub2(look_from, look_at));
+        const u = vec3Unit1(vec3Cross2(v_up, w));
+        const v = vec3Cross2(w, u);
+
+        this.origin = look_from;
+        this.horizontal = vec3MulS2(u, viewport_width);
+        this.vertical = vec3MulS2(v, viewport_height);
         this.lower_left_corner = vec3Sub2(
             this.origin,
             vec3Add2(
@@ -23,7 +40,7 @@ export class Camera {
                     vec3DivS2(this.horizontal, 2),
                     vec3DivS2(this.vertical, 2)
                 ),
-                vec3(0, 0, focal_length)
+                w
             )
         );
     }
