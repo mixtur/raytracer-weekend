@@ -1,7 +1,5 @@
 import { writeColor } from "./color";
 import { Hittable } from "./hittable/hittable";
-import { HittableList } from "./hittable/hittable_list";
-import { Sphere } from "./hittable/sphere";
 import { Ray } from './ray';
 import {
     color,
@@ -9,7 +7,7 @@ import {
     vec3Mix4,
     point3,
     vec3Add3,
-    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3, vec3Len, vec3Sub2
+    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3
 } from './vec3';
 import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
