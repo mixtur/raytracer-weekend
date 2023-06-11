@@ -150,3 +150,12 @@ export const vec3Refract = (v: Vec3, normal: Vec3, ior: number): Vec3 => {
     vec3Add3(out_x, out_x, out_y);
     return out_x;
 };
+
+
+export const vec3RandInUnitDisk = (): Vec3 => {
+    while (true) {
+        const p = vec3(randomMinMax(-1, 1), randomMinMax(-1, 1), 0);
+        if (vec3SqLen(p) >= 1) continue;
+        return p;
+    }
+}

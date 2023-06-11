@@ -9,7 +9,7 @@ import {
     vec3Mix4,
     point3,
     vec3Add3,
-    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3
+    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3, vec3Len, vec3Sub2
 } from './vec3';
 import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
@@ -43,7 +43,18 @@ world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0),   0.5, material_left))
 world.objects.push(new Sphere(point3(-1.0,    0.0, -1.0), -0.45, material_left));
 world.objects.push(new Sphere(point3( 1.0,    0.0, -1.0),   0.5, material_right));
 
-const cam = new Camera(point3(-2,2,1), point3(0,0,-1), vec3(0,1,0), 20, aspect_ratio);
+const look_from = point3(3, 3, 2);
+const look_at = point3(0, 0, -1);
+
+const cam = new Camera({
+    look_from,
+    look_at,
+    v_up: vec3(0, 1, 0),
+    focus_dist: vec3Len(vec3Sub2(look_from, look_at)),
+    aspect_ratio,
+    aperture: 1,
+    y_fov: 20
+});
 
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
 
