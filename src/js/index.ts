@@ -7,7 +7,7 @@ import {
     vec3Mix4,
     point3,
     vec3Add3,
-    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3
+    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3, vec3MulV3
 } from './vec3';
 import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
@@ -43,31 +43,54 @@ const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" 
 
 const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
 
-const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
-    if (depth <= 0) {
-        return color(0, 0, 0);
-    }
-    {// world
-        const hit = world.hit(r, 0.0001, Infinity);
-        if (hit !== null) {
-            const bounce = hit.material.scatter(r, hit);
-            if (bounce) {
-                return vec3MulV2(bounce.attenuation, ray_color(bounce.scattered, world, depth - 1));
-            }
-            return color(0, 0, 0);
-        }
-    }
+// const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
+//     if (depth <= 0) {
+//         return color(0, 0, 0);
+//     }
+//     {// world
+//         const hit = world.hit(r, 0.0001, Infinity);
+//         if (hit !== null) {
+//             const bounce = hit.material.scatter(r, hit);
+//             if (bounce) {
+//                 return vec3MulV2(bounce.attenuation, ray_color(bounce.scattered, world, depth - 1));
+//             }
+//             return color(0, 0, 0);
+//         }
+//     }
+//
+//     {// background
+//         const t = clamp(0.5 * (vec3Unit1(r.direction)[1] + 1), 0, 1);
+//         vec3Mix4(r.direction, color(1, 1, 1), color(0.5, 0.7, 1), t);
+//         return r.direction;
+//     }
+// };
 
-    {// background
-        const t = clamp(0.5 * (vec3Unit1(r.direction)[1] + 1), 0, 1);
-        vec3Mix4(r.direction, color(1, 1, 1), color(0.5, 0.7, 1), t);
-        return r.direction;
+const ray_color = (r: Ray, world: Hittable): Color => {
+    const totalAttenuation = vec3(1, 1, 1);
+    let baseColor = vec3(0, 0, 0);
+    for (let i = 0; i < max_depth; i++) {
+        const hit = world.hit(r, 0.0001, Infinity);
+        if (hit === null) {
+            // hit background and exit
+            const t = clamp(0.5 * (vec3Unit1(r.direction)[1] + 1), 0, 1);
+            vec3Mix4(baseColor, color(1, 1, 1), color(0.5, 0.7, 1), t);
+            break;
+        }
+        const bounce = hit.material.scatter(r, hit);
+        if (bounce === null) {
+            break;
+        }
+        vec3MulV3(totalAttenuation, totalAttenuation, bounce.attenuation);
+        r = bounce.scattered;
     }
-};
+    vec3MulV3(baseColor, baseColor, totalAttenuation);
+    return baseColor;
+}
 
 async function main() {
     for (let j = 0; j < image_height; j++) {
-        console.log(`scanline remaining ${image_height - j}`);
+        const mark = `scanline remaining ${image_height - j - 1}`;
+        console.time(mark);
         for (let i = 0; i < image_width; i++) {
             const x = i;
             const y = image_height -1 - j;
@@ -80,11 +103,12 @@ async function main() {
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color(r, world, max_depth));
+                    vec3Add3(pixelColor, pixelColor, ray_color(r, world));
                 }
             })
             writeColor(imageData, x, y, pixelColor, samples_per_pixel);
         }
+        console.timeEnd(mark);
         await new Promise(resolve => setTimeout(resolve, 0));
         ctx.putImageData(imageData, 0, 0);
     }

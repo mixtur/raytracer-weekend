@@ -2,53 +2,59 @@ import { HitRecord, Hittable } from './hittable';
 import { point3, vec3, Vec3, vec3Add2 } from '../vec3';
 import { Ray, rayAt2 } from '../ray';
 
+function get_t(val: number, o: number, d: number, default_t: number): number {
+    // val = o + d * t; t = (val - o) / d;
+    if (Math.abs(d) < 0.00001) return default_t;
+    return (val - o) / d;
+}
+
 export class ZXGrid implements Hittable {
-    cells: (Hittable | null)[][] = [];
+    cells: (Hittable | null)[] = [];
     cellSize: number;
     min: Vec3;
     max: Vec3;
-    w: number;// todo: name w/h better
-    h: number;
+    x_cols: number;
+    z_rows: number;
 
-    constructor(w: number, h: number, cellSize: number, min: Vec3) {
-        this.w = w;
-        this.h = h;
+    constructor(x_cols: number, z_rows: number, ySize: number, cellSize: number, min: Vec3) {
+        this.x_cols = x_cols;
+        this.z_rows = z_rows;
         this.cellSize = cellSize;
         this.min = min;
-        this.max = vec3Add2(min, vec3(w * cellSize, cellSize, h * cellSize));
-        for (let i = 0; i < h; i++) {
-            this.cells[i] = [];
-            for (let j = 0; j < w; j++) {
-                this.cells[i][j] = null;
-            }
+        this.max = vec3Add2(min, vec3(x_cols * cellSize, ySize, z_rows * cellSize));
+        for (let i = 0; i < z_rows * x_cols; i++) {
+            this.cells[i] = null;
         }
     }
 
-    addHittable(gx: number, gz: number, obj: Hittable): void {
-        const cell = this.cells[gz][gx];
+    addHittable(x_col: number, z_row: number, obj: Hittable): void {
+        const p = z_row * this.x_cols + x_col;
+        const cell = this.cells[p];
         if (cell !== null) { throw new Error(`Only one object is allowed per grid cell`); }
-        this.cells[gz][gx] = obj;
-    }
-
-    get_t(val: number, o: number, d: number, default_t: number): number {
-        // val = o + d * t; t = (val - o) / d;
-        if (Math.abs(d) < 0.00001) return default_t;
-        return (val - o) / d;
+        this.cells[p] = obj;
     }
 
     hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
-        const { cellSize, w, h } = this;
-        const [ox, oy, oz] = r.origin;
-        const [dx, dy, dz] = r.direction;
-        const [min_x, min_y, min_z] = this.min;
-        const [max_x, max_y, max_z] = this.max;
+        const { cellSize, x_cols, z_rows } = this;
+        const ox = r.origin[0];
+        const oy = r.origin[1];
+        const oz = r.origin[2];
+        const dx = r.direction[0];
+        const dy = r.direction[1];
+        const dz = r.direction[2];
+        const min_x = this.min[0];
+        const min_y = this.min[1];
+        const min_z = this.min[2];
+        const max_x = this.max[0];
+        const max_y = this.max[1];
+        const max_z = this.max[2];
 
-        const tx0 = this.get_t(dx > 0 ? min_x : max_x, ox, dx, -Infinity);
-        const ty0 = this.get_t(dy > 0 ? min_y : max_y, oy, dy, -Infinity);
-        const tz0 = this.get_t(dz > 0 ? min_z : max_z, oz, dz, -Infinity);
-        const tx1 = this.get_t(dx > 0 ? max_x : min_x, ox, dx, Infinity);
-        const ty1 = this.get_t(dy > 0 ? max_y : min_y, oy, dy, Infinity);
-        const tz1 = this.get_t(dz > 0 ? max_z : min_z, oz, dz, Infinity);
+        const tx0 = get_t(dx > 0 ? min_x : max_x, ox, dx, -Infinity);
+        const ty0 = get_t(dy > 0 ? min_y : max_y, oy, dy, -Infinity);
+        const tz0 = get_t(dz > 0 ? min_z : max_z, oz, dz, -Infinity);
+        const tx1 = get_t(dx > 0 ? max_x : min_x, ox, dx, Infinity);
+        const ty1 = get_t(dy > 0 ? max_y : min_y, oy, dy, Infinity);
+        const tz1 = get_t(dz > 0 ? max_z : min_z, oz, dz, Infinity);
 
         let enterFromTheMiddle = false;
         const t_enter = Math.max(tx0, ty0, tz0);
@@ -63,39 +69,41 @@ export class ZXGrid implements Hittable {
         }
 
         // find initial cell
-        let i, j;
+        let z_row, x_col;
         if (enterFromTheMiddle) {
-            i = Math.floor((oz - min_z) / cellSize);
-            j = Math.floor((ox - min_x) / cellSize);
+            z_row = Math.floor((oz - min_z) / cellSize);
+            x_col = Math.floor((ox - min_x) / cellSize);
         } else {
             if (t_enter === ty0) {// enter from top or bottom
                 const z = oz + dz * t_enter;
                 const x = ox + dx * t_enter;
-                i = Math.floor((z - min_z) / cellSize);
-                j = Math.floor((x - min_x) / cellSize);
+                z_row = Math.floor((z - min_z) / cellSize);
+                x_col = Math.floor((x - min_x) / cellSize);
             } else if (t_enter === tz0) { // enter from a side. Need to determine the side first
-                i = dz > 0 ? 0 : (h - 1);
+                z_row = dz > 0 ? 0 : (z_rows - 1);
                 const x = ox + dx * t_enter;
-                j = Math.floor((x - min_x) / cellSize);
+                x_col = Math.floor((x - min_x) / cellSize);
             } else {
-                j = dx > 0 ? 0 : (w - 1);
+                x_col = dx > 0 ? 0 : (x_cols - 1);
                 const z = oz + dz * t_enter;
-                i = Math.floor((z - min_z) / cellSize);
+                z_row = Math.floor((z - min_z) / cellSize);
             }
         }
-        if (i < 0 || i >= h || j < 0 || j >= h) return null;
+        if (z_row < 0 || z_row >= z_rows || x_col < 0 || x_col >= z_rows) return null;
 
-        const di = Math.sign(dz);
-        const dj = Math.sign(dx);
+        const row_stride = Math.sign(dz) * x_cols;
+        const col_stride = Math.sign(dx);
 
-        let current_z = i * cellSize + min_z;
-        let current_x = j * cellSize + min_x;
+        let p = z_row * x_cols + x_col;
+
+        let current_z = z_row * cellSize + min_z;
+        let current_x = x_col * cellSize + min_x;
         if (dx < 0) current_x += cellSize;
         if (dz < 0) current_z += cellSize;
         const zInc = Math.sign(dz) * cellSize;
         const xInc = Math.sign(dx) * cellSize;
         while (current_t < t_exit) {
-            const obj = this.cells[i][j];
+            const obj = this.cells[p];
             if (obj !== null) {// try to hit the object in the cell
                 const hit = obj.hit(r, t_min, t_max);
                 if (hit) {
@@ -103,14 +111,14 @@ export class ZXGrid implements Hittable {
                 }
             }
             // find the next cell to hit
-            const t_i_next = this.get_t(current_z + zInc, oz, dz, Infinity);
-            const t_j_next = this.get_t(current_x + xInc, ox, dx, Infinity);
+            const t_i_next = get_t(current_z + zInc, oz, dz, Infinity);
+            const t_j_next = get_t(current_x + xInc, ox, dx, Infinity);
             if (t_i_next < t_j_next) {
-                i += di;
+                p += row_stride;
                 current_z += zInc;
                 current_t = t_i_next;
             } else {
-                j += dj;
+                p += col_stride;
                 current_x += xInc;
                 current_t = t_j_next;
             }

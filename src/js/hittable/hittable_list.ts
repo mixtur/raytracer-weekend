@@ -11,7 +11,8 @@ export class HittableList implements Hittable {
     hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
         let current_t_max = t_max;
         let current_hit = null;
-        for (const obj of this.objects) {
+        for (let i = 0; i < this.objects.length; i++) {
+            const obj = this.objects[i];
             const hit = obj.hit(r, t_min, current_t_max);
             if (hit !== null) {
                 current_t_max = hit.t;

@@ -5,14 +5,18 @@ export type Ray = {
     direction: Vec3
 };
 
-export const ray = (origin: Vec3, direction: Vec3): Ray => {
-    const rayOrigin = vec3(origin[0], origin[1], origin[2]);
-    const rayDirection = vec3(direction[0], direction[1], direction[2]);
+const raySingleton = {
+    origin: vec3(0, 0, 0),
+    direction: vec3(0, 0, 0)
+};
 
-    return {
-        origin: rayOrigin,
-        direction: rayDirection
-    };
+const sDirection = raySingleton.direction;
+const sOrigin = raySingleton.origin;
+
+export const ray = (origin: Vec3, direction: Vec3): Ray => {
+    sOrigin.set(origin);
+    sDirection.set(direction);
+    return raySingleton;
 };
 
 export const rayAt2 = (ray: Ray, t: number): Vec3 => {
