@@ -2,20 +2,23 @@ import { vec3, Vec3, vec3Add2, vec3Add3, vec3MulS2 } from "./vec3";
 
 export type Ray = {
     origin: Vec3,
-    direction: Vec3
+    direction: Vec3,
+    time: number;
 };
 
-const raySingleton = {
+const raySingleton: Ray = {
     origin: vec3(0, 0, 0),
-    direction: vec3(0, 0, 0)
+    direction: vec3(0, 0, 0),
+    time: 0
 };
 
 const sDirection = raySingleton.direction;
 const sOrigin = raySingleton.origin;
 
-export const ray = (origin: Vec3, direction: Vec3): Ray => {
+export const ray = (origin: Vec3, direction: Vec3, time): Ray => {
     sOrigin.set(origin);
     sDirection.set(direction);
+    raySingleton.time = time;
     return raySingleton;
 };
 

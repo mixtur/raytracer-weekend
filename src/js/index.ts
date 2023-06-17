@@ -14,10 +14,10 @@ import { ArenaVec3Allocator } from './vec3_allocators';
 import { clamp } from './utils';
 import { world } from './world';
 
-const aspect_ratio = 3 / 2;
-const image_width = 840;
+const aspect_ratio = 16 / 9;
+const image_width = 600;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 400;
+const samples_per_pixel = 100;
 const max_depth = 50;
 
 const canvas = document.createElement('canvas');
@@ -36,7 +36,9 @@ const cam = new Camera({
     focus_dist: 10,
     aspect_ratio,
     aperture: 0.1,
-    y_fov: 20
+    y_fov: 20,
+    time0: 0,
+    time1: 1
 });
 
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });

@@ -11,6 +11,7 @@ import {
 } from './vec3';
 import { ray, Ray } from './ray';
 import { degrees_to_radians } from './utils';
+import { randomMinMax } from './random';
 
 export class Camera {
     origin: Point3;
@@ -21,6 +22,8 @@ export class Camera {
     v: Vec3;
     w: Vec3;
     lens_radius: number;
+    time0: number;
+    time1: number;
 
     constructor({
         look_from,
@@ -29,7 +32,9 @@ export class Camera {
         y_fov,
         aspect_ratio,
         aperture,
-        focus_dist
+        focus_dist,
+        time0,
+        time1
     }: {
         look_from: Point3,
         look_at: Point3,
@@ -37,7 +42,9 @@ export class Camera {
         y_fov: number,
         aspect_ratio: number,
         aperture: number,
-        focus_dist: number
+        focus_dist: number,
+        time0: number,
+        time1: number
     }) {
         const theta = degrees_to_radians(y_fov);
         const h = Math.tan(theta / 2);
@@ -47,6 +54,9 @@ export class Camera {
         this.w = vec3Unit1(vec3Sub2(look_from, look_at));
         this.u = vec3Unit1(vec3Cross2(v_up, this.w));
         this.v = vec3Cross2(this.w, this.u);
+
+        this.time0 = time0;
+        this.time1 = time1;
 
         this.origin = look_from;
         this.horizontal = vec3MulS2(this.u, viewport_width * focus_dist);
@@ -79,7 +89,8 @@ export class Camera {
         vec3Add3(offset, offset, this.origin);
         return ray(
             offset,
-            direction
+            direction,
+            randomMinMax(this.time0, this.time1)
         );
     }
 }

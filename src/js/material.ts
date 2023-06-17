@@ -34,7 +34,7 @@ export class Lambertian implements Material {
             scatter_direction = hit.normal;
         }
         return {
-            scattered: ray(hit.p, scatter_direction),
+            scattered: ray(hit.p, scatter_direction, r_in.time),
             attenuation: this.albedo
         };
     }
@@ -52,7 +52,7 @@ export class Metal implements Material {
         vec3Add3(reflected, reflected, vec3MulS2(vec3RandInUnitSphere(), this.fuzz));
         if (vec3Dot(reflected, hit.normal) <= 0) { return null; }
         return {
-            scattered: ray(hit.p, reflected),
+            scattered: ray(hit.p, reflected, r_in.time),
             attenuation: this.albedo
         };
     }
@@ -77,7 +77,7 @@ export class Dielectric implements Material {
             : vec3Refract(unit_direction, hit.normal, refraction_ratio);
 
         return {
-            scattered: ray(hit.p, direction),
+            scattered: ray(hit.p, direction, r_in.time),
             attenuation: color(1, 1, 1)
         };
     }
