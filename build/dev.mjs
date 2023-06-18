@@ -17,7 +17,10 @@ async function start() {
         ],
         bundle: true,
         sourcemap: true,
-        outdir: DIR_DEVBUILD
+        outdir: DIR_DEVBUILD,
+        loader: {
+            '.jpg': 'file'
+        }
     });
     
     

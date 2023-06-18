@@ -10,11 +10,10 @@ import {
 } from './vec3';
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { clamp } from './utils';
+import { create_earth_scene } from './scenes/earth';
 // import { lots_of_spheres } from './scenes/lots_of_spheres';
 // import { two_spheres } from './scenes/two_spheres';
-import { two_perlin_spheres } from './scenes/two_perlin_spheres';
-
-const scene = two_perlin_spheres;
+// import { two_perlin_spheres } from './scenes/two_perlin_spheres';
 
 const aspect_ratio = 16 / 9;
 const image_width = 600;
@@ -27,8 +26,6 @@ const _ctx = canvas.getContext('2d');
 if (_ctx === null) {
     throw new Error(`failed to acquire canvas 2d context`);
 }
-
-const cam = scene.create_camera(aspect_ratio);
 
 const ctx = _ctx;
 canvas.width = image_width;
@@ -84,6 +81,9 @@ const ray_color = (r: Ray, world: Hittable): Color => {
 }
 
 async function main() {
+    const scene = await create_earth_scene();
+    const cam = scene.create_camera(aspect_ratio);
+
     for (let j = 0; j < image_height; j++) {
         const mark = `scanline remaining ${image_height - j - 1}`;
         const y = image_height -1 - j;
