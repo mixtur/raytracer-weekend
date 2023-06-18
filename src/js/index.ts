@@ -5,14 +5,15 @@ import {
     color,
     Color,
     vec3Mix4,
-    point3,
     vec3Add3,
-    vec3AllocatorScope, vec3MulV2, vec3Unit1, vec3, vec3MulV3
+    vec3AllocatorScope, vec3Unit1, vec3, vec3MulV3
 } from './vec3';
-import { Camera } from './camera';
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { clamp } from './utils';
-import { world } from './world';
+// import { lots_of_spheres } from './scenes/lots_of_spheres';
+import { two_spheres } from './scenes/two_spheres';
+
+const scene = two_spheres;
 
 const aspect_ratio = 16 / 9;
 const image_width = 600;
@@ -26,25 +27,12 @@ if (_ctx === null) {
     throw new Error(`failed to acquire canvas 2d context`);
 }
 
+const cam = scene.create_camera(aspect_ratio);
+
 const ctx = _ctx;
 canvas.width = image_width;
 canvas.height = image_height;
 document.body.appendChild(canvas);
-
-const look_from = point3(13, 2, 3);
-const look_at = point3(0, 0, 0);
-
-const cam = new Camera({
-    look_from,
-    look_at,
-    v_up: vec3(0, 1, 0),
-    focus_dist: 10,
-    aspect_ratio,
-    aperture: 0.1,
-    y_fov: 20,
-    time0: 0,
-    time1: 1
-});
 
 const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
 
@@ -97,10 +85,10 @@ const ray_color = (r: Ray, world: Hittable): Color => {
 async function main() {
     for (let j = 0; j < image_height; j++) {
         const mark = `scanline remaining ${image_height - j - 1}`;
+        const y = image_height -1 - j;
         console.time(mark);
         for (let i = 0; i < image_width; i++) {
             const x = i;
-            const y = image_height -1 - j;
 
             const pixelColor = color(0, 0, 0);
             vec3AllocatorScope(rayArenaAllocator, () => {
@@ -110,14 +98,14 @@ async function main() {
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color(r, world));
+                    vec3Add3(pixelColor, pixelColor, ray_color(r, scene.root_hittable));
                 }
             })
             writeColor(imageData, x, y, pixelColor, samples_per_pixel);
         }
         console.timeEnd(mark);
         await new Promise(resolve => setTimeout(resolve, 0));
-        ctx.putImageData(imageData, 0, 0);
+        ctx.putImageData(imageData, 0, 0, 0, y, image_width, 1);
     }
     ctx.putImageData(imageData, 0, 0);
     console.log('Done!');

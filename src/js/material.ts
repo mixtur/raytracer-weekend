@@ -12,6 +12,7 @@ import {
     vec3Reflect, vec3Refract,
     vec3Unit1
 } from './vec3';
+import { Texture } from './texture/texture';
 
 export interface BounceRecord {
     scattered: Ray;
@@ -23,8 +24,8 @@ export interface Material {
 }
 
 export class Lambertian implements Material {
-    albedo: Color;
-    constructor(albedo: Color) {
+    albedo: Texture;
+    constructor(albedo: Texture) {
         this.albedo = albedo;
     }
     scatter(r_in: Ray, hit: HitRecord): BounceRecord | null {
@@ -35,15 +36,15 @@ export class Lambertian implements Material {
         }
         return {
             scattered: ray(hit.p, scatter_direction, r_in.time),
-            attenuation: this.albedo
+            attenuation: this.albedo.value(hit.u, hit.v, hit.p)
         };
     }
 }
 
 export class Metal implements Material {
-    albedo: Color;
+    albedo: Texture;
     fuzz: number;
-    constructor(albedo: Color, fuzz: number) {
+    constructor(albedo: Texture, fuzz: number) {
         this.albedo = albedo;
         this.fuzz = fuzz;
     }
@@ -53,7 +54,7 @@ export class Metal implements Material {
         if (vec3Dot(reflected, hit.normal) <= 0) { return null; }
         return {
             scattered: ray(hit.p, reflected, r_in.time),
-            attenuation: this.albedo
+            attenuation: this.albedo.value(hit.u, hit.v, hit.p)
         };
     }
 }

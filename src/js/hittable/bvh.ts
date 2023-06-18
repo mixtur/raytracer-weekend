@@ -23,6 +23,7 @@ export class BVHNode implements Hittable {
                 break;
             default:
                 const axis = randomIntMinMax(0, 2);
+                //todo: use one ArenaAllocator provided by the top call
                 vec3AllocatorScope(new ArenaVec3Allocator(Math.ceil(objects.length * Math.log2(objects.length)) * 16), () => {
                     objects.sort((a, b) => a.get_bounding_box(time0, time1).min[axis] - b.get_bounding_box(time0, time1).min[axis]);
                 });

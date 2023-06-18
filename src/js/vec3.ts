@@ -9,11 +9,12 @@ export const gcAllocator = new GCVec3Allocator();
 
 let allocator = gcAllocator;
 export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };
-export const vec3AllocatorScope = (a: Vec3Allocator, f: () => void): void => {
+export const vec3AllocatorScope = <T>(a: Vec3Allocator, f: () => T): T => {
     const prevAllocator = allocator;
     allocator = a;
-    f();
+    const result = f();
     allocator = prevAllocator;
+    return result;
 };
 
 export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x, y, z);

@@ -3,6 +3,21 @@ import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3, vec3Add2 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { Material } from '../material';
 import { AABB } from './aabb';
+import { UV } from '../texture/texture';
+
+
+export function get_sphere_uv(p: Point3): UV {
+    // p: a given point on the sphere of radius one, centered at the origin.
+    // u: returned value [0,1] of angle around the Y axis from X=-1.
+    // v: returned value [0,1] of angle from Y=-1 to Y=+1.
+
+    const theta = Math.acos(-p[1]);
+    const phi = Math.atan2(-p[2], p[0]) + Math.PI;
+    return {
+        u: phi / (2 * Math.PI),
+        v: theta / Math.PI
+    };
+}
 
 export class Sphere implements Hittable {
     center: Point3;
@@ -37,8 +52,13 @@ export class Sphere implements Hittable {
             p,
             normal: vec3DivS2(vec3Sub2(p, center), radius),
             front_face: false,
-            material: this.material
+            material: this.material,
+            u: 0,
+            v: 0
         };
+        const { u, v } = get_sphere_uv(hit.normal);
+        hit.u = u;
+        hit.v = v;
 
         set_face_normal(hit, r, hit.normal);
 
@@ -49,6 +69,6 @@ export class Sphere implements Hittable {
         return new AABB(
             vec3Sub2(this.center, vec3(this.radius, this.radius, this.radius)),
             vec3Add2(this.center, vec3(this.radius, this.radius, this.radius))
-        )
+        );
     }
 }

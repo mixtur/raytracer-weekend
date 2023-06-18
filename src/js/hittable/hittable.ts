@@ -9,6 +9,8 @@ export interface HitRecord {
     t: number;
     front_face: boolean;
     material: Material;
+    u: number;
+    v: number;
 }
 
 export const set_face_normal = (rec: HitRecord, r: Ray, outward_normal: Vec3): void => {

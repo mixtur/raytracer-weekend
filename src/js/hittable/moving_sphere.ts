@@ -3,6 +3,7 @@ import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { Material } from '../material';
 import { AABB } from './aabb';
+import { get_sphere_uv } from './sphere';
 
 export class MovingSphere implements Hittable {
     center0: Point3;
@@ -53,8 +54,13 @@ export class MovingSphere implements Hittable {
             p,
             normal: vec3DivS2(vec3Sub2(p, center), radius),
             front_face: false,
-            material: this.material
+            material: this.material,
+            u: 0,
+            v: 0
         };
+        const { u, v } = get_sphere_uv(hit.normal);
+        hit.u = u;
+        hit.v = v;
 
         set_face_normal(hit, r, hit.normal);
 
