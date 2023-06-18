@@ -11,9 +11,10 @@ import {
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { clamp } from './utils';
 // import { lots_of_spheres } from './scenes/lots_of_spheres';
-import { two_spheres } from './scenes/two_spheres';
+// import { two_spheres } from './scenes/two_spheres';
+import { two_perlin_spheres } from './scenes/two_perlin_spheres';
 
-const scene = two_spheres;
+const scene = two_perlin_spheres;
 
 const aspect_ratio = 16 / 9;
 const image_width = 600;
