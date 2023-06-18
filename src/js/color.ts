@@ -1,7 +1,7 @@
 import { Color } from "./vec3";
 import { clamp } from './utils';
 
-export const writeColor = (image_data: ImageData, x: number, y: number, color: Color, samples_per_pixel): void => {
+export const writeColor = (image_data: ImageData, x: number, y: number, color: Color, samples_per_pixel: number): void => {
     let [r, g, b] = color;
     const scale = 1 / samples_per_pixel;
     r = Math.sqrt(r * scale);

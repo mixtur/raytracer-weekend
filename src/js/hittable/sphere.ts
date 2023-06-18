@@ -1,7 +1,8 @@
 import { Ray, rayAt2 } from "../ray";
-import { Point3, vec3Dot, vec3Sub2, vec3DivS2 } from "../vec3";
+import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3, vec3Add2 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { Material } from '../material';
+import { AABB } from './aabb';
 
 export class Sphere implements Hittable {
     center: Point3;
@@ -42,5 +43,12 @@ export class Sphere implements Hittable {
         set_face_normal(hit, r, hit.normal);
 
         return hit;
+    }
+
+    get_bounding_box(time0: number, time1: number): AABB {
+        return new AABB(
+            vec3Sub2(this.center, vec3(this.radius, this.radius, this.radius)),
+            vec3Add2(this.center, vec3(this.radius, this.radius, this.radius))
+        )
     }
 }

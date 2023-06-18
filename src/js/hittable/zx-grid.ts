@@ -1,6 +1,7 @@
 import { HitRecord, Hittable } from './hittable';
 import { point3, vec3, Vec3, vec3Add2 } from '../vec3';
 import { Ray, rayAt2 } from '../ray';
+import { AABB } from './aabb';
 
 function get_t(val: number, o: number, d: number, default_t: number): number {
     // val = o + d * t; t = (val - o) / d;
@@ -15,6 +16,7 @@ export class ZXGrid implements Hittable {
     max: Vec3;
     x_cols: number;
     z_rows: number;
+    aabb: AABB;
 
     constructor(x_cols: number, z_rows: number, ySize: number, cellSize: number, min: Vec3) {
         this.x_cols = x_cols;
@@ -25,6 +27,7 @@ export class ZXGrid implements Hittable {
         for (let i = 0; i < z_rows * x_cols; i++) {
             this.cells[i] = null;
         }
+        this.aabb = new AABB(min, this.max);
     }
 
     addHittable(x_col: number, z_row: number, obj: Hittable): void {
@@ -49,6 +52,7 @@ export class ZXGrid implements Hittable {
         const max_y = this.max[1];
         const max_z = this.max[2];
 
+        //todo: can exit earlier if test coordinates one by one
         const tx0 = get_t(dx > 0 ? min_x : max_x, ox, dx, -Infinity);
         const ty0 = get_t(dy > 0 ? min_y : max_y, oy, dy, -Infinity);
         const tz0 = get_t(dz > 0 ? min_z : max_z, oz, dz, -Infinity);
@@ -60,7 +64,7 @@ export class ZXGrid implements Hittable {
         const t_enter = Math.max(tx0, ty0, tz0);
         const t_exit = Math.min(tx1, ty1, tz1);
         let current_t = t_enter;
-        if (t_exit < t_enter) return null;// not intersection
+        if (t_exit <= t_enter) return null;// no intersection (== only in the corner or on the edge. This is fine to exclude)
         if (t_exit < t_min) return null; // the entire intersection is on the wrong side of the ray
         if (!Number.isFinite(t_enter)) return null; // very short direction?
         if (t_enter < 0) {// ray origin is inside the grid
@@ -89,7 +93,7 @@ export class ZXGrid implements Hittable {
                 z_row = Math.floor((z - min_z) / cellSize);
             }
         }
-        if (z_row < 0 || z_row >= z_rows || x_col < 0 || x_col >= z_rows) return null;
+        if (z_row < 0 || z_row >= z_rows || x_col < 0 || x_col >= z_rows) return null;// this can happen if dx == 0 or dz == 0
 
         const row_stride = Math.sign(dz) * x_cols;
         const col_stride = Math.sign(dx);
@@ -124,5 +128,9 @@ export class ZXGrid implements Hittable {
             }
         }
         return null;
+    }
+
+    get_bounding_box(time0: number, time1: number): AABB {
+        return this.aabb;
     }
 }

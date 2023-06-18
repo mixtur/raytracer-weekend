@@ -1,5 +1,6 @@
 import { Ray } from "../ray";
 import { HitRecord, Hittable } from "./hittable";
+import { AABB, surrounding_box } from './aabb';
 
 export class HittableList implements Hittable {
     objects: Hittable[];
@@ -20,5 +21,13 @@ export class HittableList implements Hittable {
             }
         }
         return current_hit;
+    }
+
+    get_bounding_box(time0: number, time1: number): AABB {
+        const result = AABB.createEmpty();
+        for (const obj of this.objects) {
+            result.consume(obj.get_bounding_box(time0, time1));
+        }
+        return result;
     }
 }

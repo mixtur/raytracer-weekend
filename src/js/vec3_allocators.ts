@@ -5,7 +5,7 @@ export interface Vec3Allocator {
 }
 
 export class GCVec3Allocator implements Vec3Allocator {
-    alloc(a, b, c): Vec3 {
+    alloc(a: number, b: number, c: number): Vec3 {
         const result = new Float64Array(3)
         result[0] = a;
         result[1] = b;
@@ -27,7 +27,7 @@ export class ArenaVec3Allocator implements Vec3Allocator {
     }
     alloc(a: number, b: number, c: number): Vec3 {
         if (this.nextToAlloc >= this.vectors.length) {
-            // throw new Error('arena is full cannot alloc');
+            throw new Error('arena is full cannot alloc');
         }
         const result = this.vectors[this.nextToAlloc++];
         result[0] = a;

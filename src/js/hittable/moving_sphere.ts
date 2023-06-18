@@ -1,7 +1,8 @@
 import { Ray, rayAt2 } from "../ray";
-import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3 } from '../vec3';
+import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { Material } from '../material';
+import { AABB } from './aabb';
 
 export class MovingSphere implements Hittable {
     center0: Point3;
@@ -12,7 +13,7 @@ export class MovingSphere implements Hittable {
     radius: number;
     material: Material;
 
-    getCenter(time: number) {
+    get_center(time: number) {
         const p = (time - this.time0) / this.dt;
         return vec3Mix3(this.center0, this.center1, p);
     }
@@ -26,9 +27,10 @@ export class MovingSphere implements Hittable {
         this.radius = radius;
         this.material = material;
     }
+
     hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
         const {radius} = this;
-        const center = this.getCenter(r.time);
+        const center = this.get_center(r.time);
 
         const oc = vec3Sub2(r.origin, center);
         const a = vec3Dot(r.direction, r.direction);
@@ -57,5 +59,22 @@ export class MovingSphere implements Hittable {
         set_face_normal(hit, r, hit.normal);
 
         return hit;
+    }
+
+    get_bounding_box(time0: number, time1: number): AABB {
+        const c0 = this.get_center(time0);
+        const c1 = this.get_center(time1);
+        return new AABB(
+            vec3(
+                Math.min(c0[0], c1[0]) - this.radius,
+                Math.min(c0[1], c1[1]) - this.radius,
+                Math.min(c0[2], c1[2]) - this.radius
+            ),
+            vec3(
+                Math.max(c0[0], c1[0]) + this.radius,
+                Math.max(c0[1], c1[1]) + this.radius,
+                Math.max(c0[2], c1[2]) + this.radius
+            )
+        );
     }
 }

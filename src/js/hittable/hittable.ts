@@ -1,6 +1,7 @@
 import { Ray } from "../ray";
 import { Point3, Vec3, vec3Dot, vec3Negate1, vec3Unit1 } from '../vec3';
 import { Material } from '../material';
+import { AABB } from './aabb';
 
 export interface HitRecord {
     p: Point3;
@@ -18,4 +19,5 @@ export const set_face_normal = (rec: HitRecord, r: Ray, outward_normal: Vec3): v
 
 export interface Hittable {
     hit(r: Ray, t_min: number, t_max: number): HitRecord | null;
+    get_bounding_box(time0: number, time1: number): AABB;
 }

@@ -21,7 +21,12 @@ const samples_per_pixel = 100;
 const max_depth = 50;
 
 const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
+const _ctx = canvas.getContext('2d');
+if (_ctx === null) {
+    throw new Error(`failed to acquire canvas 2d context`);
+}
+
+const ctx = _ctx;
 canvas.width = image_width;
 canvas.height = image_height;
 document.body.appendChild(canvas);
