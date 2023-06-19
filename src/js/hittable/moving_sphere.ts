@@ -1,7 +1,7 @@
 import { Ray, rayAt2 } from "../ray";
 import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
-import { Material } from '../material';
+import { Material } from '../materials/material';
 import { AABB } from './aabb';
 import { get_sphere_uv } from './sphere';
 

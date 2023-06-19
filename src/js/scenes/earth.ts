@@ -1,10 +1,10 @@
 import { Scene } from './scene';
 import { Sphere } from '../hittable/sphere';
-import { point3, vec3 } from '../vec3';
+import { color, point3, vec3 } from '../vec3';
 import earthUrl from './earthmap.jpg';
 import { Camera } from '../camera';
-import { Lambertian } from '../material';
 import { ImageTexture } from '../texture/image_texture';
+import { Lambertian } from '../materials/lambertian';
 
 export const create_earth_scene = async (): Promise<Scene> => {
     const earthImageBitmap = await createImageBitmap(
@@ -26,6 +26,7 @@ export const create_earth_scene = async (): Promise<Scene> => {
                 time0: 0,
                 time1: 1
             });
-        }
+        },
+        background: color(0.7, 0.8, 1.0)
     };
 }

@@ -6,19 +6,20 @@ import {
     Color,
     vec3Mix4,
     vec3Add3,
-    vec3AllocatorScope, vec3Unit1, vec3, vec3MulV3
+    vec3AllocatorScope, vec3Unit1, vec3, vec3MulV3, vec3MulV2
 } from './vec3';
 import { ArenaVec3Allocator } from './vec3_allocators';
-import { clamp } from './utils';
-import { create_earth_scene } from './scenes/earth';
+// import { simple_light } from './scenes/simple_light';
+// import { create_earth_scene } from './scenes/earth';
 // import { lots_of_spheres } from './scenes/lots_of_spheres';
 // import { two_spheres } from './scenes/two_spheres';
 // import { two_perlin_spheres } from './scenes/two_perlin_spheres';
+import { empty_cornell_box } from './scenes/empty_cornell_box';
 
-const aspect_ratio = 16 / 9;
+const aspect_ratio = 1;
 const image_width = 600;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 100;
+const samples_per_pixel = 200;
 const max_depth = 50;
 
 const canvas = document.createElement('canvas');
@@ -36,52 +37,31 @@ const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" 
 
 const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
 
-// const ray_color = (r: Ray, world: Hittable, depth: number): Color => {
-//     if (depth <= 0) {
-//         return color(0, 0, 0);
-//     }
-//     {// world
-//         const hit = world.hit(r, 0.0001, Infinity);
-//         if (hit !== null) {
-//             const bounce = hit.material.scatter(r, hit);
-//             if (bounce) {
-//                 return vec3MulV2(bounce.attenuation, ray_color(bounce.scattered, world, depth - 1));
-//             }
-//             return color(0, 0, 0);
-//         }
-//     }
-//
-//     {// background
-//         const t = clamp(0.5 * (vec3Unit1(r.direction)[1] + 1), 0, 1);
-//         vec3Mix4(r.direction, color(1, 1, 1), color(0.5, 0.7, 1), t);
-//         return r.direction;
-//     }
-// };
-
-const ray_color = (r: Ray, world: Hittable): Color => {
-    const totalAttenuation = vec3(1, 1, 1);
-    let baseColor = vec3(0, 0, 0);
-    for (let i = 0; i < max_depth; i++) {
-        const hit = world.hit(r, 0.0001, Infinity);
-        if (hit === null) {
-            // hit background and exit
-            const t = clamp(0.5 * (vec3Unit1(r.direction)[1] + 1), 0, 1);
-            vec3Mix4(baseColor, color(1, 1, 1), color(0.5, 0.7, 1), t);
-            break;
-        }
-        const bounce = hit.material.scatter(r, hit);
-        if (bounce === null) {
-            break;
-        }
-        vec3MulV3(totalAttenuation, totalAttenuation, bounce.attenuation);
-        r = bounce.scattered;
+const ray_color = (r: Ray, background: Color, world: Hittable, depth: number): Color => {
+    if (depth <= 0) {
+        return color(0, 0, 0);
     }
-    vec3MulV3(baseColor, baseColor, totalAttenuation);
-    return baseColor;
-}
+    {// world
+        const hit = world.hit(r, 0.0001, Infinity);
+        if (hit !== null) {
+            const bounce = hit.material.scatter(r, hit);
+            const totalEmission = hit.material.emitted(hit.u, hit.v, hit.p);
+            if (bounce) {
+                const bounceColor = ray_color(bounce.scattered, background, world, depth - 1);
+                vec3Add3(totalEmission, totalEmission, vec3MulV2(bounceColor, bounce.attenuation));
+            }
+            return totalEmission;
+        }
+    }
+
+    return background;
+};
 
 async function main() {
-    const scene = await create_earth_scene();
+//    const scene = await create_earth_scene();
+//    const scene = lots_of_spheres;
+//    const scene = simple_light;
+    const scene = empty_cornell_box;
     const cam = scene.create_camera(aspect_ratio);
 
     for (let j = 0; j < image_height; j++) {
@@ -99,7 +79,7 @@ async function main() {
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color(r, scene.root_hittable));
+                    vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
                 }
             })
             writeColor(imageData, x, y, pixelColor, samples_per_pixel);

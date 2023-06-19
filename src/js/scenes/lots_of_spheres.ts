@@ -11,7 +11,7 @@ import {
     vec3Sub2
 } from '../vec3';
 import { ArenaVec3Allocator } from '../vec3_allocators';
-import { Dielectric, Lambertian, Material, Metal } from '../material';
+import { Material } from '../materials/material';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { sColor, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
@@ -21,6 +21,9 @@ import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';
 import { Camera } from '../camera';
 import { Scene } from './scene';
+import { Lambertian } from '../materials/lambertian';
+import { Metal } from '../materials/metal';
+import { Dielectric } from '../materials/dielectric';
 
 function createLotsOfSpheres(): Hittable {
     return vec3AllocatorScope(new ArenaVec3Allocator(8192), () => {
@@ -86,5 +89,6 @@ const create_camera = (aspect_ratio: number): Camera => new Camera({
 
 export const lots_of_spheres: Scene = {
     create_camera,
-    root_hittable: createLotsOfSpheres()
+    root_hittable: createLotsOfSpheres(),
+    background: color(0.7, 0.8, 1.0)
 };

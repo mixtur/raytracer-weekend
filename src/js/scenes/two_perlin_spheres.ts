@@ -1,10 +1,10 @@
 import { HittableList } from '../hittable/hittable_list';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Sphere } from '../hittable/sphere';
-import { point3, vec3 } from '../vec3';
-import { Lambertian } from '../material';
+import { color, point3, vec3 } from '../vec3';
 import { Scene } from './scene';
 import { Camera } from '../camera';
+import { Lambertian } from '../materials/lambertian';
 
 const pertext = new NoiseTexture(4);
 
@@ -29,5 +29,6 @@ export const two_perlin_spheres: Scene = {
             time0: 0,
             time1: 1
         });
-    }
+    },
+    background: color(0.7, 0.8, 1.0)
 }

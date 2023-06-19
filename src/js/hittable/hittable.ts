@@ -1,6 +1,6 @@
 import { Ray } from "../ray";
 import { Point3, Vec3, vec3Dot, vec3Negate1, vec3Unit1 } from '../vec3';
-import { Material } from '../material';
+import { Material } from '../materials/material';
 import { AABB } from './aabb';
 
 export interface HitRecord {
