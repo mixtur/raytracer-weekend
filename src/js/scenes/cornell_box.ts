@@ -8,20 +8,38 @@ import { YZRect } from '../hittable/yz_rect';
 import { XZRect } from '../hittable/xz_rect';
 import { XYRect } from '../hittable/xy_rect';
 import { color, point3, vec3 } from '../vec3';
+import { Box } from '../hittable/box';
+import { RotateY } from '../hittable/rotate_y';
+import { Translate } from '../hittable/translate';
 
 const red = new Lambertian(sColor(.65, .05, .05));
 const white = new Lambertian(sColor(.73, .73, .73));
 const green = new Lambertian(sColor(.12, .45, .15));
 const light = new DiffuseLight(sColor(15, 15, 15));
 
-export const empty_cornell_box: Scene = {
+export const cornell_box: Scene = {
     root_hittable: new HittableList([
         new YZRect(0,   555, 0,   555, 555, green),
         new YZRect(0,   555, 0,   555, 0,   red),
         new XZRect(213, 343, 227, 332, 554, light),
         new XZRect(0,   555, 0,   555, 0,   white),
         new XZRect(0,   555, 0,   555, 555, white),
-        new XYRect(0,   555, 0,   555, 555, white)
+        new XYRect(0,   555, 0,   555, 555, white),
+
+        new Translate(
+            new RotateY(
+                new Box(point3(0, 0, 0), point3(165, 330, 165), white),
+                15
+            ),
+            vec3(265, 0, 295)
+        ),
+        new Translate(
+            new RotateY(
+                new Box(point3(0, 0, 0), point3(165, 165, 165), white),
+                -18
+            ),
+            vec3(130, 0, 65)
+        )
     ]),
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(278, 278, -800);

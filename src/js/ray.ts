@@ -15,11 +15,15 @@ const raySingleton: Ray = {
 const sDirection = raySingleton.direction;
 const sOrigin = raySingleton.origin;
 
-export const ray = (origin: Vec3, direction: Vec3, time): Ray => {
-    sOrigin.set(origin);
-    sDirection.set(direction);
-    raySingleton.time = time;
-    return raySingleton;
+export const ray = (origin: Vec3, direction: Vec3, time: number): Ray => {
+    // sOrigin.set(origin);
+    // sDirection.set(direction);
+    // raySingleton.time = time;
+    return {
+        origin,
+        direction,
+        time
+    };
 };
 
 export const rayAt2 = (ray: Ray, t: number): Vec3 => {

@@ -14,7 +14,7 @@ import { ArenaVec3Allocator } from './vec3_allocators';
 // import { lots_of_spheres } from './scenes/lots_of_spheres';
 // import { two_spheres } from './scenes/two_spheres';
 // import { two_perlin_spheres } from './scenes/two_perlin_spheres';
-import { empty_cornell_box } from './scenes/empty_cornell_box';
+import { cornell_box } from './scenes/cornell_box';
 
 const aspect_ratio = 1;
 const image_width = 600;
@@ -61,7 +61,7 @@ async function main() {
 //    const scene = await create_earth_scene();
 //    const scene = lots_of_spheres;
 //    const scene = simple_light;
-    const scene = empty_cornell_box;
+    const scene = cornell_box;
     const cam = scene.create_camera(aspect_ratio);
 
     for (let j = 0; j < image_height; j++) {
