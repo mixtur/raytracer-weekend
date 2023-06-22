@@ -15,11 +15,12 @@ import { ArenaVec3Allocator } from './vec3_allocators';
 // import { two_perlin_spheres } from './scenes/two_perlin_spheres';
 import { cornell_box } from './scenes/cornell_box';
 import { createArrayWriter, createCanvasColorWriter } from './color-writers';
+import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 
 const aspect_ratio = 1;
 const image_width = 600;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 200;
+const samples_per_pixel = 100;
 const max_depth = 50;
 
 const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
@@ -58,7 +59,8 @@ async function main() {
 //    const scene = await create_earth_scene();
 //    const scene = lots_of_spheres;
 //    const scene = simple_light;
-    const scene = cornell_box;
+//    const scene = cornell_box;
+    const scene = cornell_box_with_smoke;
     const cam = scene.create_camera(aspect_ratio);
 
     await vec3AllocatorScope(rayArenaAllocator, async () => {
