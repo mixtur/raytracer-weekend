@@ -14,7 +14,6 @@ export class GCVec3Allocator implements Vec3Allocator {
     }
 }
 
-let hwm = 0;
 export class ArenaVec3Allocator implements Vec3Allocator {
     nextToAlloc: number = 0;
     vectors: Array<Float64Array> = [];
@@ -36,10 +35,6 @@ export class ArenaVec3Allocator implements Vec3Allocator {
         return result;
     }
     reset(): void {
-        if (this.nextToAlloc > hwm) {
-            hwm = this.nextToAlloc;
-            // console.log(hwm);
-        }
         this.nextToAlloc = 0;
     }
 }

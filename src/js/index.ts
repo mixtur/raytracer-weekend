@@ -1,4 +1,3 @@
-import { writeColor } from "./color";
 import { Hittable } from "./hittable/hittable";
 import { Ray } from './ray';
 import {
@@ -15,6 +14,7 @@ import { ArenaVec3Allocator } from './vec3_allocators';
 // import { two_spheres } from './scenes/two_spheres';
 // import { two_perlin_spheres } from './scenes/two_perlin_spheres';
 import { cornell_box } from './scenes/cornell_box';
+import { createArrayWriter, createCanvasColorWriter } from './color-writers';
 
 const aspect_ratio = 1;
 const image_width = 600;
@@ -22,18 +22,11 @@ const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 200;
 const max_depth = 50;
 
-const canvas = document.createElement('canvas');
-const _ctx = canvas.getContext('2d');
-if (_ctx === null) {
-    throw new Error(`failed to acquire canvas 2d context`);
-}
+const { writeColor, dumpLine, dumpImage } = createCanvasColorWriter(image_width, image_height);
+// const { writeColor, dumpLine, dumpImage } = createArrayWriter(image_width, image_height, (array) => {
+//     console.log(array);
+// });
 
-const ctx = _ctx;
-canvas.width = image_width;
-canvas.height = image_height;
-document.body.appendChild(canvas);
-
-const imageData = new ImageData(image_width, image_height, { colorSpace: "srgb" });
 
 const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
 
@@ -81,14 +74,14 @@ async function main() {
                     const r = cam.get_ray(u, v);
                     vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
                 }
-            })
-            writeColor(imageData, x, y, pixelColor, samples_per_pixel);
+            });
+            writeColor(x, y, pixelColor, samples_per_pixel);
         }
         console.timeEnd(mark);
         await new Promise(resolve => setTimeout(resolve, 0));
-        ctx.putImageData(imageData, 0, 0, 0, y, image_width, 1);
+        dumpLine(y);
     }
-    ctx.putImageData(imageData, 0, 0);
+    dumpImage();
     console.log('Done!');
 }
 
