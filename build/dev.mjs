@@ -12,12 +12,15 @@ const DIR_DEVBUILD = project_path('dev-build');
 
 async function start() {
     const esbuildContext = await context({
-        entryPoints: [
-            project_path('src/js/index.ts')
-        ],
+        entryPoints: {
+            index: project_path('src/js/index.ts'),
+            render_worker: project_path('src/js/render_worker.ts'),
+        },
         bundle: true,
         sourcemap: true,
         outdir: DIR_DEVBUILD,
+        format: "esm",
+        splitting: true,
         loader: {
             '.jpg': 'file'
         }
