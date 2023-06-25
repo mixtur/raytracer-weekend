@@ -9,7 +9,8 @@ export async function multiThreadedRender(thread_number: number, render_paramete
         image_height,
         samples_per_pixel,
         aspect_ratio,
-        max_depth
+        max_depth,
+        scene_creation_random_numbers
     } = render_parameters;
 
     const { writeColor, dumpLine, dumpImage } = writer;
@@ -27,7 +28,8 @@ export async function multiThreadedRender(thread_number: number, render_paramete
             image_width,
             image_height,
             samples_per_pixel: samples_to_send,
-            max_depth
+            max_depth,
+            scene_creation_random_numbers
         } as RenderParameters);
 
         promises.push(new Promise<void>(resolve => {

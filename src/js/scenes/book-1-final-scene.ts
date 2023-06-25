@@ -15,7 +15,7 @@ import { Material } from '../materials/material';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { sColor, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
-import { randomMinMax } from '../random';
+import { random, randomMinMax } from '../random';
 import { MovingSphere } from '../hittable/moving_sphere';
 import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';
@@ -33,8 +33,8 @@ function createLotsOfSpheres(): Hittable {
         const objects = [];
         for (let a = -11; a < 11; a++) {
             for (let b = -11; b < 11; b++) {
-                const choose_mat = Math.random();
-                const center1 = point3(a + 0.2 + 0.6 * Math.random(), 0.2, b + 0.2 + 0.6 * Math.random());
+                const choose_mat = random();
+                const center1 = point3(a + 0.2 + 0.6 * random(), 0.2, b + 0.2 + 0.6 * random());
                 if (vec3Len(vec3Sub2(center1, point3(4, 0.2, 0))) > 0.9) {
                     let sphere_mat: Material;
                     if (choose_mat < 0.8) {
@@ -87,7 +87,7 @@ const create_camera = (aspect_ratio: number): Camera => new Camera({
 });
 
 
-export const lots_of_spheres: Scene = {
+export const book1FinalScene: Scene = {
     create_camera,
     root_hittable: createLotsOfSpheres(),
     background: color(0.7, 0.8, 1.0)

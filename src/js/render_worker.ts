@@ -4,6 +4,7 @@ import { ray_color } from './ray_color';
 import { RenderParameters } from './types';
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { randomIntMinMax } from './random';
+import { book2_final_scene } from './scenes/book-2-final-scene';
 
 export interface RenderWorkerMessageData {
     y: number;
@@ -19,17 +20,19 @@ async function render({
                           image_height,
                           image_width,
                           samples_per_pixel,
-                          max_depth
+                          max_depth,
+                          scene_creation_random_numbers
                       }: RenderParameters): Promise<void> {
-//    const scene = await create_earth_scene();
-//    const scene = lots_of_spheres;
-//    const scene = simple_light;
-//    const scene = cornell_box;
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
     const stratification_grid_step = 1 / stratification_grid_size;
 
-    const scene = cornell_box_with_smoke;
+//    const scene = await create_earth_scene();
+//    const scene = lots_of_spheres;
+//    const scene = simple_light;
+//    const scene = cornell_box;
+//    const scene = cornell_box_with_smoke;
+    const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
     const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);

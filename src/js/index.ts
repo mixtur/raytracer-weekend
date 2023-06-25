@@ -19,9 +19,9 @@ import { multiThreadedRender } from './miulti_threaded_render';
 import { singleThreadedRender } from './single_threaded_render';
 
 const aspect_ratio = 1;
-const image_width = 600;
+const image_width = 800;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 200;
+const samples_per_pixel = 10000;
 const max_depth = 50;
 
 const writer = createCanvasColorWriter(image_width, image_height);
@@ -29,12 +29,18 @@ const writer = createCanvasColorWriter(image_width, image_height);
 //     console.log(array);
 // });
 
-multiThreadedRender(4, {
+const scene_creation_random_numbers = [];
+for (let i = 0; i < 2048; i++) {
+    scene_creation_random_numbers.push(Math.random());
+}
+
+multiThreadedRender(7, {
     aspect_ratio,
     image_width,
     image_height,
     samples_per_pixel,
-    max_depth
+    max_depth,
+    scene_creation_random_numbers
 }, writer).catch((e) => {
     console.log(e);
 });

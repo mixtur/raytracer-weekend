@@ -5,9 +5,7 @@ import { clamp } from '../utils';
 export class ImageTexture implements Texture {
     private readonly imageData: ImageData;
     constructor(bmp: ImageBitmap) {
-        const tmpCanvas = document.createElement('canvas');
-        tmpCanvas.width = bmp.width;
-        tmpCanvas.height = bmp.height;
+        const tmpCanvas = new OffscreenCanvas(bmp.width, bmp.height);
         const ctx = tmpCanvas.getContext('2d');
         if (ctx === null) {
             throw new Error('cannot acquire canvas 2d context');

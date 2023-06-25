@@ -1,4 +1,4 @@
-import { randomMinMax } from './random';
+import { random, randomMinMax } from './random';
 import { GCVec3Allocator, Vec3Allocator } from './vec3_allocators';
 
 export type Vec3 = Float64Array;
@@ -111,7 +111,7 @@ export const vec3Negate2 = (result: Vec3, a: Vec3): void => {
     result[2] = -a[2];
 };
 
-export const vec3Rand = (): Vec3 => vec3(Math.random(), Math.random(), Math.random());
+export const vec3Rand = (): Vec3 => vec3(random(), random(), random());
 
 export const vec3RandMinMax = (min: number, max: number): Vec3 => vec3(randomMinMax(min, max), randomMinMax(min, max), randomMinMax(min, max));
 
