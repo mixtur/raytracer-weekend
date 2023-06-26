@@ -2,6 +2,7 @@ import { RenderParameters } from './types';
 import { ColorWriter } from './color-writers';
 import { RenderWorkerMessageData } from './render_worker';
 import { color } from './vec3';
+import { format_time } from './utils';
 
 export async function multiThreadedRender(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter): Promise<void> {
     const {
@@ -18,6 +19,9 @@ export async function multiThreadedRender(thread_number: number, render_paramete
     const outputLineCompleteness = new Uint8Array(image_height);
     const promises = [];
     let samples_sent = 0;
+    const total_rays = image_width * image_height * samples_per_pixel;
+    let done_rays = 0;
+    const t0 = performance.now();
     for (let i = 0; i < thread_number; i++) {
         const worker = new Worker(new URL('./render_worker.js', import.meta.url), {type: 'module'});
         let eventCount = 0;
@@ -51,6 +55,13 @@ export async function multiThreadedRender(thread_number: number, render_paramete
                     writeColor(x, y, pixelColor, samples_per_pixel * completeness / thread_number);
                 }
                 dumpLine(y);
+
+                done_rays += image_width * samples_to_send;
+                const dt = performance.now() - t0;
+                const speed = done_rays / dt;
+                const estimated_time_to_complete = (total_rays - done_rays) / speed;
+
+                console.log(`[${format_time(dt)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays. Estimated time to complete: ${format_time(estimated_time_to_complete)}`);
 
                 if (eventCount === image_height) {
                     resolve();
