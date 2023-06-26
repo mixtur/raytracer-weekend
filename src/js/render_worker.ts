@@ -84,7 +84,6 @@ async function render({
                 }
             }
             postMessage({y, pixels: outputLine});
-            await new Promise(resolve => setTimeout(resolve, 0));
         }
     });
 }
