@@ -4,9 +4,10 @@ import { HitRecord } from '../hittable/hittable';
 import { Color, color, Point3, vec3Add2, vec3NearZero, vec3RandUnit } from '../vec3';
 import { BounceRecord, Material } from './material';
 
-export class Lambertian implements Material {
+export class Lambertian extends Material {
     albedo: Texture;
     constructor(albedo: Texture) {
+        super();
         this.albedo = albedo;
     }
     scatter(r_in: Ray, hit: HitRecord): BounceRecord | null {
@@ -19,8 +20,5 @@ export class Lambertian implements Material {
             scattered: ray(hit.p, scatter_direction, r_in.time),
             attenuation: this.albedo.value(hit.u, hit.v, hit.p)
         };
-    }
-    emitted(u: number, v: number, p: Point3): Color {
-        return color(0, 0, 0);
     }
 }

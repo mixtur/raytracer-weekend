@@ -3,9 +3,10 @@ import { HitRecord } from '../hittable/hittable';
 import { Color, color, Point3, vec3Dot, vec3Reflect, vec3Refract, vec3Unit1 } from '../vec3';
 import { BounceRecord, Material } from './material';
 
-export class Dielectric implements Material {
+export class Dielectric extends Material {
     ior: number
     constructor(ior: number) {
+        super();
         this.ior = ior;
     }
     scatter(r_in: Ray, hit: HitRecord): BounceRecord | null {
@@ -31,8 +32,5 @@ export class Dielectric implements Material {
         // Use Schlick's approximation for reflectance.
         let r0 = ((1-ref_idx) / (1+ref_idx)) ** 2;
         return r0 + (1 - r0) * ((1 - cos) ** 5);
-    }
-    emitted(u: number, v: number, p: Point3): Color {
-        return color(0, 0, 0);
     }
 }

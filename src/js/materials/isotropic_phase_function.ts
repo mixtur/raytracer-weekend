@@ -4,10 +4,11 @@ import { ray, Ray } from '../ray';
 import { HitRecord } from '../hittable/hittable';
 import { color, Color, Point3, vec3RandInUnitSphere } from '../vec3';
 
-export class IsotropicPhaseFunction implements Material {
+export class IsotropicPhaseFunction extends Material {
     albedo: Texture;
 
     constructor(albedo: Texture) {
+        super();
         this.albedo = albedo;
     }
 
@@ -16,9 +17,5 @@ export class IsotropicPhaseFunction implements Material {
             scattered: ray(hit.p, vec3RandInUnitSphere(), r_in.time),
             attenuation: this.albedo.value(hit.u, hit.v, hit.p)
         };
-    }
-
-    emitted(u: number, v: number, p: Point3): Color {
-        return color(0, 0, 0);
     }
 }

@@ -4,9 +4,10 @@ import { HitRecord } from '../hittable/hittable';
 import { Color, Point3 } from '../vec3';
 import { Texture } from '../texture/texture';
 
-export class DiffuseLight implements Material {
+export class DiffuseLight extends Material {
     emit: Texture;
     constructor(emit: Texture) {
+        super();
         this.emit = emit;
     }
     scatter(r_in: Ray, hit: HitRecord): BounceRecord | null {

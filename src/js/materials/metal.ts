@@ -14,10 +14,11 @@ import {
 } from '../vec3';
 import { BounceRecord, Material } from './material';
 
-export class Metal implements Material {
+export class Metal extends Material {
     albedo: Texture;
     fuzz: number;
     constructor(albedo: Texture, fuzz: number) {
+        super();
         this.albedo = albedo;
         this.fuzz = fuzz;
     }
@@ -29,8 +30,5 @@ export class Metal implements Material {
             scattered: ray(hit.p, reflected, r_in.time),
             attenuation: this.albedo.value(hit.u, hit.v, hit.p)
         };
-    }
-    emitted(u: number, v: number, p: Point3): Color {
-        return color(0, 0, 0);
     }
 }
