@@ -2,9 +2,13 @@ import { ray, Ray } from '../ray';
 import { HitRecord } from '../hittable/hittable';
 import { Color, color, Point3, vec3Dot, vec3Reflect, vec3Refract, vec3Unit1 } from '../vec3';
 import { BounceRecord, Material } from './material';
+import { register_scatter_id } from './register_scatter_id';
+
+export const dielectric_scatter_id = register_scatter_id();
 
 export class Dielectric extends Material {
-    ior: number
+    scatter_id = dielectric_scatter_id;
+    ior: number;
     constructor(ior: number) {
         super();
         this.ior = ior;

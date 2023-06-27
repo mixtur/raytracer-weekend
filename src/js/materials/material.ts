@@ -11,6 +11,7 @@ export interface BounceRecord {
 }
 
 export abstract class Material {
+    scatter_id: number = 0;
     abstract scatter(r_in: Ray, hit: HitRecord): BounceRecord | null;
     emitted(u: number, v: number, p: Point3): Color {
         return color(0, 0, 0);

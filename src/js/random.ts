@@ -13,13 +13,22 @@ export const getPredefinedRandom = (numbers: number[]): Random => {
 
 export const random = () => currentRandom();
 
-export const randomScope = <T>(randomFunc: Random, scope: () => T): T => {
+export const randomScopeSync = <T>(randomFunc: Random, scope: () => T): T => {
     const prevRandom = currentRandom;
     currentRandom = randomFunc;
     const result = scope();
     currentRandom = prevRandom;
     return result;
 }
+
+export const randomScopeAsync = async <T>(randomFunc: Random, scope: () => Promise<T>): Promise<T> => {
+    const prevRandom = currentRandom;
+    currentRandom = randomFunc;
+    const result = await scope();
+    currentRandom = prevRandom;
+    return result;
+}
+
 
 export const randomMinMax = (min: number, max: number): number => {
     return min + (max - min) * currentRandom();

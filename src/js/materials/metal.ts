@@ -13,8 +13,12 @@ import {
     vec3Unit1
 } from '../vec3';
 import { BounceRecord, Material } from './material';
+import { register_scatter_id } from './register_scatter_id';
+
+export const metal_scatter_id = register_scatter_id();
 
 export class Metal extends Material {
+    scatter_id = metal_scatter_id;
     albedo: Texture;
     fuzz: number;
     constructor(albedo: Texture, fuzz: number) {

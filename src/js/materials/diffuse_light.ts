@@ -3,8 +3,12 @@ import { Ray } from '../ray';
 import { HitRecord } from '../hittable/hittable';
 import { Color, Point3 } from '../vec3';
 import { Texture } from '../texture/texture';
+import { register_scatter_id } from './register_scatter_id';
+
+export const diffuse_light_scatter_id = register_scatter_id();
 
 export class DiffuseLight extends Material {
+    scatter_id = diffuse_light_scatter_id;
     emit: Texture;
     constructor(emit: Texture) {
         super();

@@ -34,7 +34,7 @@ for (let i = 0; i < 2048; i++) {
     scene_creation_random_numbers.push(Math.random());
 }
 
-multiThreadedRender(7, {
+multiThreadedRender(4, {
     aspect_ratio,
     image_width,
     image_height,

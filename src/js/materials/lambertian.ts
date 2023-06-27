@@ -3,8 +3,11 @@ import { ray, Ray } from '../ray';
 import { HitRecord } from '../hittable/hittable';
 import { Color, color, Point3, vec3Add2, vec3NearZero, vec3RandUnit } from '../vec3';
 import { BounceRecord, Material } from './material';
+import { register_scatter_id } from './register_scatter_id';
 
+export const lambertian_scatter_id = register_scatter_id();
 export class Lambertian extends Material {
+    scatter_id = lambertian_scatter_id;
     albedo: Texture;
     constructor(albedo: Texture) {
         super();

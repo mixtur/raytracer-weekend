@@ -1,6 +1,7 @@
 import { Ray } from './ray';
 import { color, Color, vec3Add3, vec3MulV2 } from './vec3';
 import { Hittable } from './hittable/hittable';
+import { dispatch_scatter } from './materials/dispatch_scatter';
 
 export const ray_color = (r: Ray, background: Color, world: Hittable, depth: number): Color => {
     if (depth <= 0) {
@@ -9,7 +10,8 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, depth: num
     {// world
         const hit = world.hit(r, 0.0001, Infinity);
         if (hit !== null) {
-            const bounce = hit.material.scatter(r, hit);
+            // const bounce = hit.material.scatter(r, hit);
+            const bounce = dispatch_scatter(hit.material, r, hit);
             const totalEmission = hit.material.emitted(hit.u, hit.v, hit.p);
             if (bounce) {
                 const bounceColor = ray_color(bounce.scattered, background, world, depth - 1);
