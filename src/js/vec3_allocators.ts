@@ -16,10 +16,12 @@ export class GCVec3Allocator implements Vec3Allocator {
 
 export class ArenaVec3Allocator implements Vec3Allocator {
     nextToAlloc: number = 0;
+    dump: Float64Array;
     vectors: Array<Float64Array> = [];
     constructor(maxVectors: number) {
         const vectorByteLength = Float64Array.BYTES_PER_ELEMENT * 3;
         const buffer = new ArrayBuffer(maxVectors * vectorByteLength);
+        this.dump = new Float64Array(buffer);
         for (let i = 0; i < maxVectors; i++) {
             this.vectors.push(new Float64Array(buffer, i * vectorByteLength, 3));
         }

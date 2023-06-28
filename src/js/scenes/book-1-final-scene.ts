@@ -4,7 +4,7 @@ import {
     point3,
     vec3,
     vec3Add2,
-    vec3AllocatorScope,
+    vec3AllocatorScopeSync,
     vec3Len,
     vec3Rand,
     vec3RandMinMax,
@@ -26,7 +26,7 @@ import { Metal } from '../materials/metal';
 import { Dielectric } from '../materials/dielectric';
 
 function createLotsOfSpheres(): Hittable {
-    return vec3AllocatorScope(new ArenaVec3Allocator(8192), () => {
+    return vec3AllocatorScopeSync(new ArenaVec3Allocator(8192), () => {
         const worldObjects: Hittable[] = [];
         const ground_material = new Lambertian(new Checker3DTexture(sColor(0.2, 0.3, 0.1), sColor(0.9, 0.9, 0.9)));
         worldObjects.push(new Sphere(point3(0,-1000,0), 1000, ground_material));

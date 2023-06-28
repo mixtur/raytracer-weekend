@@ -9,13 +9,22 @@ export const gcAllocator = new GCVec3Allocator();
 
 let allocator = gcAllocator;
 export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };
-export const vec3AllocatorScope = <T>(a: Vec3Allocator, f: () => T): T => {
+export const vec3AllocatorScopeSync = <T>(a: Vec3Allocator, f: () => T): T => {
     const prevAllocator = allocator;
     allocator = a;
     const result = f();
     allocator = prevAllocator;
     return result;
 };
+
+export const vec3AllocatorScopeAsync = async <T>(a: Vec3Allocator, f: () => Promise<T>): Promise<T> => {
+    const prevAllocator = allocator;
+    allocator = a;
+    const result = await f();
+    allocator = prevAllocator;
+    return result;
+};
+
 
 export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x, y, z);
 export const color = vec3;
@@ -146,7 +155,11 @@ export const vec3Reflect = (v: Vec3, normal: Vec3): Vec3 => {
 
 export const vec3Refract = (v: Vec3, normal: Vec3, ior: number): Vec3 => {
     const cos_theta = -vec3Dot(normal, v);
-    const out_x = vec3MulS2(vec3Add2(v, vec3MulS2(normal, cos_theta)), ior);
+    const v_proj = vec3MulS2(normal, cos_theta);
+    const out_x_dir = v_proj;
+    vec3Add3(out_x_dir, v, v_proj);
+    const out_x = out_x_dir;
+    vec3MulS3(out_x, out_x_dir, ior);
     const out_y = vec3MulS2(normal, -Math.sqrt(1 - vec3SqLen(out_x)));
     vec3Add3(out_x, out_x, out_y);
     return out_x;

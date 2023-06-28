@@ -1,7 +1,7 @@
 import {
     color,
     vec3Add3,
-    vec3AllocatorScope
+    vec3AllocatorScopeSync
 } from './vec3';
 import { ArenaVec3Allocator } from './vec3_allocators';
 // import { simple_light } from './scenes/simple_light';

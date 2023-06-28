@@ -1,7 +1,15 @@
 import { Scene } from './scene';
 import { Hittable } from '../hittable/hittable';
 import { Lambertian } from '../materials/lambertian';
-import { color, point3, vec3, vec3Add2, vec3AllocatorScope, vec3RandMinMax } from '../vec3';
+import {
+    color,
+    point3,
+    vec3,
+    vec3Add2,
+    vec3AllocatorScopeAsync,
+    vec3AllocatorScopeSync,
+    vec3RandMinMax
+} from '../vec3';
 import { sColor } from '../texture/solid_color';
 import { Box } from '../hittable/box';
 import { getPredefinedRandom, randomMinMax, randomScopeAsync, randomScopeSync } from '../random';
@@ -27,7 +35,7 @@ import { Camera } from '../camera';
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     const rng = getPredefinedRandom(scene_creation_random_numbers);
     return randomScopeAsync(rng, () => {
-        return vec3AllocatorScope(new ArenaVec3Allocator(1024 * 16), async (): Promise<Scene> => {
+        return vec3AllocatorScopeAsync(new ArenaVec3Allocator(1024 * 12), async (): Promise<Scene> => {
             const ground = new Lambertian(sColor(0.48, 0.83, 0.53));
             const boxes_per_side = 20;
 

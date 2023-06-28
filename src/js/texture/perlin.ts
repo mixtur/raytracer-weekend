@@ -1,5 +1,5 @@
 import { randomIntMinMax } from '../random';
-import { Point3, vec3, Vec3, vec3AllocatorScope, vec3Dot, vec3MulS3, vec3RandMinMax } from '../vec3';
+import { Point3, vec3, Vec3, vec3AllocatorScopeSync, vec3Dot, vec3MulS3, vec3RandMinMax } from '../vec3';
 import { ArenaVec3Allocator } from '../vec3_allocators';
 
 const POINT_COUNT = 256;
@@ -45,7 +45,7 @@ function perlin_interp(c: Vec3[][][], u: number, v: number, w: number): number {
     return acc;
 }
 
-const trilinear_buffer = vec3AllocatorScope(new ArenaVec3Allocator(8), () =>
+const trilinear_buffer = vec3AllocatorScopeSync(new ArenaVec3Allocator(8), () =>
     [[[vec3(0, 0, 0), vec3(0, 0, 0)], [vec3(0, 0, 0), vec3(0, 0, 0)]], [[vec3(0, 0, 0), vec3(0, 0, 0)], [vec3(0, 0, 0), vec3(0, 0, 0)]]]
 );
 

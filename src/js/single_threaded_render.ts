@@ -1,7 +1,7 @@
 import { RenderParameters } from './types';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { ArenaVec3Allocator } from './vec3_allocators';
-import { color, vec3Add3, vec3AllocatorScope } from './vec3';
+import { color, vec3Add3, vec3AllocatorScopeSync } from './vec3';
 import { ray_color } from './ray_color';
 import { ColorWriter } from './color-writers';
 
@@ -26,7 +26,7 @@ export async function singleThreadedRender({
 
     const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
 
-    await vec3AllocatorScope(rayArenaAllocator, async () => {
+    await vec3AllocatorScopeSync(rayArenaAllocator, async () => {
         for (let j = 0; j < image_height; j++) {
             const mark = `scanline remaining ${image_height - j - 1}`;
             const y = image_height -1 - j;

@@ -1,5 +1,5 @@
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
-import { color, vec3Add3, vec3AllocatorScope } from './vec3';
+import { color, vec3Add3, vec3AllocatorScopeSync } from './vec3';
 import { ray_color } from './ray_color';
 import { RenderParameters } from './types';
 import { ArenaVec3Allocator } from './vec3_allocators';
@@ -45,8 +45,8 @@ async function render({
             xs[j] = t;
         }
     }
-
-    await vec3AllocatorScope(rayArenaAllocator, async () => {
+    const outputLineAllocator = new ArenaVec3Allocator(image_width);
+    await vec3AllocatorScopeSync(rayArenaAllocator, async () => {
         const jRand = new Uint16Array(image_height);
         for (let i = 0; i < image_height; i++) { jRand[i] = i; }
         permute(jRand);
@@ -54,10 +54,9 @@ async function render({
         for (let _j = 0; _j < image_height; _j++) {
             const j = jRand[_j];
             const y = image_height -1 - j;
-            const outputLine = new Float64Array(image_width * 3);
+            outputLineAllocator.reset();
             for (let i = 0; i < image_width; i++) {
-                const x = i;
-                const pixelColor = new Float64Array(outputLine.buffer, x * 3 * 8, 3);
+                const pixelColor = outputLineAllocator.alloc(0, 0, 0);
 
                 for (let sj = 0; sj < stratification_grid_size; sj++) {
                     for (let si = 0; si < stratification_grid_size; si++) {
@@ -83,7 +82,7 @@ async function render({
                     vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
                 }
             }
-            postMessage({y, pixels: outputLine});
+            postMessage({y, pixels: outputLineAllocator.dump});
         }
     });
 }

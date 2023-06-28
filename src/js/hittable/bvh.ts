@@ -2,7 +2,7 @@ import { HitRecord, Hittable } from './hittable';
 import { AABB, surrounding_box } from './aabb';
 import { Ray } from '../ray';
 import { randomIntMinMax } from '../random';
-import { vec3AllocatorScope } from '../vec3';
+import { vec3AllocatorScopeSync } from '../vec3';
 import { ArenaVec3Allocator } from '../vec3_allocators';
 
 export class BVHNode implements Hittable {
@@ -24,7 +24,7 @@ export class BVHNode implements Hittable {
             default:
                 const axis = randomIntMinMax(0, 2);
                 //todo: use one ArenaAllocator provided by the top call
-                vec3AllocatorScope(new ArenaVec3Allocator(Math.ceil(objects.length * Math.log2(objects.length)) * 16), () => {
+                vec3AllocatorScopeSync(new ArenaVec3Allocator(Math.ceil(objects.length * Math.log2(objects.length)) * 16), () => {
                     objects.sort((a, b) => a.get_bounding_box(time0, time1).min[axis] - b.get_bounding_box(time0, time1).min[axis]);
                 });
                 this.left = new BVHNode(objects.slice(0, Math.floor(objects.length / 2)), time0, time1);
