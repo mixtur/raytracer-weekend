@@ -1,5 +1,5 @@
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
-import { color, vec3Add3, vec3AllocatorScopeSync } from './vec3';
+import { vec3Add3, vec3AllocatorScopeSync } from './vec3';
 import { ray_color } from './ray_color';
 import { RenderParameters } from './types';
 import { ArenaVec3Allocator } from './vec3_allocators';
@@ -45,12 +45,12 @@ async function render({
             xs[j] = t;
         }
     }
-    const outputLineAllocator = new ArenaVec3Allocator(image_width);
-    await vec3AllocatorScopeSync(rayArenaAllocator, async () => {
-        const jRand = new Uint16Array(image_height);
-        for (let i = 0; i < image_height; i++) { jRand[i] = i; }
-        permute(jRand);
+    const jRand = new Uint16Array(image_height);
+    for (let i = 0; i < image_height; i++) { jRand[i] = i; }
+    permute(jRand);
 
+    const outputLineAllocator = new ArenaVec3Allocator(image_width);
+    vec3AllocatorScopeSync(rayArenaAllocator, () => {
         for (let _j = 0; _j < image_height; _j++) {
             const j = jRand[_j];
             const y = image_height -1 - j;
