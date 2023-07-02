@@ -1,6 +1,6 @@
 import { HitRecord, Hittable } from './hittable';
-import { point3, vec3, Vec3, vec3Add2 } from '../vec3';
-import { Ray, rayAt2 } from '../ray';
+import { vec3, Vec3, vec3Add2 } from '../vec3';
+import { Ray } from '../ray';
 import { AABB } from './aabb';
 
 function get_t(val: number, o: number, d: number, default_t: number): number {

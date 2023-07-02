@@ -1,9 +1,9 @@
 import { Ray, rayAt2 } from "../ray";
 import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
-import { Material } from '../materials/material';
 import { AABB } from './aabb';
 import { get_sphere_uv } from './sphere';
+import { MegaMaterial } from '../materials/megamaterial';
 
 export class MovingSphere implements Hittable {
     center0: Point3;
@@ -12,14 +12,14 @@ export class MovingSphere implements Hittable {
     time1: number;
     dt: number;
     radius: number;
-    material: Material;
+    material: MegaMaterial;
 
     get_center(time: number) {
         const p = (time - this.time0) / this.dt;
         return vec3Mix3(this.center0, this.center1, p);
     }
 
-    constructor(center0: Point3, center1: Point3, time0: number, time1: number, radius: number, material: Material) {
+    constructor(center0: Point3, center1: Point3, time0: number, time1: number, radius: number, material: MegaMaterial) {
         this.center0 = center0;
         this.center1 = center1;
         this.time0 = time0;

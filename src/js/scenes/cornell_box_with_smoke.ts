@@ -1,9 +1,7 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
 import { HittableList } from '../hittable/hittable_list';
-import { Lambertian } from '../materials/lambertian';
 import { sColor } from '../texture/solid_color';
-import { DiffuseLight } from '../materials/diffuse_light';
 import { YZRect } from '../hittable/yz_rect';
 import { XZRect } from '../hittable/xz_rect';
 import { XYRect } from '../hittable/xy_rect';
@@ -12,12 +10,14 @@ import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
 import { ConstantMedium } from '../hittable/constant_medium';
-import { IsotropicPhaseFunction } from '../materials/isotropic_phase_function';
+import { createDiffuseLight } from '../materials/diffuse_light';
+import { createLambertian } from '../materials/lambertian';
+import { createIsotropicPhaseFunction } from '../materials/isotropic_phase_function';
 
-const red = new Lambertian(sColor(.65, .05, .05));
-const white = new Lambertian(sColor(.73, .73, .73));
-const green = new Lambertian(sColor(.12, .45, .15));
-const light = new DiffuseLight(sColor(7, 7, 7));
+const red = createLambertian(sColor(.65, .05, .05));
+const white = createLambertian(sColor(.73, .73, .73));
+const green = createLambertian(sColor(.12, .45, .15));
+const light = createDiffuseLight(sColor(7, 7, 7));
 
 export const cornell_box_with_smoke: Scene = {
     root_hittable: new HittableList([
@@ -37,7 +37,7 @@ export const cornell_box_with_smoke: Scene = {
                 vec3(265, 0, 295)
             ),
             0.01,
-            new IsotropicPhaseFunction(sColor(0, 0, 0))
+            createIsotropicPhaseFunction(sColor(0, 0, 0))
         ),
 
         new ConstantMedium(
@@ -49,7 +49,7 @@ export const cornell_box_with_smoke: Scene = {
                 vec3(130, 0, 65)
             ),
             0.01,
-            new IsotropicPhaseFunction(sColor(1, 1, 1))
+            createIsotropicPhaseFunction(sColor(1, 1, 1))
         )
     ]),
 

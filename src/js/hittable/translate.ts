@@ -1,5 +1,5 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
-import { Vec3, vec3Add2, vec3Add3, vec3Sub2 } from '../vec3';
+import { Vec3, vec3Add3, vec3Sub2 } from '../vec3';
 import { ray, Ray } from '../ray';
 import { AABB } from './aabb';
 

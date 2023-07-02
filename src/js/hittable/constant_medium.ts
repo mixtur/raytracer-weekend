@@ -1,15 +1,15 @@
 import { HitRecord, Hittable } from './hittable';
-import { Material } from '../materials/material';
 import { AABB } from './aabb';
 import { Ray, rayAt2 } from '../ray';
 import { vec3, vec3Len } from '../vec3';
+import { MegaMaterial } from '../materials/megamaterial';
 
 export class ConstantMedium implements Hittable {
     boundary: Hittable;
-    phase_function: Material;
+    phase_function: MegaMaterial;
     neg_inv_density: number;
 
-    constructor(boundary: Hittable, density: number, phase_function: Material) {
+    constructor(boundary: Hittable, density: number, phase_function: MegaMaterial) {
         this.boundary = boundary;
         this.neg_inv_density = -1 / density;
         this.phase_function = phase_function;

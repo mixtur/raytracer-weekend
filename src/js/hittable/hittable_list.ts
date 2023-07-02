@@ -1,6 +1,6 @@
 import { Ray } from "../ray";
 import { HitRecord, Hittable } from "./hittable";
-import { AABB, surrounding_box } from './aabb';
+import { AABB } from './aabb';
 
 export class HittableList implements Hittable {
     objects: Hittable[];

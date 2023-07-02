@@ -1,8 +1,8 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { Point3, vec3 } from '../vec3';
-import { Material } from '../materials/material';
 import { Ray, rayAt2 } from '../ray';
 import { AABB } from './aabb';
+import { MegaMaterial } from '../materials/megamaterial';
 
 function get_t(val: number, o: number, d: number, default_t: number): number {
     // val = o + d * t; t = (val - o) / d;
@@ -13,8 +13,8 @@ function get_t(val: number, o: number, d: number, default_t: number): number {
 export class Box implements Hittable {
     min: Point3;
     max: Point3;
-    mat: Material;
-    constructor(p0: Point3, p1: Point3, mat: Material) {
+    mat: MegaMaterial;
+    constructor(p0: Point3, p1: Point3, mat: MegaMaterial) {
         this.min = p0;
         this.max = p1;
         this.mat = mat;

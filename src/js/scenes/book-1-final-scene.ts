@@ -11,7 +11,6 @@ import {
     vec3Sub2
 } from '../vec3';
 import { ArenaVec3Allocator } from '../vec3_allocators';
-import { Material } from '../materials/material';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { sColor, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
@@ -21,14 +20,15 @@ import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';
 import { Camera } from '../camera';
 import { Scene } from './scene';
-import { Lambertian } from '../materials/lambertian';
-import { Metal } from '../materials/metal';
-import { Dielectric } from '../materials/dielectric';
+import { createLambertian } from '../materials/lambertian';
+import { createMetal } from '../materials/metal';
+import { createDielectric } from '../materials/dielectric';
+import { MegaMaterial } from '../materials/megamaterial';
 
 function createLotsOfSpheres(): Hittable {
     return vec3AllocatorScopeSync(new ArenaVec3Allocator(8192), () => {
         const worldObjects: Hittable[] = [];
-        const ground_material = new Lambertian(new Checker3DTexture(sColor(0.2, 0.3, 0.1), sColor(0.9, 0.9, 0.9)));
+        const ground_material = createLambertian(new Checker3DTexture(sColor(0.2, 0.3, 0.1), sColor(0.9, 0.9, 0.9)));
         worldObjects.push(new Sphere(point3(0,-1000,0), 1000, ground_material));
         const objects = [];
         for (let a = -11; a < 11; a++) {
@@ -36,13 +36,13 @@ function createLotsOfSpheres(): Hittable {
                 const choose_mat = random();
                 const center1 = point3(a + 0.2 + 0.6 * random(), 0.2, b + 0.2 + 0.6 * random());
                 if (vec3Len(vec3Sub2(center1, point3(4, 0.2, 0))) > 0.9) {
-                    let sphere_mat: Material;
+                    let sphere_mat: MegaMaterial;
                     if (choose_mat < 0.8) {
-                        sphere_mat = new Lambertian(new SolidColor(vec3Rand()));
+                        sphere_mat = createLambertian(new SolidColor(vec3Rand()));
                     } else if (choose_mat < 0.95) {
-                        sphere_mat = new Metal(new SolidColor(vec3RandMinMax(0.5, 1)), randomMinMax(0, 0.5));
+                        sphere_mat = createMetal(new SolidColor(vec3RandMinMax(0.5, 1)), randomMinMax(0, 0.5));
                     } else {
-                        sphere_mat = new Dielectric(1.5);
+                        sphere_mat = createDielectric(1.5);
                     }
                     const center2 = vec3Add2(center1, vec3(0, randomMinMax(0, 0.5), 0));
                     objects.push({ xCell: a + 11, zCell: b + 11, obj: new MovingSphere(center1, center2, 0, 1, 0.2, sphere_mat)});
@@ -59,9 +59,9 @@ function createLotsOfSpheres(): Hittable {
         // const plainList = new HittableList(objects.map(o => o.obj));
         // world.objects.push(plainList);
 
-        const mat1 = new Dielectric(1.5);
-        const mat2 = new Lambertian(new SolidColor(color(0.4, 0.2, 0.1)));
-        const mat3 = new Metal(new SolidColor(color(0.7, 0.6, 0.5)), 0.0);
+        const mat1 = createDielectric(1.5);
+        const mat2 = createLambertian(new SolidColor(color(0.4, 0.2, 0.1)));
+        const mat3 = createMetal(new SolidColor(color(0.7, 0.6, 0.5)), 0.0);
 
         worldObjects.push(new Sphere(point3(0, 1, 0), 1.0, mat1));
         worldObjects.push(new Sphere(point3(-4, 1, 0), 1.0, mat2));

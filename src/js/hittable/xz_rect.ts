@@ -2,7 +2,7 @@ import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
 import { point3, vec3 } from '../vec3';
 import { Ray } from '../ray';
-import { Material } from '../materials/material';
+import { MegaMaterial } from '../materials/megamaterial';
 
 export class XZRect implements Hittable {
     x0: number;
@@ -10,8 +10,8 @@ export class XZRect implements Hittable {
     x1: number;
     z1: number;
     y: number;
-    material: Material;
-    constructor(x0: number, x1: number, z0: number, z1: number, y: number, material: Material) {
+    material: MegaMaterial;
+    constructor(x0: number, x1: number, z0: number, z1: number, y: number, material: MegaMaterial) {
         this.x0 = x0;
         this.x1 = x1;
         this.z0 = z0;

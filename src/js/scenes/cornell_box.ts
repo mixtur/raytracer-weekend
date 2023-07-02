@@ -1,9 +1,7 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
 import { HittableList } from '../hittable/hittable_list';
-import { Lambertian } from '../materials/lambertian';
 import { sColor } from '../texture/solid_color';
-import { DiffuseLight } from '../materials/diffuse_light';
 import { YZRect } from '../hittable/yz_rect';
 import { XZRect } from '../hittable/xz_rect';
 import { XYRect } from '../hittable/xy_rect';
@@ -11,11 +9,13 @@ import { color, point3, vec3 } from '../vec3';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
+import { createLambertian } from '../materials/lambertian';
+import { createDiffuseLight } from '../materials/diffuse_light';
 
-const red = new Lambertian(sColor(.65, .05, .05));
-const white = new Lambertian(sColor(.73, .73, .73));
-const green = new Lambertian(sColor(.12, .45, .15));
-const light = new DiffuseLight(sColor(15, 15, 15));
+const red = createLambertian(sColor(.65, .05, .05));
+const white = createLambertian(sColor(.73, .73, .73));
+const green = createLambertian(sColor(.12, .45, .15));
+const light = createDiffuseLight(sColor(15, 15, 15));
 
 export const cornell_box: Scene = {
     root_hittable: new HittableList([

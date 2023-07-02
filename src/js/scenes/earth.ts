@@ -4,14 +4,14 @@ import { color, point3, vec3 } from '../vec3';
 import earthUrl from './earthmap.jpg';
 import { Camera } from '../camera';
 import { ImageTexture } from '../texture/image_texture';
-import { Lambertian } from '../materials/lambertian';
+import { createLambertian } from '../materials/lambertian';
 
 export const create_earth_scene = async (): Promise<Scene> => {
     const earthImageBitmap = await createImageBitmap(
         await fetch(earthUrl).then(res => res.blob())
     );
     return {
-        root_hittable: new Sphere(point3(0, 0, 0), 2, new Lambertian(new ImageTexture(earthImageBitmap))),
+        root_hittable: new Sphere(point3(0, 0, 0), 2, createLambertian(new ImageTexture(earthImageBitmap))),
         create_camera: (aspect_ratio: number): Camera => {
             const look_from = point3(13, 2, 3);
             const look_at = point3(0, 0, 0);

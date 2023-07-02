@@ -1,14 +1,14 @@
 import { Ray } from "../ray";
 import { Point3, Vec3, vec3Dot, vec3Negate1, vec3Unit1 } from '../vec3';
-import { Material } from '../materials/material';
 import { AABB } from './aabb';
+import { MegaMaterial } from '../materials/megamaterial';
 
 export interface HitRecord {
     p: Point3;
     normal: Vec3;
     t: number;
     front_face: boolean;
-    material: Material;
+    material: MegaMaterial;
     u: number;
     v: number;
 }

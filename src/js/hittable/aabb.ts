@@ -1,4 +1,4 @@
-import { point3, Point3, vec3, vec3Sub2 } from '../vec3';
+import { point3, Point3, vec3 } from '../vec3';
 import { Ray } from '../ray';
 
 export class AABB {

@@ -11,12 +11,12 @@ import { ArenaVec3Allocator } from './vec3_allocators';
 // import { two_perlin_spheres } from './scenes/two_perlin_spheres';
 // import { cornell_box } from './scenes/cornell_box';
 import { ColorWriter, createArrayWriter, createCanvasColorWriter } from './color-writers';
-import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
-import { ray_color } from './ray_color';
-import { RenderWorkerMessageData } from './render_worker';
-import { RenderParameters } from './types';
-import { multiThreadedRender } from './miulti_threaded_render';
-import { singleThreadedRender } from './single_threaded_render';
+// import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
+// import { ray_color } from './ray_color';
+// import { RenderWorkerMessageData } from './render_worker';
+// import { RenderParameters } from './types';
+import { multiThreadedRender } from './multi_threaded_render';
+// import { singleThreadedRender } from './single_threaded_render';
 
 const aspect_ratio = 1;
 const image_width = 800;
@@ -25,7 +25,7 @@ const samples_per_pixel = 10000;
 const max_depth = 50;
 
 const writer = createCanvasColorWriter(image_width, image_height);
-// const { writeColor, dumpLine, dumpImage } = createArrayWriter(image_width, image_height, (array) => {
+// const writer = createArrayWriter(image_width, image_height, (array) => {
 //     console.log(array);
 // });
 
@@ -51,7 +51,8 @@ multiThreadedRender(4, {
 //     image_width,
 //     image_height,
 //     samples_per_pixel,
-//     max_depth
+//     max_depth,
+//     scene_creation_random_numbers
 // }, writer).catch((e) => {
 //     console.log(e);
 // });

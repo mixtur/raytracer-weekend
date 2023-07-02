@@ -4,14 +4,14 @@ import { Sphere } from '../hittable/sphere';
 import { color, point3, vec3 } from '../vec3';
 import { Scene } from './scene';
 import { Camera } from '../camera';
-import { Lambertian } from '../materials/lambertian';
+import { createLambertian } from '../materials/lambertian';
 
 const pertext = new NoiseTexture(4);
 
 export const two_perlin_spheres: Scene = {
     root_hittable: new HittableList([
-        new Sphere(point3(0, -1000, 0), 1000, new Lambertian(pertext)),
-        new Sphere(point3(0, 2, 0), 2, new Lambertian(pertext))
+        new Sphere(point3(0, -1000, 0), 1000, createLambertian(pertext)),
+        new Sphere(point3(0, 2, 0), 2, createLambertian(pertext))
     ]),
 
     create_camera(aspect_ratio: number): Camera {

@@ -1,40 +1,33 @@
-import { ray, Ray } from '../ray';
-import { HitRecord } from '../hittable/hittable';
-import { Color, color, Point3, vec3Dot, vec3Reflect, vec3Refract, vec3Unit1 } from '../vec3';
-import { BounceRecord, Material } from './material';
+import { ray } from '../ray';
+import { color, vec3Dot, vec3Reflect, vec3Refract, vec3Unit1 } from '../vec3';
 import { register_scatter_id } from './register_scatter_id';
+import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
 
 export const dielectric_scatter_id = register_scatter_id();
 
-export class Dielectric extends Material {
-    scatter_id = dielectric_scatter_id;
-    ior: number;
-    constructor(ior: number) {
-        super();
-        this.ior = ior;
-    }
-    scatter(r_in: Ray, hit: HitRecord): BounceRecord | null {
-        const refraction_ratio = hit.front_face ? (1 / this.ior) : this.ior;
-        const unit_direction = vec3Unit1(r_in.direction);
-        const cos_theta = -vec3Dot(unit_direction, hit.normal);
-        const sin_theta = Math.sqrt(1.0 - cos_theta*cos_theta);
+export const createDielectric = (ior: number): MegaMaterial => createMegaMaterial(dielectric_scatter_id, { ior });
 
-        const cannot_refract = refraction_ratio * sin_theta > 1.0;
-        const reflectance = this._reflectance(cos_theta, refraction_ratio);
+const _reflectance = (cos: number, ref_idx: number): number => {
+    // Use Schlick's approximation for reflectance.
+    let r0 = ((1-ref_idx) / (1+ref_idx)) ** 2;
+    return r0 + (1 - r0) * ((1 - cos) ** 5);
+}
 
-        const direction = (cannot_refract || (reflectance > Math.random()))
-            ? vec3Reflect(unit_direction, hit.normal)
-            : vec3Refract(unit_direction, hit.normal, refraction_ratio);
+export const dielectric_scatter: ScatterFunction = (mat, r_in, hit) => {
+    const refraction_ratio = hit.front_face ? (1 / mat.ior) : mat.ior;
+    const unit_direction = vec3Unit1(r_in.direction);
+    const cos_theta = -vec3Dot(unit_direction, hit.normal);
+    const sin_theta = Math.sqrt(1.0 - cos_theta*cos_theta);
 
-        return {
-            scattered: ray(hit.p, direction, r_in.time),
-            attenuation: color(1, 1, 1)
-        };
-    }
+    const cannot_refract = refraction_ratio * sin_theta > 1.0;
+    const reflectance = _reflectance(cos_theta, refraction_ratio);
 
-    _reflectance(cos: number, ref_idx: number): number {
-        // Use Schlick's approximation for reflectance.
-        let r0 = ((1-ref_idx) / (1+ref_idx)) ** 2;
-        return r0 + (1 - r0) * ((1 - cos) ** 5);
-    }
+    const direction = (cannot_refract || (reflectance > Math.random()))
+        ? vec3Reflect(unit_direction, hit.normal)
+        : vec3Refract(unit_direction, hit.normal, refraction_ratio);
+
+    return {
+        scattered: ray(hit.p, direction, r_in.time),
+        attenuation: color(1, 1, 1)
+    };
 }

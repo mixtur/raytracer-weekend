@@ -1,9 +1,9 @@
 import { Ray, rayAt2 } from "../ray";
 import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3, vec3Add2 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
-import { Material } from '../materials/material';
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';
+import { MegaMaterial } from '../materials/megamaterial';
 
 
 export function get_sphere_uv(p: Point3): UV {
@@ -22,8 +22,8 @@ export function get_sphere_uv(p: Point3): UV {
 export class Sphere implements Hittable {
     center: Point3;
     radius: number;
-    material: Material;
-    constructor(center: Point3, radius: number, material: Material) {
+    material: MegaMaterial;
+    constructor(center: Point3, radius: number, material: MegaMaterial) {
         this.center = center;
         this.radius = radius;
         this.material = material;
