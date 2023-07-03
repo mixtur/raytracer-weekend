@@ -6,7 +6,7 @@ import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamateria
 
 export const lambertian_scatter_id = register_scatter_id();
 
-export const createLambertian = (albedo: Texture): MegaMaterial => createMegaMaterial(lambertian_scatter_id, { albedo });
+export const createLambertian = (albedo: Texture): MegaMaterial => createMegaMaterial(lambertian_scatter, { albedo });
 
 export const lambertian_scatter: ScatterFunction = (mat, r_in, hit) => {
     //todo: this is not exactly Lambertian isn't it?

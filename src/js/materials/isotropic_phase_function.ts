@@ -6,7 +6,7 @@ import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamateria
 
 export const isotropic_phase_function_scatter_id = register_scatter_id();
 
-export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => createMegaMaterial(isotropic_phase_function_scatter_id, { albedo });
+export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => createMegaMaterial(isotropic_phase_function_scatter, { albedo });
 
 export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit) => {
     return {

@@ -50,13 +50,13 @@ export class Box implements Hittable {
             const p = rayAt2(r, t_enter);
             hit = {
                 p,
-                material: this.mat,
-                front_face: true,
                 normal:
                     t_enter === tx0 ? vec3(dx > 0 ? -1 : 1, 0, 0) :
                     t_enter === ty0 ? vec3(0, dy > 0 ? -1 : 1, 0) :
                     vec3(0, 0, dz > 0 ? -1 : 1),
                 t: t_enter,
+                front_face: true,
+                material: this.mat,
                 u:
                     t_enter === tx0 ? (p[1] - min_y) / (max_y - min_y) :
                     t_enter === ty0 ? (p[2] - min_z) / (max_z - min_z) :
@@ -70,13 +70,13 @@ export class Box implements Hittable {
             const p = rayAt2(r, t_exit);
             hit = {
                 p,
-                material: this.mat,
-                front_face: true,
                 normal:
                     t_exit === tx1 ? vec3(dx > 0 ? 1 : -1, 0, 0) :
                     t_exit === ty1 ? vec3(0, dy > 0 ? 1 : -1, 0) :
                     vec3(0, 0, dz > 0 ? 1 : -1),
                 t: t_exit,
+                front_face: true,
+                material: this.mat,
                 u:
                     t_exit === tx1 ? (p[1] - min_y) / (max_y - min_y) :
                     t_exit === ty1 ? (p[2] - min_z) / (max_z - min_z) :

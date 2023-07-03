@@ -5,7 +5,7 @@ import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamateria
 
 export const dielectric_scatter_id = register_scatter_id();
 
-export const createDielectric = (ior: number): MegaMaterial => createMegaMaterial(dielectric_scatter_id, { ior });
+export const createDielectric = (ior: number): MegaMaterial => createMegaMaterial(dielectric_scatter, { ior });
 
 const _reflectance = (cos: number, ref_idx: number): number => {
     // Use Schlick's approximation for reflectance.

@@ -41,13 +41,13 @@ export class YZRect implements Hittable {
             return null;
         }
         const hit: HitRecord = {
-            u: (y - y0) / (y1 - y0),
-            v: (z - z0) / (z1 - z0),
-            t,
             p: point3(x, y, z),
             normal: vec3(1, 0, 0),
+            t,
+            front_face: false,
             material: this.material,
-            front_face: false
+            u: (y - y0) / (y1 - y0),
+            v: (z - z0) / (z1 - z0),
         };
 
         set_face_normal(hit, r, hit.normal);

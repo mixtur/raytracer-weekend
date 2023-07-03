@@ -9,12 +9,12 @@ export const clamp = (x: number, min: number, max: number): number => {
 }
 
 export const format_time = (ms: number): string => {
-    const s = ms / 1000;
-    const m = s / 60;
-    const h = m / 60;
+    const msInt = Math.floor(ms);
+    const s = Math.floor(msInt / 1000);
+    const m = Math.floor(s / 60);
+    const h = Math.floor(m / 60);
 
-    const padStart = (x: number, f: number, p: number): string => x.toFixed(f).padStart(p, '0');
+    const padStart = (x: number, p: number): string => Math.floor(x).toString().padStart(p, '0');
 
-    return `${padStart(h, 0, 2)}:${padStart(m % 60, 0, 2)}:${padStart(s % 60, 0, 2)}.${padStart(ms % 1000, 0, 3)}`;
-
+    return `${padStart(h, 2)}:${padStart(m % 60, 2)}:${padStart(s % 60, 2)}.${padStart(ms % 1000, 3)}`;
 };

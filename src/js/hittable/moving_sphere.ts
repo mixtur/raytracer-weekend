@@ -50,9 +50,9 @@ export class MovingSphere implements Hittable {
         const p = rayAt2(r, t);
 
         const hit = {
-            t,
             p,
             normal: vec3DivS2(vec3Sub2(p, center), radius),
+            t,
             front_face: false,
             material: this.material,
             u: 0,

@@ -1,8 +1,9 @@
 import { RenderParameters } from './types';
 import { ColorWriter } from './color-writers';
 import { RenderWorkerMessageData } from './render_worker';
-import { color } from './vec3';
+import { color, vec3AllocatorScopeSync } from './vec3';
 import { format_time } from './utils';
+import { ArenaVec3Allocator } from './vec3_allocators';
 
 export async function multiThreadedRender(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter): Promise<void> {
     const {
@@ -36,6 +37,7 @@ export async function multiThreadedRender(thread_number: number, render_paramete
             scene_creation_random_numbers
         } as RenderParameters);
 
+        const tmpColor = color(0, 0, 0);
         promises.push(new Promise<void>(resolve => {
             worker.onmessage = (ev: MessageEvent): void => {
                 eventCount++;
@@ -47,12 +49,10 @@ export async function multiThreadedRender(thread_number: number, render_paramete
                 }
 
                 for (let x = 0; x < image_width; x++) {
-                    const pixelColor = color(
-                        outputBuffer[y_offset + x * 3],
-                        outputBuffer[y_offset + x * 3 + 1],
-                        outputBuffer[y_offset + x * 3 + 2]
-                    );
-                    writeColor(x, y, pixelColor, samples_per_pixel * completeness / thread_number);
+                    tmpColor[0] = outputBuffer[y_offset + x * 3];
+                    tmpColor[1] = outputBuffer[y_offset + x * 3 + 1];
+                    tmpColor[2] = outputBuffer[y_offset + x * 3 + 2];
+                    writeColor(x, y, tmpColor, samples_per_pixel * completeness / thread_number);
                 }
                 dumpLine(y);
 

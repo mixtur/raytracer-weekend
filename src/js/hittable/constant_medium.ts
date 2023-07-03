@@ -36,13 +36,13 @@ export class ConstantMedium implements Hittable {
 
         const t = hit1.t + hit_distance / ray_length;
         return {
-            t,
-            u: 0,
-            v: 0,
             p: rayAt2(r, t),
             normal: vec3(1, 0, 0),
+            t,
             front_face: true,
-            material: this.phase_function
+            material: this.phase_function,
+            u: 0,
+            v: 0
         };
     }
 }

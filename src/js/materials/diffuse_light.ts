@@ -4,6 +4,6 @@ import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamateria
 
 export const diffuse_light_scatter_id = register_scatter_id();
 
-export const createDiffuseLight = (emit: Texture): MegaMaterial => createMegaMaterial(diffuse_light_scatter_id, { emit });
+export const createDiffuseLight = (emit: Texture): MegaMaterial => createMegaMaterial(diffuse_light_scatter, { emit });
 
 export const diffuse_light_scatter: ScatterFunction = (): null => null;

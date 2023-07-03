@@ -1,13 +1,14 @@
 import { random, randomMinMax } from './random';
-import { GCVec3Allocator, Vec3Allocator } from './vec3_allocators';
+import { ArenaVec3Allocator, GCVec3Allocator, Vec3Allocator } from './vec3_allocators';
 
 export type Vec3 = Float64Array;
 export type Color = Vec3;
 export type Point3 = Vec3;
 
 export const gcAllocator = new GCVec3Allocator();
+export const defaultAllocator = new ArenaVec3Allocator(1024);
 
-let allocator = gcAllocator;
+let allocator: Vec3Allocator = defaultAllocator;
 export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };
 export const vec3AllocatorScopeSync = <T>(a: Vec3Allocator, f: () => T): T => {
     const prevAllocator = allocator;
