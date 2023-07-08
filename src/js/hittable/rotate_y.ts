@@ -1,7 +1,7 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
 import { point3, vec3 } from '../vec3';
-import { ray, Ray } from '../ray';
+import { Ray, rayAllocator } from '../ray';
 import { degrees_to_radians } from '../utils';
 
 export class RotateY implements Hittable {
@@ -50,7 +50,7 @@ export class RotateY implements Hittable {
             sin_theta * direction[0] + cos_theta * direction[2]
         );
 
-        const r_rotated = ray(new_origin, new_direction, r.time);
+        const r_rotated = rayAllocator.alloc(new_origin, new_direction, r.time);
 
         const hit = this.obj.hit(r_rotated, t_min, t_max);
         if (hit === null) return null;

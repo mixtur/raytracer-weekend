@@ -1,4 +1,4 @@
-import { ray } from '../ray';
+import { rayAllocator } from '../ray';
 import { color, vec3Dot, vec3Reflect, vec3Refract, vec3Unit1 } from '../vec3';
 import { register_scatter_id } from './register_scatter_id';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
@@ -27,7 +27,7 @@ export const dielectric_scatter: ScatterFunction = (mat, r_in, hit) => {
         : vec3Refract(unit_direction, hit.normal, refraction_ratio);
 
     return {
-        scattered: ray(hit.p, direction, r_in.time),
+        scattered: rayAllocator.reuse(hit.p, direction, r_in.time),
         attenuation: color(1, 1, 1)
     };
 }

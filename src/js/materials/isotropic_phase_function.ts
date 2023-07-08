@@ -1,5 +1,5 @@
 import { Texture } from '../texture/texture';
-import { ray } from '../ray';
+import { rayAllocator } from '../ray';
 import { vec3RandInUnitSphere } from '../vec3';
 import { register_scatter_id } from './register_scatter_id';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
@@ -10,7 +10,7 @@ export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => c
 
 export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit) => {
     return {
-        scattered: ray(hit.p, vec3RandInUnitSphere(), r_in.time),
+        scattered: rayAllocator.reuse(hit.p, vec3RandInUnitSphere(), r_in.time),
         attenuation: mat.albedo.value(hit.u, hit.v, hit.p)
     };
 };

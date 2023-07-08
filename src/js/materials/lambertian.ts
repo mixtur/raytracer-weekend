@@ -1,5 +1,5 @@
 import { Texture } from '../texture/texture';
-import { ray } from '../ray';
+import { rayAllocator } from '../ray';
 import { vec3Add2, vec3NearZero, vec3RandUnit } from '../vec3';
 import { register_scatter_id } from './register_scatter_id';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
@@ -15,7 +15,7 @@ export const lambertian_scatter: ScatterFunction = (mat, r_in, hit) => {
         scatter_direction = hit.normal;
     }
     return {
-        scattered: ray(hit.p, scatter_direction, r_in.time),
+        scattered: rayAllocator.reuse(hit.p, scatter_direction, r_in.time),
         attenuation: mat.albedo.value(hit.u, hit.v, hit.p)
     };
 };

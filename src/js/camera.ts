@@ -9,7 +9,7 @@ import {
     vec3Sub3,
     vec3Unit1
 } from './vec3';
-import { ray, Ray } from './ray';
+import { Ray, rayAllocator } from './ray';
 import { degrees_to_radians } from './utils';
 import { randomMinMax } from './random';
 
@@ -87,7 +87,8 @@ export class Camera {
         vec3Sub3(direction, direction, this.origin);
 
         vec3Add3(offset, offset, this.origin);
-        return ray(
+        rayAllocator.reset();
+        return rayAllocator.reuse(
             offset,
             direction,
             randomMinMax(this.time0, this.time1)

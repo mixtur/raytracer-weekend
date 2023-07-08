@@ -6,7 +6,7 @@ export type Color = Vec3;
 export type Point3 = Vec3;
 
 export const gcAllocator = new GCVec3Allocator();
-export const defaultAllocator = new ArenaVec3Allocator(1024);
+export const defaultAllocator = new ArenaVec3Allocator(4096);
 
 let allocator: Vec3Allocator = defaultAllocator;
 export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };

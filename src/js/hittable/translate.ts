@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { Vec3, vec3Add3, vec3Sub2 } from '../vec3';
-import { ray, Ray } from '../ray';
+import { Ray, rayAllocator } from '../ray';
 import { AABB } from './aabb';
 
 export class Translate implements Hittable {
@@ -12,7 +12,7 @@ export class Translate implements Hittable {
     }
 
     hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
-        const r_moved = ray(
+        const r_moved = rayAllocator.alloc(
             vec3Sub2(r.origin, this.displacement),
             r.direction,
             r.time
