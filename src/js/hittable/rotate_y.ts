@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
-import { point3, vec3 } from '../vec3';
+import { point3, vec3, vec3Set } from '../vec3';
 import { Ray, rayAllocator } from '../ray';
 import { degrees_to_radians } from '../utils';
 
@@ -14,7 +14,8 @@ export class RotateY implements Hittable {
         const cos = this.sin_theta = Math.sin(rad_angle);
         const sin = this.cos_theta = Math.cos(rad_angle);
         this.obj = obj;
-        const objAABB = obj.get_bounding_box(0, 1);//todo: 0..1?
+        const objAABB = AABB.createEmpty();
+        obj.get_bounding_box(0, 1, objAABB);//todo: 0..1?
 
         const aabb = this.aabb = new AABB(
             point3( Infinity, objAABB.min[1],  Infinity),
@@ -36,7 +37,7 @@ export class RotateY implements Hittable {
         }
     }
 
-    hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
+    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const { origin, direction } = r;
         const { cos_theta, sin_theta } = this;
         const new_origin = vec3(
@@ -52,16 +53,15 @@ export class RotateY implements Hittable {
 
         const r_rotated = rayAllocator.alloc(new_origin, new_direction, r.time);
 
-        const hit = this.obj.hit(r_rotated, t_min, t_max);
-        if (hit === null) return null;
+        if (!this.obj.hit(r_rotated, t_min, t_max, hit)) return false;
 
-        hit.p = vec3(
+        vec3Set(hit.p,
              cos_theta * hit.p[0] + sin_theta * hit.p[2],
             hit.p[1],
             -sin_theta * hit.p[0] + cos_theta * hit.p[2],
         );
 
-        hit.normal = vec3(
+        vec3Set(hit.normal,
             cos_theta * hit.normal[0] + sin_theta * hit.normal[2],
             hit.normal[1],
             -sin_theta * hit.normal[0] + cos_theta * hit.normal[2]
@@ -69,10 +69,11 @@ export class RotateY implements Hittable {
 
         set_face_normal(hit, r_rotated, hit.normal);
 
-        return hit;
+        return true;
     }
 
-    get_bounding_box(time0: number, time1: number): AABB {
-        return this.aabb;
+    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
+        aabb.min.set(this.aabb.min);
+        aabb.max.set(this.aabb.max);
     }
 }

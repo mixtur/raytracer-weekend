@@ -5,6 +5,10 @@ import { RenderParameters } from './types';
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { randomIntMinMax } from './random';
 import { book2_final_scene } from './scenes/book-2-final-scene';
+import { simple_light } from './scenes/simple_light';
+import { cornell_box } from './scenes/cornell_box';
+import { book1_final_scene } from './scenes/book-1-final-scene';
+import { create_earth_scene } from './scenes/earth';
 
 export interface RenderWorkerMessageData {
     y: number;
@@ -28,14 +32,14 @@ async function render({
     const stratification_grid_step = 1 / stratification_grid_size;
 
 //    const scene = await create_earth_scene();
-//    const scene = lots_of_spheres;
+//    const scene = book1_final_scene(scene_creation_random_numbers);
 //    const scene = simple_light;
 //    const scene = cornell_box;
 //    const scene = cornell_box_with_smoke;
     const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
-    const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
+    const rayArenaAllocator = new ArenaVec3Allocator(1024 * 12);
 
     function permute(xs: Uint16Array): void {
         for (let i = xs.length; i >= 0; i--) {

@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
-import { Point3, vec3 } from '../vec3';
-import { Ray, rayAt2 } from '../ray';
+import { Point3, vec3, vec3Set } from '../vec3';
+import { Ray, rayAt2, rayAt3 } from '../ray';
 import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
 
@@ -20,7 +20,7 @@ export class Box implements Hittable {
         this.mat = mat;
     }
 
-    hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
+    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const ox = r.origin[0];
         const oy = r.origin[1];
         const oz = r.origin[2];
@@ -44,59 +44,47 @@ export class Box implements Hittable {
         const t_enter = Math.max(tx0, ty0, tz0);
         const t_exit = Math.min(tx1, ty1, tz1);
 
-        if (t_exit < t_enter) return null;// no intersection
-        let hit: HitRecord;
+        if (t_exit < t_enter) return false;
+        const p = hit.p;
         if (t_min <= t_enter && t_enter <= t_max) {
-            const p = rayAt2(r, t_enter);
-            hit = {
-                p,
-                normal:
-                    t_enter === tx0 ? vec3(dx > 0 ? -1 : 1, 0, 0) :
-                    t_enter === ty0 ? vec3(0, dy > 0 ? -1 : 1, 0) :
-                    vec3(0, 0, dz > 0 ? -1 : 1),
-                t: t_enter,
-                front_face: true,
-                material: this.mat,
-                u:
-                    t_enter === tx0 ? (p[1] - min_y) / (max_y - min_y) :
+            rayAt3(p, r, t_enter)
+            hit.normal.set(t_enter === tx0 ? vec3(dx > 0 ? -1 : 1, 0, 0) :
+                t_enter === ty0 ? vec3(0, dy > 0 ? -1 : 1, 0) :
+                    vec3(0, 0, dz > 0 ? -1 : 1));
+            hit.t = t_enter;
+            hit.material = this.mat;
+            hit.u = t_enter === tx0 ? (p[1] - min_y) / (max_y - min_y) :
                     t_enter === ty0 ? (p[2] - min_z) / (max_z - min_z) :
-                    (p[0] - min_x) / (max_x - min_x),
-                v:
-                    t_enter === tx0 ? (p[2] - min_z) / (max_z - min_z) :
-                    t_enter === ty0 ? (p[0] - min_x) / (max_x - min_x) :
-                    (p[1] - min_y) / (max_y - min_y),
-            };
+                                      (p[0] - min_x) / (max_x - min_x);
+            hit.v = t_enter === tx0 ? (p[1] - min_y) / (max_y - min_y) :
+                    t_enter === ty0 ? (p[2] - min_z) / (max_z - min_z) :
+                                      (p[0] - min_x) / (max_x - min_x);
         } else if (t_min <= t_exit && t_exit <= t_max) {
-            const p = rayAt2(r, t_exit);
-            hit = {
-                p,
-                normal:
-                    t_exit === tx1 ? vec3(dx > 0 ? 1 : -1, 0, 0) :
-                    t_exit === ty1 ? vec3(0, dy > 0 ? 1 : -1, 0) :
-                    vec3(0, 0, dz > 0 ? 1 : -1),
-                t: t_exit,
-                front_face: true,
-                material: this.mat,
-                u:
-                    t_exit === tx1 ? (p[1] - min_y) / (max_y - min_y) :
+            rayAt3(p, r, t_exit);
+            hit.normal.set(
+                t_exit === tx1 ? vec3(dx > 0 ? 1 : -1, 0, 0) :
+                t_exit === ty1 ? vec3(0, dy > 0 ? 1 : -1, 0) :
+                                 vec3(0, 0, dz > 0 ? 1 : -1));
+            hit.t = t_exit;
+            hit.material = this.mat;
+            hit.u = t_exit === tx1 ? (p[1] - min_y) / (max_y - min_y) :
                     t_exit === ty1 ? (p[2] - min_z) / (max_z - min_z) :
-                    (p[0] - min_x) / (max_x - min_x),
-                v:
-                    t_exit === tx1 ? (p[2] - min_z) / (max_z - min_z) :
+                                     (p[0] - min_x) / (max_x - min_x);
+            hit.v = t_exit === tx1 ? (p[2] - min_z) / (max_z - min_z) :
                     t_exit === ty1 ? (p[0] - min_x) / (max_x - min_x) :
-                    (p[1] - min_y) / (max_y - min_y),
-            };
+                                     (p[1] - min_y) / (max_y - min_y);
         } else {
-            return null;
+            return false;
         }
 
         set_face_normal(hit, r, hit.normal);
 
-        return hit;
+        return true;
     }
 
-    get_bounding_box(time0: number, time1: number): AABB {
-        return new AABB(this.min, this.max);
+    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
+        aabb.min.set(this.min);
+        aabb.max.set(this.max);
     }
 }
 

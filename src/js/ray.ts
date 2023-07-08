@@ -1,4 +1,5 @@
-import { vec3, Vec3 } from "./vec3";
+import { vec3, Vec3, vec3AllocatorScopeSync } from './vec3';
+import { ArenaVec3Allocator } from './vec3_allocators';
 
 export type Ray = {
     origin: Vec3,
@@ -6,10 +7,7 @@ export type Ray = {
     time: number;
 };
 
-export const ray = (origin: Vec3, direction: Vec3, time: number): Ray => {
-    // sOrigin.set(origin);
-    // sDirection.set(direction);
-    // raySingleton.time = time;
+const ray = (origin: Vec3, direction: Vec3, time: number): Ray => {
     return {
         origin,
         direction,
@@ -50,10 +48,11 @@ export class RayArenaAllocator {
     }
     reset(): void {
         this.currentRayIndex = 0;
+        this.currentRay = this.storage[0];
     }
 }
 
-export const rayAllocator = new RayArenaAllocator(150);
+export const rayAllocator = vec3AllocatorScopeSync(new ArenaVec3Allocator(1024), () => new RayArenaAllocator(512));
 
 export const rayAt2 = (ray: Ray, t: number): Vec3 => {
     return vec3(

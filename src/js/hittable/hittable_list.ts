@@ -9,25 +9,26 @@ export class HittableList implements Hittable {
         this.objects = objects;
     }
     
-    hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
+    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         let current_t_max = t_max;
-        let current_hit = null;
+        let is_hit = false;
         for (let i = 0; i < this.objects.length; i++) {
             const obj = this.objects[i];
-            const hit = obj.hit(r, t_min, current_t_max);
-            if (hit !== null) {
+            if (obj.hit(r, t_min, current_t_max, hit)) {
                 current_t_max = hit.t;
-                current_hit = hit;
+                is_hit = true;
             }
         }
-        return current_hit;
+        return is_hit;
     }
 
-    get_bounding_box(time0: number, time1: number): AABB {
-        const result = AABB.createEmpty();
+    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
+        const tmp = AABB.createEmpty();
+        aabb.min.set(tmp.min);
+        aabb.max.set(tmp.max);
         for (const obj of this.objects) {
-            result.consume(obj.get_bounding_box(time0, time1));
+            obj.get_bounding_box(time0, time1, tmp);
+            aabb.consume(tmp);
         }
-        return result;
     }
 }

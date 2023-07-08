@@ -1,5 +1,5 @@
-import { Ray, rayAt2 } from "../ray";
-import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3 } from '../vec3';
+import { Ray, rayAt2, rayAt3 } from '../ray';
+import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3, vec3DivS3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { get_sphere_uv } from './sphere';
@@ -29,7 +29,7 @@ export class MovingSphere implements Hittable {
         this.material = material;
     }
 
-    hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
+    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const {radius} = this;
         const center = this.get_center(r.time);
 
@@ -38,49 +38,37 @@ export class MovingSphere implements Hittable {
         const half_b = vec3Dot(oc, r.direction);
         const c = vec3Dot(oc, oc) - radius ** 2;
         const D = half_b * half_b - a * c;
-        if (D < 0) return null;
+        if (D < 0) return false;
         const sqrt_d = Math.sqrt(D);
         let t = ( -half_b - sqrt_d ) / a;
         if (t < t_min || t_max < t) {
             t = ( -half_b + sqrt_d ) / a;
             if (t < t_min || t_max < t) {
-                return null;
+                return false;
             }
         }
-        const p = rayAt2(r, t);
-
-        const hit = {
-            p,
-            normal: vec3DivS2(vec3Sub2(p, center), radius),
-            t,
-            front_face: false,
-            material: this.material,
-            u: 0,
-            v: 0
-        };
+        const p = hit.p;
+        rayAt3(p, r, t);
+        vec3DivS3(hit.normal, vec3Sub2(p, center), radius);
+        hit.t = t;
+        hit.material = this.material;
         const { u, v } = get_sphere_uv(hit.normal);
         hit.u = u;
         hit.v = v;
 
         set_face_normal(hit, r, hit.normal);
 
-        return hit;
+        return true;
     }
 
-    get_bounding_box(time0: number, time1: number): AABB {
+    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
         const c0 = this.get_center(time0);
         const c1 = this.get_center(time1);
-        return new AABB(
-            vec3(
-                Math.min(c0[0], c1[0]) - this.radius,
-                Math.min(c0[1], c1[1]) - this.radius,
-                Math.min(c0[2], c1[2]) - this.radius
-            ),
-            vec3(
-                Math.max(c0[0], c1[0]) + this.radius,
-                Math.max(c0[1], c1[1]) + this.radius,
-                Math.max(c0[2], c1[2]) + this.radius
-            )
-        );
+        aabb.min[0] = Math.min(c0[0], c1[0]) - this.radius;
+        aabb.min[1] = Math.min(c0[1], c1[1]) - this.radius;
+        aabb.min[2] = Math.min(c0[2], c1[2]) - this.radius;
+        aabb.max[0] = Math.max(c0[0], c1[0]) + this.radius;
+        aabb.max[1] = Math.max(c0[1], c1[1]) + this.radius;
+        aabb.max[2] = Math.max(c0[2], c1[2]) + this.radius;
     }
 }

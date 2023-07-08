@@ -31,6 +31,12 @@ export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x
 export const color = vec3;
 export const point3 = vec3;
 
+export const vec3Set = (v: Vec3, x: number, y: number, z: number): void => {
+    v[0] = x;
+    v[1] = y;
+    v[2] = z;
+}
+
 export const vec3Sub2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 export const vec3Sub3 = (result: Vec3, a: Vec3, b: Vec3): void => {
     result[0] = a[0] - b[0];

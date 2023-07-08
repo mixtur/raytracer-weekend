@@ -1,14 +1,14 @@
 import { Ray } from './ray';
-import { color, Color, vec3Add2, vec3Add3, vec3MulV2, vec3MulV3, vec3MulVAddV4 } from './vec3';
-import { Hittable } from './hittable/hittable';
+import { color, Color, point3, vec3, vec3Add2, vec3Add3, vec3MulV2, vec3MulV3, vec3MulVAddV4 } from './vec3';
+import { createEmptyHitRecord, Hittable } from './hittable/hittable';
 
+const hit = createEmptyHitRecord();
 export const ray_color = (r: Ray, background: Color, world: Hittable, depth: number): Color => {
     if (depth <= 0) {
         return color(0, 0, 0);
     }
     {// world
-        const hit = world.hit(r, 0.0001, Infinity);
-        if (hit !== null) {
+        if (world.hit(r, 0.0001, Infinity, hit)) {
             const bounce = hit.material.scatter(hit.material, r, hit);
             let totalEmission = hit.material.emit.value(hit.u, hit.v, hit.p);
             if (bounce) {
@@ -26,9 +26,9 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, depth: num
 export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, depth: number): Color => {
     const totalEmission = color(0, 0, 0);
     const totalAttenuation = color(1, 1, 1);
+    // const hit = createEmptyHitRecord();
     for (let i = 0; i < depth; i++) {
-        const hit = world.hit(r, 0.0001, Infinity);
-        if (hit === null) {
+        if (!world.hit(r, 0.0001, Infinity, hit)) {
             vec3MulVAddV4(totalEmission, totalAttenuation, background, totalEmission);
             break;
         }

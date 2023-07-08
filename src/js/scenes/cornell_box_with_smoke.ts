@@ -13,6 +13,7 @@ import { ConstantMedium } from '../hittable/constant_medium';
 import { createDiffuseLight } from '../materials/diffuse_light';
 import { createLambertian } from '../materials/lambertian';
 import { createIsotropicPhaseFunction } from '../materials/isotropic_phase_function';
+import { BVHNode } from '../hittable/bvh';
 
 const red = createLambertian(sColor(.65, .05, .05));
 const white = createLambertian(sColor(.73, .73, .73));
@@ -20,7 +21,7 @@ const green = createLambertian(sColor(.12, .45, .15));
 const light = createDiffuseLight(sColor(7, 7, 7));
 
 export const cornell_box_with_smoke: Scene = {
-    root_hittable: new HittableList([
+    root_hittable: new BVHNode([
         new YZRect(0,   555, 0,   555, 555, green),
         new YZRect(0,   555, 0,   555, 0,   red),
         new XZRect(113, 443, 127, 432, 554, light),
@@ -51,7 +52,7 @@ export const cornell_box_with_smoke: Scene = {
             0.01,
             createIsotropicPhaseFunction(sColor(1, 1, 1))
         )
-    ]),
+    ], 0, 1),
 
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(278, 278, -800);

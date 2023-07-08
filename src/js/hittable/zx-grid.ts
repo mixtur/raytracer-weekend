@@ -37,7 +37,7 @@ export class ZXGrid implements Hittable {
         this.cells[p] = obj;
     }
 
-    hit(r: Ray, t_min: number, t_max: number): HitRecord | null {
+    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const { cellSize, x_cols, z_rows } = this;
         const ox = r.origin[0];
         const oy = r.origin[1];
@@ -64,9 +64,9 @@ export class ZXGrid implements Hittable {
         const t_enter = Math.max(tx0, ty0, tz0);
         const t_exit = Math.min(tx1, ty1, tz1);
         let current_t = t_enter;
-        if (t_exit <= t_enter) return null;// no intersection (== only in the corner or on the edge. This is fine to exclude)
-        if (t_exit < t_min) return null; // the entire intersection is on the wrong side of the ray
-        if (!Number.isFinite(t_enter)) return null; // very short direction?
+        if (t_exit <= t_enter) return false;// no intersection (== only in the corner or on the edge. This is fine to exclude)
+        if (t_exit < t_min) return false; // the entire intersection is on the wrong side of the ray
+        if (!Number.isFinite(t_enter)) return false; // very short direction?
         if (t_enter < 0) {// ray origin is inside the grid
             enterFromTheMiddle = true;
             current_t = 0;
@@ -93,7 +93,7 @@ export class ZXGrid implements Hittable {
                 z_row = Math.floor((z - min_z) / cellSize);
             }
         }
-        if (z_row < 0 || z_row >= z_rows || x_col < 0 || x_col >= z_rows) return null;// this can happen if dx == 0 or dz == 0
+        if (z_row < 0 || z_row >= z_rows || x_col < 0 || x_col >= z_rows) return false;// this can happen if dx == 0 or dz == 0
 
         const row_stride = Math.sign(dz) * x_cols;
         const col_stride = Math.sign(dx);
@@ -109,9 +109,8 @@ export class ZXGrid implements Hittable {
         while (current_t < t_exit) {
             const obj = this.cells[p];
             if (obj !== null) {// try to hit the object in the cell
-                const hit = obj.hit(r, t_min, t_max);
-                if (hit) {
-                    return hit;
+                if (obj.hit(r, t_min, t_max, hit)) {
+                    return true;
                 }
             }
             // find the next cell to hit
@@ -127,10 +126,11 @@ export class ZXGrid implements Hittable {
                 current_t = t_j_next;
             }
         }
-        return null;
+        return false;
     }
 
-    get_bounding_box(time0: number, time1: number): AABB {
-        return this.aabb;
+    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
+        aabb.min.set(this.aabb.min);
+        aabb.max.set(this.aabb.max);
     }
 }
