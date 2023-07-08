@@ -69,6 +69,21 @@ export const vec3MulV3 = (a: Vec3, b: Vec3, c: Vec3): void => {
     a[2] = b[2] * c[2];    
 };
 
+// a * b + c
+export const vec3MulVAddV3 = (a: Vec3, b: Vec3, c: Vec3): Vec3 => {
+    return vec3(
+        a[0] * b[0] + c[0],
+        a[1] * b[1] + c[1],
+        a[2] * b[2] + c[2]
+    );
+}
+
+export const vec3MulVAddV4 = (result: Vec3, a: Vec3, b: Vec3, c: Vec3): void => {
+    result[0] = a[0] * b[0] + c[0];
+    result[1] = a[1] * b[1] + c[1];
+    result[2] = a[2] * b[2] + c[2];
+}
+
 export const vec3Dot = (a: Vec3, b: Vec3): number => {
     return a[0] * b[0]
          + a[1] * b[1]

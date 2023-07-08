@@ -1,6 +1,6 @@
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { vec3Add3, vec3AllocatorScopeSync } from './vec3';
-import { ray_color } from './ray_color';
+import { ray_color, ray_color_iterative } from './ray_color';
 import { RenderParameters } from './types';
 import { ArenaVec3Allocator } from './vec3_allocators';
 import { randomIntMinMax } from './random';
@@ -68,7 +68,7 @@ async function render({
                         const v = (j + sv) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
-                        vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
+                        vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, max_depth));
                     }
                 }
 
@@ -79,7 +79,7 @@ async function render({
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
+                    vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, max_depth));
                 }
             }
             postMessage({y, pixels: outputLineAllocator.dump});
