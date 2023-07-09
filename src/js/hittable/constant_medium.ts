@@ -1,9 +1,11 @@
 import { createEmptyHitRecord, HitRecord, Hittable } from './hittable';
 import { AABB } from './aabb';
-import { Ray, rayAt2, rayAt3 } from '../ray';
-import { vec3, vec3Len, vec3Set } from '../vec3';
+import { Ray, rayAt3 } from '../ray';
+import { vec3Len, vec3Set } from '../vec3';
 import { MegaMaterial } from '../materials/megamaterial';
 
+const hit1 = createEmptyHitRecord();
+const hit2 = createEmptyHitRecord();
 export class ConstantMedium implements Hittable {
     boundary: Hittable;
     phase_function: MegaMaterial;
@@ -20,9 +22,7 @@ export class ConstantMedium implements Hittable {
     }
 
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
-        const hit1 = createEmptyHitRecord();
         if (!this.boundary.hit(r, -Infinity, Infinity, hit1)) { return false; }
-        const hit2 = createEmptyHitRecord();
         if (!this.boundary.hit(r, hit1.t + 0.0001, Infinity, hit2)) { return false; };
         if (hit2 === null) return false;
         if (hit1.t < t_min) hit1.t = t_min;

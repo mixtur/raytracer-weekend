@@ -1,5 +1,5 @@
 import { Ray } from "../ray";
-import { point3, Point3, vec3, Vec3, vec3Dot, vec3Negate1, vec3Unit1, vec3Unit2 } from '../vec3';
+import { point3, Point3, vec3, Vec3, vec3Dot, vec3Negate1, vec3Unit2 } from '../vec3';
 import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
 import { sColor } from '../texture/solid_color';
@@ -26,11 +26,11 @@ export const createEmptyHitRecord = (): HitRecord => {
     return {
         p: point3(0, 0, 0),
         normal: vec3(0, 0, 0),
-        t: 0,
+        t: NaN,
         front_face: false,
         material: dummyMaterial,
-        v: 0,
-        u: 0
+        v: NaN,
+        u: NaN
     };
 };
 
