@@ -39,7 +39,7 @@ async function render({
     const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
-    const rayArenaAllocator = new ArenaVec3Allocator(1024 * 12);
+    const rayArenaAllocator = new ArenaVec3Allocator(1024);
 
     function permute(xs: Uint16Array): void {
         for (let i = xs.length; i >= 0; i--) {

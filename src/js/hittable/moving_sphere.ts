@@ -1,10 +1,14 @@
-import { Ray, rayAt2, rayAt3 } from '../ray';
-import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3Mix3, vec3, vec3DivS3 } from '../vec3';
+import { Ray, rayAt3 } from '../ray';
+import { Point3, vec3Dot, vec3Sub2, vec3, vec3DivS3, vec3Mix4, Vec3, vec3Sub3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { get_sphere_uv } from './sphere';
 import { MegaMaterial } from '../materials/megamaterial';
 
+const tmp1 = vec3(0, 0, 0);
+const tmp2 = vec3(0, 0, 0);
+const oc = vec3(0, 0, 0);
+const r_vector = vec3(0, 0, 0);
 export class MovingSphere implements Hittable {
     center0: Point3;
     center1: Point3;
@@ -14,9 +18,9 @@ export class MovingSphere implements Hittable {
     radius: number;
     material: MegaMaterial;
 
-    get_center(time: number) {
+    get_center(time: number, result: Vec3): void {
         const p = (time - this.time0) / this.dt;
-        return vec3Mix3(this.center0, this.center1, p);
+        vec3Mix4(result, this.center0, this.center1, p);
     }
 
     constructor(center0: Point3, center1: Point3, time0: number, time1: number, radius: number, material: MegaMaterial) {
@@ -31,14 +35,15 @@ export class MovingSphere implements Hittable {
 
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const {radius} = this;
-        const center = this.get_center(r.time);
+        const center = tmp1;
+        this.get_center(r.time, center);
 
-        const oc = vec3Sub2(r.origin, center);
+        vec3Sub3(oc, r.origin, center);
         const a = vec3Dot(r.direction, r.direction);
         const half_b = vec3Dot(oc, r.direction);
         const c = vec3Dot(oc, oc) - radius ** 2;
         const D = half_b * half_b - a * c;
-        if (D < 0) return false;
+        if (D < 1e-10) return false;
         const sqrt_d = Math.sqrt(D);
         let t = ( -half_b - sqrt_d ) / a;
         if (t < t_min || t_max < t) {
@@ -49,21 +54,22 @@ export class MovingSphere implements Hittable {
         }
         const p = hit.p;
         rayAt3(p, r, t);
-        vec3DivS3(hit.normal, vec3Sub2(p, center), radius);
+        vec3Sub3(r_vector, p, center)
+        vec3DivS3(hit.normal, r_vector, radius);
         hit.t = t;
         hit.material = this.material;
-        const { u, v } = get_sphere_uv(hit.normal);
-        hit.u = u;
-        hit.v = v;
-
+        get_sphere_uv(hit.normal, hit);
         set_face_normal(hit, r, hit.normal);
 
         return true;
     }
 
     get_bounding_box(time0: number, time1: number, aabb: AABB): void {
-        const c0 = this.get_center(time0);
-        const c1 = this.get_center(time1);
+        const c0 = tmp1;
+        const c1 = tmp2;
+
+        this.get_center(time0, c0);
+        this.get_center(time1, c1);
         aabb.min[0] = Math.min(c0[0], c1[0]) - this.radius;
         aabb.min[1] = Math.min(c0[1], c1[1]) - this.radius;
         aabb.min[2] = Math.min(c0[2], c1[2]) - this.radius;

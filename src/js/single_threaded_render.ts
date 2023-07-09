@@ -27,7 +27,7 @@ export async function singleThreadedRender({
     const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
-    const rayArenaAllocator = new ArenaVec3Allocator(1024 * 64);
+    const rayArenaAllocator = new ArenaVec3Allocator(1024);
 
     await vec3AllocatorScopeAsync(rayArenaAllocator, async () => {
         for (let j = 0; j < image_height; j++) {

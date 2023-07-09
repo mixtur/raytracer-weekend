@@ -35,7 +35,7 @@ import { createLambertian } from '../materials/lambertian';
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     const rng = getPredefinedRandom(scene_creation_random_numbers);
     return randomScopeAsync(rng, () => {
-        return vec3AllocatorScopeAsync(new ArenaVec3Allocator(1024 * 12), async (): Promise<Scene> => {
+        return vec3AllocatorScopeAsync(new ArenaVec3Allocator(1024 * 6), async (): Promise<Scene> => {
             const ground = createLambertian(sColor(0.48, 0.83, 0.53));
             const boxes_per_side = 20;
 

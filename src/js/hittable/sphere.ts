@@ -1,27 +1,27 @@
-import { Ray, rayAt2, rayAt3 } from '../ray';
-import { Point3, vec3Dot, vec3Sub2, vec3DivS2, vec3, vec3Add2, vec3DivS3, vec3Sub3, vec3Add3 } from '../vec3';
+import { Ray, rayAt3 } from '../ray';
+import { Point3, vec3Dot, vec3, vec3DivS3, vec3Sub3 } from '../vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';
 import { MegaMaterial } from '../materials/megamaterial';
 
 
-export function get_sphere_uv(p: Point3): UV {
+export function get_sphere_uv(p: Point3, uv: UV): void {
     // p: a given point on the sphere of radius one, centered at the origin.
     // u: returned value [0,1] of angle around the Y axis from X=-1.
     // v: returned value [0,1] of angle from Y=-1 to Y=+1.
 
     const theta = Math.acos(-p[1]);
     const phi = Math.atan2(-p[2], p[0]) + Math.PI;
-    return {
-        u: phi / (2 * Math.PI),
-        v: theta / Math.PI
-    };
+    uv.u = phi / (2 * Math.PI);
+    uv.v = theta / Math.PI;
 }
 
+const oc = vec3(0, 0, 0);
+const r_vector = vec3(0, 0, 0);
 export class Sphere implements Hittable {
     center: Point3;
-    radius: number;
+    radius: number = NaN;
     material: MegaMaterial;
     constructor(center: Point3, radius: number, material: MegaMaterial) {
         this.center = center;
@@ -31,12 +31,12 @@ export class Sphere implements Hittable {
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const {center, radius} = this;
 
-        const oc = vec3Sub2(r.origin, center);
+        vec3Sub3(oc, r.origin, center);
         const a = vec3Dot(r.direction, r.direction);
         const half_b = vec3Dot(oc, r.direction);
         const c = vec3Dot(oc, oc) - radius ** 2;
         const D = half_b * half_b - a * c;
-        if (D < 0) return false;
+        if (D < 1e-10) return false;
         const sqrt_d = Math.sqrt(D);
         let t = ( -half_b - sqrt_d ) / a;
         if (t < t_min || t_max < t) {
@@ -47,13 +47,11 @@ export class Sphere implements Hittable {
         }
         const p = hit.p;
         rayAt3(p, r, t);
-        vec3DivS3(hit.normal, vec3Sub2(p, center), radius)
+        vec3Sub3(r_vector, p, center)
+        vec3DivS3(hit.normal, r_vector, radius)
         hit.t = t;
         hit.material = this.material;
-        const { u, v } = get_sphere_uv(hit.normal);
-        hit.u = u;
-        hit.v = v;
-
+        get_sphere_uv(hit.normal, hit);
         set_face_normal(hit, r, hit.normal);
 
         return true;
