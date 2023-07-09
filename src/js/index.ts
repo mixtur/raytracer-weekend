@@ -1,9 +1,3 @@
-import {
-    color,
-    vec3Add3,
-    vec3AllocatorScopeSync
-} from './vec3';
-import { ArenaVec3Allocator } from './vec3_allocators';
 // import { simple_light } from './scenes/simple_light';
 // import { create_earth_scene } from './scenes/earth';
 // import { lots_of_spheres } from './scenes/lots_of_spheres';
@@ -21,7 +15,7 @@ import { multiThreadedRender } from './multi_threaded_render';
 const aspect_ratio = 1;
 const image_width = 800;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 100;
+const samples_per_pixel = 10000;
 const max_depth = 50;
 
 const writer = createCanvasColorWriter(image_width, image_height);
