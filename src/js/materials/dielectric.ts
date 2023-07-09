@@ -1,9 +1,6 @@
-import { rayAllocator } from '../ray';
-import { color, vec3Dot, vec3Reflect, vec3Refract, vec3Unit1 } from '../vec3';
-import { register_scatter_id } from './register_scatter_id';
+import { raySet } from '../ray';
+import { vec3Dot, vec3Reflect, vec3Refract, vec3Set, vec3Unit1 } from '../vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
-
-export const dielectric_scatter_id = register_scatter_id();
 
 export const createDielectric = (ior: number): MegaMaterial => createMegaMaterial(dielectric_scatter, { ior });
 
@@ -13,7 +10,7 @@ const _reflectance = (cos: number, ref_idx: number): number => {
     return r0 + (1 - r0) * ((1 - cos) ** 5);
 }
 
-export const dielectric_scatter: ScatterFunction = (mat, r_in, hit) => {
+export const dielectric_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     const refraction_ratio = hit.front_face ? (1 / mat.ior) : mat.ior;
     const unit_direction = vec3Unit1(r_in.direction);
     const cos_theta = -vec3Dot(unit_direction, hit.normal);
@@ -26,8 +23,7 @@ export const dielectric_scatter: ScatterFunction = (mat, r_in, hit) => {
         ? vec3Reflect(unit_direction, hit.normal)
         : vec3Refract(unit_direction, hit.normal, refraction_ratio);
 
-    return {
-        scattered: rayAllocator.reuse(hit.p, direction, r_in.time),
-        attenuation: color(1, 1, 1)
-    };
+    raySet(bounce.scattered, hit.p, direction, r_in.time)
+    vec3Set(bounce.attenuation, 1, 1, 1);
+    return true;
 }

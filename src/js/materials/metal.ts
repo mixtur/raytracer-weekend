@@ -1,5 +1,5 @@
 import { Texture } from '../texture/texture';
-import { rayAllocator } from '../ray';
+import { raySet } from '../ray';
 import {
     vec3Add3,
     vec3Dot,
@@ -8,19 +8,15 @@ import {
     vec3Reflect,
     vec3Unit1
 } from '../vec3';
-import { register_scatter_id } from './register_scatter_id';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
-
-export const metal_scatter_id = register_scatter_id();
 
 export const createMetal = (albedo: Texture, fuzz: number): MegaMaterial => createMegaMaterial(metal_scatter, { albedo, fuzz });
 
-export const metal_scatter: ScatterFunction = (mat, r_in, hit) => {
+export const metal_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     const reflected = vec3Reflect(vec3Unit1(r_in.direction), hit.normal);
     vec3Add3(reflected, reflected, vec3MulS2(vec3RandInUnitSphere(), mat.fuzz));
-    if (vec3Dot(reflected, hit.normal) <= 0) { return null; }
-    return {
-        scattered: rayAllocator.reuse(hit.p, reflected, r_in.time),
-        attenuation: mat.albedo.value(hit.u, hit.v, hit.p)
-    };
+    if (vec3Dot(reflected, hit.normal) <= 0) { return false; }
+    raySet(bounce.scattered, hit.p, reflected, r_in.time);
+    bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
+    return true;
 }

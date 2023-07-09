@@ -1,8 +1,8 @@
 import { Texture } from '../texture/texture';
 import { sColor } from '../texture/solid_color';
-import { Ray } from '../ray';
+import { ray, Ray, rayAllocator } from '../ray';
 import { HitRecord } from '../hittable/hittable';
-import { Color } from '../vec3';
+import { color, Color, vec3 } from '../vec3';
 
 export interface MegaMaterial {
     scatter: ScatterFunction;
@@ -17,7 +17,14 @@ export interface BounceRecord {
     attenuation: Color;
 }
 
-export type ScatterFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord) => BounceRecord | null;
+export type ScatterFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord) => boolean;
+
+export const createBounceRecord = (): BounceRecord => {
+    return {
+        scattered: ray(vec3(0, 0, 0), vec3(0, 0, 0), 0),
+        attenuation: color(0, 0, 0)
+    }
+};
 
 export const createMegaMaterial = (scatter: ScatterFunction, config: Partial<MegaMaterial>): MegaMaterial => {
     return {
