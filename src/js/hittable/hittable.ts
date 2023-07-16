@@ -15,7 +15,7 @@ export interface HitRecord {
 }
 
 const dummyMaterial: MegaMaterial = {
-    scatter: () => null,
+    scatter: () => false,
     albedo: sColor(0, 0, 0),
     fuzz: NaN,
     ior: NaN,
@@ -40,7 +40,17 @@ export const hitRecord = (p: Point3, normal: Vec3, t: number, front_face: boolea
 
 export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3): void => {
     hit.front_face = vec3Dot(r.direction, outward_normal) < 0;
-    vec3Unit2(hit.normal, hit.front_face ? outward_normal : vec3Negate1(outward_normal));
+    const n = hit.normal;
+    const l = Math.hypot(n[0], n[1], n[2]);
+    if (hit.front_face) {
+        hit.normal[0] = outward_normal[0] / l;
+        hit.normal[1] = outward_normal[1] / l;
+        hit.normal[2] = outward_normal[2] / l;
+    } else {
+        hit.normal[0] = -outward_normal[0] / l;
+        hit.normal[1] = -outward_normal[1] / l;
+        hit.normal[2] = -outward_normal[2] / l;
+    }
 };
 
 
