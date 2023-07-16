@@ -16,7 +16,7 @@ import { randomIntMinMax } from './random';
 const aspect_ratio = 1;
 const image_width = 500;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 100;
+const samples_per_pixel = 10;
 const max_depth = 50;
 
 const writer = createCanvasColorWriter(image_width, image_height);
