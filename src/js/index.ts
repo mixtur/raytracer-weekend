@@ -10,12 +10,13 @@ import { ColorWriter, createArrayWriter, createCanvasColorWriter } from './color
 // import { RenderWorkerMessageData } from './render_worker';
 // import { RenderParameters } from './types';
 import { multiThreadedRender } from './multi_threaded_render';
+import { randomIntMinMax } from './random';
 // import { singleThreadedRender } from './single_threaded_render';
 
 const aspect_ratio = 1;
-const image_width = 800;
+const image_width = 500;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 10000;
+const samples_per_pixel = 100;
 const max_depth = 50;
 
 const writer = createCanvasColorWriter(image_width, image_height);
@@ -28,13 +29,28 @@ for (let i = 0; i < 2048; i++) {
     scene_creation_random_numbers.push(Math.random());
 }
 
+
+function permute(xs: Uint16Array): void {
+    for (let i = xs.length - 1; i >= 0; i--) {
+        const j = randomIntMinMax(0, i);
+        const t = xs[i];
+        xs[i] = xs[j];
+        xs[j] = t;
+    }
+}
+
+const jRand = new Uint16Array(image_height);
+for (let i = 0; i < image_height; i++) { jRand[i] = i; }
+permute(jRand);
+
 multiThreadedRender(4, {
     aspect_ratio,
     image_width,
     image_height,
     samples_per_pixel,
     max_depth,
-    scene_creation_random_numbers
+    scene_creation_random_numbers,
+    line_order: jRand
 }, writer).catch((e) => {
     console.log(e);
 });

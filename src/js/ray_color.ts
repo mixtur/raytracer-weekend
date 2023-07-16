@@ -1,5 +1,5 @@
 import { Ray } from './ray';
-import { color, Color, vec3Add2, vec3MulV2, vec3MulV3, vec3MulVAddV4 } from './vec3';
+import { color, Color, vec3Add2, vec3MulS2, vec3MulV2, vec3MulV3, vec3MulVAddV3, vec3MulVAddV4 } from './vec3';
 import { createEmptyHitRecord, Hittable } from './hittable/hittable';
 import { createBounceRecord } from './materials/megamaterial';
 
@@ -14,8 +14,9 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, depth: num
             let totalEmission = hit.material.emit.value(hit.u, hit.v, hit.p);
             if (hit.material.scatter(hit.material, r, hit, bounce)) {
                 const bounceColor = ray_color(bounce.scattered, background, world, depth - 1);
-                //vec3Add3 shouldn't work here because we may screw up the light source
-                totalEmission = vec3Add2(totalEmission, vec3MulV2(bounceColor, bounce.attenuation));
+                const pdfFactor = hit.material.scattering_pdf(r, hit, bounce.scattered) / bounce.sampling_pdf;
+                // vec3MulVAddV3 may not work because we can screw up the light source
+                totalEmission = vec3MulVAddV3(bounceColor, vec3MulS2(bounce.attenuation, pdfFactor), totalEmission);
             }
             return totalEmission;
         }
@@ -35,7 +36,9 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
         const emission = hit.material.emit.value(hit.u, hit.v, hit.p);
         vec3MulVAddV4(totalEmission, totalAttenuation, emission, totalEmission);
         if (hit.material.scatter(hit.material, r, hit, bounce)) {
-            vec3MulV3(totalAttenuation, totalAttenuation, bounce.attenuation);
+            const pdfFactor = hit.material.scattering_pdf(r, hit, bounce.scattered) /  bounce.sampling_pdf;
+
+            vec3MulV3(totalAttenuation, totalAttenuation, vec3MulS2(bounce.attenuation, pdfFactor));
             r = bounce.scattered;
         } else {
             break;

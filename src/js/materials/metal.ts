@@ -10,7 +10,7 @@ import {
 } from '../vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
 
-export const createMetal = (albedo: Texture, fuzz: number): MegaMaterial => createMegaMaterial(metal_scatter, { albedo, fuzz });
+export const createMetal = (albedo: Texture, fuzz: number): MegaMaterial => createMegaMaterial(metal_scatter, null, { albedo, fuzz });
 
 export const metal_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     const reflected = vec3Reflect(vec3Unit1(r_in.direction), hit.normal);

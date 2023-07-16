@@ -4,6 +4,7 @@ import { RenderWorkerMessageData } from './render_worker';
 import { color, vec3AllocatorScopeSync } from './vec3';
 import { format_time } from './utils';
 import { ArenaVec3Allocator } from './vec3_allocators';
+import { randomIntMinMax } from './random';
 
 export async function multiThreadedRender(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter): Promise<void> {
     const {
@@ -12,7 +13,8 @@ export async function multiThreadedRender(thread_number: number, render_paramete
         samples_per_pixel,
         aspect_ratio,
         max_depth,
-        scene_creation_random_numbers
+        scene_creation_random_numbers,
+        line_order
     } = render_parameters;
 
     const { writeColor, dumpLine, dumpImage } = writer;
@@ -34,7 +36,9 @@ export async function multiThreadedRender(thread_number: number, render_paramete
             image_height,
             samples_per_pixel: samples_to_send,
             max_depth,
-            scene_creation_random_numbers
+            scene_creation_random_numbers,
+            first_line_index: Math.floor(i / thread_number * image_height),
+            line_order
         } as RenderParameters);
 
         const tmpColor = color(0, 0, 0);

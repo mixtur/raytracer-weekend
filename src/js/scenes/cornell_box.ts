@@ -22,8 +22,8 @@ export const cornell_box: Scene = {
         new YZRect(0,   555, 0,   555, 555, green),
         new YZRect(0,   555, 0,   555, 0,   red),
         new XZRect(213, 343, 227, 332, 554, light),
-        new XZRect(0,   555, 0,   555, 0,   white),
         new XZRect(0,   555, 0,   555, 555, white),
+        new XZRect(0,   555, 0,   555, 0,   white),
         new XYRect(0,   555, 0,   555, 555, white),
 
         new Translate(

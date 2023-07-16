@@ -59,7 +59,7 @@ export class RayArenaAllocator {
     }
 }
 
-export const rayAllocator = vec3AllocatorScopeSync(new ArenaVec3Allocator(256), () => new RayArenaAllocator(128));
+export const rayAllocator = vec3AllocatorScopeSync(new ArenaVec3Allocator(512), () => new RayArenaAllocator(256));
 
 export const rayAt2 = (ray: Ray, t: number): Vec3 => {
     return vec3(

@@ -25,7 +25,9 @@ async function render({
                           image_width,
                           samples_per_pixel,
                           max_depth,
-                          scene_creation_random_numbers
+                          scene_creation_random_numbers,
+                          line_order,
+                          first_line_index
                       }: RenderParameters): Promise<void> {
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
@@ -34,29 +36,19 @@ async function render({
 //    const scene = await create_earth_scene();
 //    const scene = book1_final_scene(scene_creation_random_numbers);
 //    const scene = simple_light;
-//    const scene = cornell_box;
+    const scene = cornell_box;
 //    const scene = cornell_box_with_smoke;
-    const scene = await book2_final_scene(scene_creation_random_numbers);
+//    const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
     const rayArenaAllocator = new ArenaVec3Allocator(768);
 
-    function permute(xs: Uint16Array): void {
-        for (let i = xs.length; i >= 0; i--) {
-            const j = randomIntMinMax(0, i);
-            const t = xs[i];
-            xs[i] = xs[j];
-            xs[j] = t;
-        }
-    }
-    const jRand = new Uint16Array(image_height);
-    for (let i = 0; i < image_height; i++) { jRand[i] = i; }
-    permute(jRand);
-
     const outputLineAllocator = new ArenaVec3Allocator(image_width);
+    const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
+
     vec3AllocatorScopeSync(rayArenaAllocator, () => {
         for (let _j = 0; _j < image_height; _j++) {
-            const j = jRand[_j];
+            const j = local_order[_j];
             const y = image_height -1 - j;
             outputLineAllocator.reset();
             for (let i = 0; i < image_width; i++) {

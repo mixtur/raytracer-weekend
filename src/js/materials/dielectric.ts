@@ -2,7 +2,7 @@ import { raySet } from '../ray';
 import { vec3Dot, vec3Reflect, vec3Refract, vec3Set, vec3Unit1 } from '../vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
 
-export const createDielectric = (ior: number): MegaMaterial => createMegaMaterial(dielectric_scatter, { ior });
+export const createDielectric = (ior: number): MegaMaterial => createMegaMaterial(dielectric_scatter, null, { ior });
 
 const _reflectance = (cos: number, ref_idx: number): number => {
     // Use Schlick's approximation for reflectance.
