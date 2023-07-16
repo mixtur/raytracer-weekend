@@ -1,5 +1,5 @@
 import { randomIntMinMax } from '../random';
-import { Point3, vec3, Vec3, vec3AllocatorScopeSync, vec3Dot, vec3MulS3, vec3RandMinMax } from '../vec3';
+import { Point3, vec3, Vec3, vec3AllocatorScopeSync, vec3Dot, vec3MulS3, vec3RandMinMax2 } from '../vec3';
 import { ArenaVec3Allocator } from '../vec3_allocators';
 
 const POINT_COUNT = 256;
@@ -57,7 +57,7 @@ export class Perlin {
     constructor() {
         const ranVec: Float64Array[] = this.ranVec = [];
         for (let i = 0; i < POINT_COUNT; i++) {
-            ranVec.push(vec3RandMinMax(-1, 1));
+            ranVec.push(vec3RandMinMax2(-1, 1));
         }
         this.x_perm = perlin_generate_perm();
         this.y_perm = perlin_generate_perm();

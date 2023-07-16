@@ -7,7 +7,7 @@ import {
     vec3Add2,
     vec3AllocatorScopeAsync,
     vec3AllocatorScopeSync,
-    vec3RandMinMax
+    vec3RandMinMax2
 } from '../vec3';
 import { sColor } from '../texture/solid_color';
 import { Box } from '../hittable/box';
@@ -88,7 +88,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
             const white = createLambertian(sColor(.73, .73, .73));
             const ns = 1000;
             for (let j = 0; j < ns; j++) {
-                boxes2.push(new Sphere(vec3RandMinMax(0,165), 10, white));
+                boxes2.push(new Sphere(vec3RandMinMax2(0,165), 10, white));
             }
 
             objects.objects.push(new Translate(

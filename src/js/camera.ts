@@ -4,7 +4,7 @@ import {
     vec3Add2,
     vec3Add3, vec3Cross2,
     vec3DivS2,
-    vec3MulS2, vec3RandInUnitDisk,
+    vec3MulS2, vec3MulS3, vec3MulSAddV4, vec3MulVAddV4, vec3RandInUnitDisk,
     vec3Sub2,
     vec3Sub3,
     vec3Unit1
@@ -75,11 +75,10 @@ export class Camera {
     }
 
     get_ray(u: number, v: number): Ray {
-        const rd = vec3MulS2(vec3RandInUnitDisk(), this.lens_radius);
-        const offset = vec3Add2(
-            vec3MulS2(this.u, rd[0]),
-            vec3MulS2(this.v, rd[1])
-        );
+        const rd = vec3RandInUnitDisk();
+        vec3MulS3(rd, rd, this.lens_radius);
+        const offset = vec3MulS2(this.u, rd[0]);
+        vec3MulSAddV4(offset, this.v, rd[1], offset)
 
         const direction = vec3Sub2(this.lower_left_corner, offset);
         vec3Add3(direction, direction, vec3MulS2(this.horizontal, u));

@@ -7,7 +7,7 @@ import {
     vec3AllocatorScopeSync,
     vec3Len,
     vec3Rand,
-    vec3RandMinMax,
+    vec3RandMinMax2,
     vec3Sub2
 } from '../vec3';
 import { ArenaVec3Allocator } from '../vec3_allocators';
@@ -43,7 +43,7 @@ function createLotsOfSpheres(scene_creation_random_numbers: number[]): Hittable 
                         if (choose_mat < 0.8) {
                             sphere_mat = createLambertian(new SolidColor(vec3Rand()));
                         } else if (choose_mat < 0.95) {
-                            sphere_mat = createMetal(new SolidColor(vec3RandMinMax(0.5, 1)), randomMinMax(0, 0.5));
+                            sphere_mat = createMetal(new SolidColor(vec3RandMinMax2(0.5, 1)), randomMinMax(0, 0.5));
                         } else {
                             sphere_mat = createDielectric(1.5);
                         }

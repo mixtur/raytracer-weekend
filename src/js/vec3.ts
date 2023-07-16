@@ -90,6 +90,20 @@ export const vec3MulVAddV4 = (result: Vec3, a: Vec3, b: Vec3, c: Vec3): void => 
     result[2] = a[2] * b[2] + c[2];
 }
 
+export const vec3MulSAddV3 = (a: Vec3, b: number, c: Vec3): Vec3 => {
+    return vec3(
+        a[0] * b + c[0],
+        a[1] * b + c[1],
+        a[2] * b + c[2]
+    );
+};
+
+export const vec3MulSAddV4 = (result: Vec3, a: Vec3, b: number, c: Vec3): void => {
+    result[0] = a[0] * b + c[0];
+    result[1] = a[1] * b + c[1];
+    result[2] = a[2] * b + c[2];
+}
+
 export const vec3Dot = (a: Vec3, b: Vec3): number => {
     return a[0] * b[0]
          + a[1] * b[1]
@@ -114,7 +128,7 @@ export const vec3Cross3 = (a: Vec3, b: Vec3, c: Vec3): void => {
 
 export const vec3Unit1 = (a: Vec3): Vec3 => vec3MulS2(a, 1 / vec3Len(a));
 
-export const vec3Unit2 = (result: Vec3, a: Vec3): void => vec3DivS3(result, a, 1 / vec3Len(a));
+export const vec3Unit2 = (result: Vec3, a: Vec3): void => vec3DivS3(result, a, vec3Len(a));
 
 export const vec3Mix3 = (a: Vec3, b: Vec3, t: number): Vec3 => {
     const q = 1 - t;
@@ -143,20 +157,45 @@ export const vec3Negate2 = (result: Vec3, a: Vec3): void => {
 };
 
 export const vec3Rand = (): Vec3 => vec3(random(), random(), random());
+export const vec3Rand1 = (v: Vec3): void => {
+    v[0] = random();
+    v[1] = random();
+    v[2] = random();
+}
 
-export const vec3RandMinMax = (min: number, max: number): Vec3 => vec3(randomMinMax(min, max), randomMinMax(min, max), randomMinMax(min, max));
+export const vec3RandMinMax2 = (min: number, max: number): Vec3 => vec3(randomMinMax(min, max), randomMinMax(min, max), randomMinMax(min, max));
+export const vec3RandMinMax3 = (v: Vec3, min: number, max: number): void => {
+    v[0] = randomMinMax(min, max);
+    v[1] = randomMinMax(min, max);
+    v[2] = randomMinMax(min, max);
+};
 
 export const vec3RandInUnitSphere = (): Vec3 => {
-    while (true) {
-        const p = vec3RandMinMax(-1, 1);
-        if (vec3SqLen(p) >= 1) continue;
-        return p;
+    const v = vec3RandMinMax2(-1, 1);
+    while (vec3SqLen(v) >= 1) {
+        vec3RandMinMax3(v, -1, 1);
+    }
+    return v;
+};
+
+export const vec3RandInUnitSphere1 = (v: Vec3): void => {
+    vec3RandMinMax3(v, -1, 1);
+    while (vec3SqLen(v) >= 1) {
+        vec3RandMinMax3(v, -1, 1);
     }
 };
 
 export const vec3RandUnit = (): Vec3 => {
-    return vec3Unit1(vec3RandInUnitSphere());
+    const v = vec3RandInUnitSphere();
+    vec3Unit2(v, v);
+    return v;
 };
+
+export const vec3RandUnit1 = (v: Vec3): void => {
+    vec3RandInUnitSphere1(v);
+    vec3Unit2(v, v);
+};
+
 export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {
     const in_unit_sphere = vec3RandInUnitSphere();
     return vec3Dot(in_unit_sphere, normal) < 0
