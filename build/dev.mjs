@@ -25,13 +25,13 @@ async function start() {
             '.jpg': 'file'
         }
     });
-    
-    
+
+
     const prepareFile = createPrepareFile(
         [DIR_PUBLIC, DIR_DEVBUILD],
         path.join(DIR_DEVBUILD, '404.html')
     );
-    
+
     const httpServer = createServer(async (req, res) => {
         let file = await prepareFile(req.url);
         const statusCode = file.found ? 200 : 404;
@@ -44,7 +44,7 @@ async function start() {
         }
         console.log(`${req.method} ${req.url} ${statusCode}`);
     });
-    
+
     const HOST = '0.0.0.0';
     const PORT = 8080;
 
@@ -59,9 +59,9 @@ async function start() {
         });
     });
 
-    console.log(`STARTED AN HTTP SERVER ON http://${HOST}:${PORT}`);    
+    console.log(`Started HTTP server on http://${HOST}:${PORT}`);
     await esbuildContext.watch();
-    console.log(`STARTED ESBUILD`);
+    console.log(`Started esbuild`);
 }
 
 

@@ -1,9 +1,8 @@
-import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { vec3Add3, vec3AllocatorScopeSync } from './vec3';
-import { ray_color, ray_color_iterative } from './ray_color';
-import { RenderParameters } from './types';
+import { ray_color_iterative } from './ray_color';
+import { RenderParameters, RenderWorkerMessage } from './types';
 import { ArenaVec3Allocator } from './vec3_allocators';
-import { randomIntMinMax } from './random';
+import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
 import { simple_light } from './scenes/simple_light';
 import { cornell_box } from './scenes/cornell_box';
@@ -15,7 +14,7 @@ export interface RenderWorkerMessageData {
     pixels: Float64Array;
 }
 
-onmessage = (ev: MessageEvent<RenderParameters>) => {
+onmessage = (ev: MessageEvent<RenderWorkerMessage>) => {
     render(ev.data);
 };
 
@@ -28,7 +27,7 @@ async function render({
                           scene_creation_random_numbers,
                           line_order,
                           first_line_index
-                      }: RenderParameters): Promise<void> {
+                      }: RenderWorkerMessage): Promise<void> {
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
     const stratification_grid_step = 1 / stratification_grid_size;

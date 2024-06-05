@@ -16,6 +16,7 @@ export interface HitRecord {
 
 const dummyMaterial: MegaMaterial = {
     scatter: () => false,
+    scattering_pdf: () => 1 / Math.PI * 4,
     albedo: sColor(0, 0, 0),
     fuzz: NaN,
     ior: NaN,

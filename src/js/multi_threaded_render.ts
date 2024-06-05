@@ -1,4 +1,4 @@
-import { RenderParameters } from './types';
+import { RenderParameters, RenderWorkerMessage } from './types';
 import { ColorWriter } from './color-writers';
 import { RenderWorkerMessageData } from './render_worker';
 import { color, vec3AllocatorScopeSync } from './vec3';
@@ -30,6 +30,7 @@ export async function multiThreadedRender(thread_number: number, render_paramete
         let eventCount = 0;
         const samples_to_send = Math.floor((i + 1) * samples_per_pixel / thread_number) - samples_sent;
         samples_sent += samples_to_send;
+        // note: tried to use transferables explicitly, but it seems Chrome doesn't care. It even makes things slightly slower.
         worker.postMessage({
             aspect_ratio,
             image_width,
@@ -39,7 +40,7 @@ export async function multiThreadedRender(thread_number: number, render_paramete
             scene_creation_random_numbers,
             first_line_index: Math.floor(i / thread_number * image_height),
             line_order
-        } as RenderParameters);
+        } as RenderWorkerMessage);
 
         const tmpColor = color(0, 0, 0);
         promises.push(new Promise<void>(resolve => {
@@ -68,6 +69,7 @@ export async function multiThreadedRender(thread_number: number, render_paramete
                 console.log(`[${format_time(dt)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays. Estimated time to complete: ${format_time(estimated_time_to_complete)}`);
 
                 if (eventCount === image_height) {
+                    console.log(`Thread #${i} - done`);
                     resolve();
                 }
             };

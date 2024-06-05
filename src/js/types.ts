@@ -7,3 +7,7 @@ export interface RenderParameters {
     scene_creation_random_numbers: number[],
     line_order: Uint16Array
 }
+
+export interface RenderWorkerMessage extends RenderParameters {
+    first_line_index: number;
+}
