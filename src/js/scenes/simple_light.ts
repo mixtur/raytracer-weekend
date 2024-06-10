@@ -1,6 +1,6 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
-import { color, point3, vec3 } from '../vec3';
+import { color, point3, vec3 } from '../math/vec3';
 import { HittableList } from '../hittable/hittable_list';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Sphere } from '../hittable/sphere';

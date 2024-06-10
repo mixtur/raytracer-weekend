@@ -1,7 +1,7 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
-import { point3, vec3, vec3Set } from '../vec3';
-import { Ray, rayAllocator } from '../ray';
+import { point3, vec3, vec3Set } from '../math/vec3';
+import { Ray, rayAllocator } from '../math/ray';
 import { degrees_to_radians } from '../utils';
 
 export class RotateY implements Hittable {

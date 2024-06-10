@@ -1,7 +1,7 @@
 import { createArrayWriter, createCanvasColorWriter } from './color-writers';
 // import { singleThreadedRender } from './single_threaded_render';
 import { multiThreadedRender } from './multi_threaded_render';
-import { randomIntMinMax } from './random';
+import { randomIntMinMax } from './math/random';
 
 const aspect_ratio = 1;
 const image_width = 500;

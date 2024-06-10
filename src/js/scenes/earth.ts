@@ -1,6 +1,6 @@
 import { Scene } from './scene';
 import { Sphere } from '../hittable/sphere';
-import { color, point3, vec3 } from '../vec3';
+import { color, point3, vec3 } from '../math/vec3';
 import earthUrl from './earthmap.jpg';
 import { Camera } from '../camera';
 import { ImageTexture } from '../texture/image_texture';

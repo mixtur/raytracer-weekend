@@ -1,5 +1,5 @@
 import { Texture } from './texture';
-import { color, Color } from '../vec3';
+import { color, Color } from '../math/vec3';
 
 export class SolidColor implements Texture {
     color: Color;

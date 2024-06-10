@@ -9,12 +9,12 @@ import {
     vec3Rand,
     vec3RandMinMax2,
     vec3Sub2
-} from '../vec3';
-import { ArenaVec3Allocator } from '../vec3_allocators';
+} from '../math/vec3';
+import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { sColor, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
-import { getPredefinedRandom, random, randomMinMax, randomScopeAsync, randomScopeSync } from '../random';
+import { getPredefinedRandom, random, randomMinMax, randomScopeAsync, randomScopeSync } from '../math/random';
 import { MovingSphere } from '../hittable/moving_sphere';
 import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';

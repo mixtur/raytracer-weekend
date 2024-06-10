@@ -1,4 +1,4 @@
-import { Ray } from "../ray";
+import { Ray } from "../math/ray";
 import { HitRecord, Hittable } from "./hittable";
 import { AABB } from './aabb';
 
@@ -8,7 +8,7 @@ export class HittableList implements Hittable {
     constructor(objects: Hittable[] = []) {
         this.objects = objects;
     }
-    
+
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         let current_t_max = t_max;
         let is_hit = false;

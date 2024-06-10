@@ -1,5 +1,5 @@
 import { Texture } from './texture';
-import { color, Color, Point3, vec3MulS2 } from '../vec3';
+import { color, Color, Point3, vec3MulS2 } from '../math/vec3';
 import { Perlin } from './perlin';
 
 export class NoiseTexture implements Texture {

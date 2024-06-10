@@ -1,7 +1,7 @@
 import { createEmptyHitRecord, HitRecord, Hittable } from './hittable';
 import { AABB } from './aabb';
-import { Ray, rayAt3 } from '../ray';
-import { vec3Len, vec3Set } from '../vec3';
+import { Ray, rayAt3 } from '../math/ray';
+import { vec3Len, vec3Set } from '../math/vec3';
 import { MegaMaterial } from '../materials/megamaterial';
 
 const hit1 = createEmptyHitRecord();

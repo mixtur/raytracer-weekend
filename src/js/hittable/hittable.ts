@@ -1,5 +1,5 @@
-import { Ray } from "../ray";
-import { point3, Point3, vec3, Vec3, vec3Dot, vec3Negate1, vec3Unit2 } from '../vec3';
+import { Ray } from "../math/ray";
+import { point3, Point3, vec3, Vec3, vec3Dot } from '../math/vec3';
 import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
 import { sColor } from '../texture/solid_color';

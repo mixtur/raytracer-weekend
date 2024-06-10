@@ -1,9 +1,7 @@
 import { HitRecord, Hittable } from './hittable';
 import { AABB, surrounding_box } from './aabb';
-import { Ray } from '../ray';
-import { randomIntMinMax } from '../random';
-import { vec3AllocatorScopeSync } from '../vec3';
-import { ArenaVec3Allocator } from '../vec3_allocators';
+import { Ray } from '../math/ray';
+import { randomIntMinMax } from '../math/random';
 
 const b0 = AABB.createEmpty();
 const b1 = AABB.createEmpty();

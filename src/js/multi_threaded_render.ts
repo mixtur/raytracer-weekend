@@ -1,10 +1,8 @@
 import { RenderParameters, RenderWorkerMessage } from './types';
 import { ColorWriter } from './color-writers';
 import { RenderWorkerMessageData } from './render_worker';
-import { color, vec3AllocatorScopeSync } from './vec3';
+import { color } from './math/vec3';
 import { format_time } from './utils';
-import { ArenaVec3Allocator } from './vec3_allocators';
-import { randomIntMinMax } from './random';
 
 export async function multiThreadedRender(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter): Promise<void> {
     const {
@@ -64,9 +62,9 @@ export async function multiThreadedRender(thread_number: number, render_paramete
                 done_rays += image_width * samples_to_send;
                 const dt = performance.now() - t0;
                 const speed = done_rays / dt;
-                const estimated_time_to_complete = (total_rays - done_rays) / speed;
+                const estimated_total_time = total_rays / speed;
 
-                console.log(`[${format_time(dt)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays. Estimated time to complete: ${format_time(estimated_time_to_complete)}`);
+                console.log(`[${format_time(dt)} / ${format_time(estimated_total_time)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays`);
 
                 if (eventCount === image_height) {
                     console.log(`Thread #${i} - done`);

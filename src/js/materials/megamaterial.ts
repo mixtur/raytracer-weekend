@@ -1,8 +1,8 @@
 import { Texture } from '../texture/texture';
 import { sColor } from '../texture/solid_color';
-import { ray, Ray, rayAllocator } from '../ray';
+import { ray, Ray } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
-import { color, Color, vec3 } from '../vec3';
+import { color, Color, vec3 } from '../math/vec3';
 
 export interface MegaMaterial {
     scatter: ScatterFunction;

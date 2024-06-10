@@ -1,5 +1,5 @@
 import { Scene } from './scene';
-import { color, point3, vec3 } from '../vec3';
+import { color, point3, vec3 } from '../math/vec3';
 import { Camera } from '../camera';
 import { Hittable } from '../hittable/hittable';
 import { HittableList } from '../hittable/hittable_list';

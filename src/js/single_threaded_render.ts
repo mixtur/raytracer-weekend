@@ -1,8 +1,8 @@
 import { RenderParameters } from './types';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
-import { ArenaVec3Allocator } from './vec3_allocators';
-import { color, vec3Add3, vec3AllocatorScopeAsync } from './vec3';
+import { ArenaVec3Allocator } from './math/vec3_allocators';
+import { color, vec3Add3, vec3AllocatorScopeAsync } from './math/vec3';
 import { ray_color, ray_color_iterative } from './ray_color';
 import { ColorWriter } from './color-writers';
 

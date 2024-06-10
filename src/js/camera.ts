@@ -4,14 +4,14 @@ import {
     vec3Add2,
     vec3Add3, vec3Cross2,
     vec3DivS2,
-    vec3MulS2, vec3MulS3, vec3MulSAddV4, vec3MulVAddV4, vec3RandInUnitDisk,
+    vec3MulS2, vec3MulS3, vec3MulSAddV4, vec3RandInUnitDisk,
     vec3Sub2,
     vec3Sub3,
     vec3Unit1
-} from './vec3';
-import { Ray, rayAllocator } from './ray';
+} from './math/vec3';
+import { Ray, rayAllocator } from './math/ray';
 import { degrees_to_radians } from './utils';
-import { randomMinMax } from './random';
+import { randomMinMax } from './math/random';
 
 export class Camera {
     origin: Point3;

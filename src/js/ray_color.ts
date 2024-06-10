@@ -1,4 +1,4 @@
-import { Ray, raySet } from './ray';
+import { Ray, raySet } from './math/ray';
 import {
     color,
     Color,
@@ -10,10 +10,10 @@ import {
     vec3MulVAddV3,
     vec3MulVAddV4, vec3SqLen,
     vec3Sub2
-} from './vec3';
+} from './math/vec3';
 import { createEmptyHitRecord, Hittable } from './hittable/hittable';
 import { createBounceRecord } from './materials/megamaterial';
-import { randomMinMax } from './random';
+import { randomMinMax } from './math/random';
 
 const hit = createEmptyHitRecord();
 const bounce = createBounceRecord();
@@ -37,7 +37,6 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, depth: num
     vec3MulS3(to_light, to_light, 1 / Math.sqrt(distance_squared));
 
     if (vec3Dot(to_light, hit.normal) < 0) {
-        console.log('light below surface');
         return emitted;
     }
 

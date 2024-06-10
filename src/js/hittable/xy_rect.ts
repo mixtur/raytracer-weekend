@@ -1,7 +1,7 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
-import { point3, vec3, vec3Set } from '../vec3';
-import { Ray } from '../ray';
+import { vec3Set } from '../math/vec3';
+import { Ray } from '../math/ray';
 import { MegaMaterial } from '../materials/megamaterial';
 
 export class XYRect implements Hittable {

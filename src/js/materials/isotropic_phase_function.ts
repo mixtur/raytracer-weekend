@@ -1,6 +1,6 @@
 import { Texture } from '../texture/texture';
-import { raySet } from '../ray';
-import { vec3RandInUnitSphere } from '../vec3';
+import { raySet } from '../math/ray';
+import { vec3RandInUnitSphere } from '../math/vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
 
 export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => createMegaMaterial(isotropic_phase_function_scatter, null, { albedo });

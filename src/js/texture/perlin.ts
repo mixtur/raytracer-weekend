@@ -1,6 +1,6 @@
-import { randomIntMinMax } from '../random';
-import { Point3, vec3, Vec3, vec3AllocatorScopeSync, vec3Dot, vec3MulS3, vec3RandMinMax2 } from '../vec3';
-import { ArenaVec3Allocator } from '../vec3_allocators';
+import { randomIntMinMax } from '../math/random';
+import { Point3, vec3, Vec3, vec3AllocatorScopeSync, vec3Dot, vec3MulS3, vec3RandMinMax2 } from '../math/vec3';
+import { ArenaVec3Allocator } from '../math/vec3_allocators';
 
 const POINT_COUNT = 256;
 

@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
-import { Vec3, vec3Add3, vec3Sub2 } from '../vec3';
-import { Ray, rayAllocator } from '../ray';
+import { Vec3, vec3Add3, vec3Sub2 } from '../math/vec3';
+import { Ray, rayAllocator } from '../math/ray';
 import { AABB } from './aabb';
 
 export class Translate implements Hittable {

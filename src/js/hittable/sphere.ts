@@ -1,5 +1,5 @@
-import { Ray, rayAt3 } from '../ray';
-import { Point3, vec3Dot, vec3, vec3DivS3, vec3Sub3 } from '../vec3';
+import { Ray, rayAt3 } from '../math/ray';
+import { Point3, vec3Dot, vec3, vec3DivS3, vec3Sub3 } from '../math/vec3';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';

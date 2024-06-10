@@ -1,5 +1,5 @@
 import { Texture } from '../texture/texture';
-import { raySet } from '../ray';
+import { raySet } from '../math/ray';
 import {
     vec3Add3,
     vec3Dot,
@@ -7,7 +7,7 @@ import {
     vec3RandInUnitSphere,
     vec3Reflect,
     vec3Unit1
-} from '../vec3';
+} from '../math/vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction } from './megamaterial';
 
 export const createMetal = (albedo: Texture, fuzz: number): MegaMaterial => createMegaMaterial(metal_scatter, null, { albedo, fuzz });

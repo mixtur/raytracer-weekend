@@ -5,7 +5,7 @@ import { sColor } from '../texture/solid_color';
 import { YZRect } from '../hittable/yz_rect';
 import { XZRect } from '../hittable/xz_rect';
 import { XYRect } from '../hittable/xy_rect';
-import { color, point3, vec3 } from '../vec3';
+import { color, point3, vec3 } from '../math/vec3';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';

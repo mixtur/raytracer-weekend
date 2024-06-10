@@ -1,5 +1,5 @@
 import { Texture } from './texture';
-import { Color, Point3 } from '../vec3';
+import { Color, Point3 } from '../math/vec3';
 
 export class Checker2DTexture implements Texture {
     even: Texture;

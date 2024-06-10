@@ -72,7 +72,7 @@ export const vec3MulV2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] * b[0], a[1] * b[
 export const vec3MulV3 = (a: Vec3, b: Vec3, c: Vec3): void => {
     a[0] = b[0] * c[0];
     a[1] = b[1] * c[1];
-    a[2] = b[2] * c[2];    
+    a[2] = b[2] * c[2];
 };
 
 // a * b + c
@@ -186,14 +186,31 @@ export const vec3RandInUnitSphere1 = (v: Vec3): void => {
 };
 
 export const vec3RandUnit = (): Vec3 => {
-    const v = vec3RandInUnitSphere();
-    vec3Unit2(v, v);
-    return v;
+    const r1 = Math.random();
+    const r2 = Math.random() * Math.PI * 2;
+    const cosT = 1 - 2 * r1;
+    const sinT = Math.sqrt(1 - cosT * cosT);
+    const sinP = Math.sin(r2);
+    const cosP = Math.cos(r2);
+
+    return vec3(
+        sinT * cosP,
+        sinT * sinP,
+        cosT
+    );
 };
 
 export const vec3RandUnit1 = (v: Vec3): void => {
-    vec3RandInUnitSphere1(v);
-    vec3Unit2(v, v);
+    const r1 = Math.random();
+    const r2 = Math.random() * Math.PI * 2;
+    const cosT = 1 - 2 * r1;
+    const sinT = Math.sqrt(1 - cosT * cosT);
+    const sinP = Math.sin(r2);
+    const cosP = Math.cos(r2);
+
+    v[0] = sinT * cosP;
+    v[1] = sinT * sinP;
+    v[2] = cosT;
 };
 
 export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {

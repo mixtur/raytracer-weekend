@@ -1,6 +1,6 @@
 import { Hittable } from '../hittable/hittable';
 import { Camera } from '../camera';
-import { Color } from '../vec3';
+import { Color } from '../math/vec3';
 
 export interface Scene {
     root_hittable: Hittable;

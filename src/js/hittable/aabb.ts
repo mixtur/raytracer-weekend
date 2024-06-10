@@ -1,5 +1,5 @@
-import { point3, Point3, vec3 } from '../vec3';
-import { Ray } from '../ray';
+import { point3, Point3, vec3 } from '../math/vec3';
+import { Ray } from '../math/ray';
 
 export class AABB {
     static createEmpty() { return new AABB(vec3(Infinity, Infinity, Infinity), vec3(-Infinity, -Infinity, -Infinity)); }

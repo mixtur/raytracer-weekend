@@ -6,14 +6,13 @@ import {
     vec3,
     vec3Add2,
     vec3AllocatorScopeAsync,
-    vec3AllocatorScopeSync,
     vec3RandMinMax2
-} from '../vec3';
+} from '../math/vec3';
 import { sColor } from '../texture/solid_color';
 import { Box } from '../hittable/box';
-import { getPredefinedRandom, randomMinMax, randomScopeAsync, randomScopeSync } from '../random';
+import { getPredefinedRandom, randomMinMax, randomScopeAsync } from '../math/random';
 import { ZXGrid } from '../hittable/zx-grid';
-import { ArenaVec3Allocator } from '../vec3_allocators';
+import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { HittableList } from '../hittable/hittable_list';
 import { XZRect } from '../hittable/xz_rect';
 import { MovingSphere } from '../hittable/moving_sphere';

@@ -1,7 +1,7 @@
-import { vec3Add3, vec3AllocatorScopeSync } from './vec3';
-import { ray_color_iterative } from './ray_color';
-import { RenderParameters, RenderWorkerMessage } from './types';
-import { ArenaVec3Allocator } from './vec3_allocators';
+import { vec3Add3, vec3AllocatorScopeSync } from './math/vec3';
+import { ray_color, ray_color_iterative } from './ray_color';
+import { RenderWorkerMessage } from './types';
+import { ArenaVec3Allocator } from './math/vec3_allocators';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
 import { simple_light } from './scenes/simple_light';
@@ -63,7 +63,7 @@ async function render({
                         const v = (j + sv) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
-                        vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, max_depth));
+                        vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
                     }
                 }
 
@@ -74,7 +74,7 @@ async function render({
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, max_depth));
+                    vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
                 }
             }
             postMessage({y, pixels: outputLineAllocator.dump});

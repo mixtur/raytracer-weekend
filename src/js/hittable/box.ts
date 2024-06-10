@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
-import { Point3, vec3, vec3Set } from '../vec3';
-import { Ray, rayAt2, rayAt3 } from '../ray';
+import { Point3, vec3 } from '../math/vec3';
+import { Ray, rayAt3 } from '../math/ray';
 import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
 

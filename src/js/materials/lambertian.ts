@@ -1,6 +1,6 @@
 import { Texture } from '../texture/texture';
-import { raySet } from '../ray';
-import { vec3Add2, vec3Dot, vec3Len, vec3NearZero, vec3RandomInHemisphere, vec3RandUnit, vec3Unit1 } from '../vec3';
+import { raySet } from '../math/ray';
+import { vec3Dot, vec3Len, vec3RandomInHemisphere, vec3Unit1 } from '../math/vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
 
 const lambertian_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
