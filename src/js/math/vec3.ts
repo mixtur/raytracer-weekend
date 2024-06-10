@@ -213,6 +213,36 @@ export const vec3RandUnit1 = (v: Vec3): void => {
     v[2] = cosT;
 };
 
+export const vec3RandCosineUnit = (): Vec3 => {
+    const r1 = Math.random() * Math.PI * 2;
+    const r2 = Math.random();
+
+    const cosP = Math.cos(r1);
+    const sinP = Math.sin(r1);
+    const cosT = Math.sqrt(1 - r2);
+    const sinT = Math.sqrt(r2);
+
+    return vec3(
+        cosP * sinT,
+        sinP * sinT,
+        cosT
+    );
+}
+
+export const vec3RandCosineUnit1 = (v: Vec3): void => {
+    const r1 = Math.random() * Math.PI * 2;
+    const r2 = Math.random();
+
+    const cosP = Math.cos(r1);
+    const sinP = Math.sin(r1);
+    const cosT = Math.sqrt(1 - r2);
+    const sinT = Math.sqrt(r2);
+
+    v[0] = cosP * sinT;
+    v[1] = sinP * sinT;
+    v[2] = cosT;
+}
+
 export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {
     const in_unit_sphere = vec3RandInUnitSphere();
     return vec3Dot(in_unit_sphere, normal) < 0

@@ -8,6 +8,7 @@ import { simple_light } from './scenes/simple_light';
 import { cornell_box } from './scenes/cornell_box';
 import { book1_final_scene } from './scenes/book-1-final-scene';
 import { create_earth_scene } from './scenes/earth';
+import { ArenaMat3Allocator, mat3AllocatorScopeSync } from './math/mat3';
 
 export interface RenderWorkerMessageData {
     y: number;
@@ -41,43 +42,48 @@ async function render({
     const cam = scene.create_camera(aspect_ratio);
 
     const rayArenaAllocator = new ArenaVec3Allocator(768);
+    const mat3ArenaAllocator = new ArenaMat3Allocator(64);
 
     const outputLineAllocator = new ArenaVec3Allocator(image_width);
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
 
-    vec3AllocatorScopeSync(rayArenaAllocator, () => {
-        for (let _j = 0; _j < image_height; _j++) {
-            const j = local_order[_j];
-            const y = image_height -1 - j;
-            outputLineAllocator.reset();
-            for (let i = 0; i < image_width; i++) {
-                const pixelColor = outputLineAllocator.alloc(0, 0, 0);
+    mat3AllocatorScopeSync(mat3ArenaAllocator, () => {
+        vec3AllocatorScopeSync(rayArenaAllocator, () => {
+            for (let _j = 0; _j < image_height; _j++) {
+                const j = local_order[_j];
+                const y = image_height -1 - j;
+                outputLineAllocator.reset();
+                for (let i = 0; i < image_width; i++) {
+                    const pixelColor = outputLineAllocator.alloc(0, 0, 0);
 
-                for (let sj = 0; sj < stratification_grid_size; sj++) {
-                    for (let si = 0; si < stratification_grid_size; si++) {
+                    for (let sj = 0; sj < stratification_grid_size; sj++) {
+                        for (let si = 0; si < stratification_grid_size; si++) {
+                            rayArenaAllocator.reset();
+                            mat3ArenaAllocator.reset();
+                            const su = stratification_grid_step * (si + Math.random());
+                            const sv = stratification_grid_step * (sj + Math.random());
+
+                            const u = (i + su) / (image_width - 1);
+                            const v = (j + sv) / (image_height - 1);
+
+                            const r = cam.get_ray(u, v);
+                            vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
+                        }
+                    }
+
+
+                    for (let s = 0; s < stratification_remainder; s++) {
                         rayArenaAllocator.reset();
-                        const su = stratification_grid_step * (si + Math.random());
-                        const sv = stratification_grid_step * (sj + Math.random());
-
-                        const u = (i + su) / (image_width - 1);
-                        const v = (j + sv) / (image_height - 1);
+                        mat3ArenaAllocator.reset();
+                        const u = (i + Math.random()) / (image_width - 1);
+                        const v = (j + Math.random()) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
                         vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
                     }
                 }
-
-
-                for (let s = 0; s < stratification_remainder; s++) {
-                    rayArenaAllocator.reset();
-                    const u = (i + Math.random()) / (image_width - 1);
-                    const v = (j + Math.random()) / (image_height - 1);
-
-                    const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
-                }
+                postMessage({y, pixels: outputLineAllocator.dump});
             }
-            postMessage({y, pixels: outputLineAllocator.dump});
-        }
+        });
     });
 }

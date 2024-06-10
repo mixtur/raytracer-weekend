@@ -14,6 +14,8 @@ export async function multiThreadedRender(thread_number: number, render_paramete
         scene_creation_random_numbers,
         line_order
     } = render_parameters;
+    //todo: make it so that every thread handles first few lines quickly, and then slows down.
+    //      In that case we'll get some image quickly and then its refinement will still be apparent
 
     const { writeColor, dumpLine, dumpImage } = writer;
     const outputBuffer = new Float64Array(image_width * image_height * 3);

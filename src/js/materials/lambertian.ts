@@ -1,17 +1,15 @@
 import { Texture } from '../texture/texture';
 import { raySet } from '../math/ray';
-import { vec3Dot, vec3Len, vec3RandomInHemisphere, vec3Unit1 } from '../math/vec3';
+import { vec3Dot, vec3Len, vec3RandCosineUnit } from '../math/vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
+import { mat3FromZ1, mulMat3Vec3_2 } from '../math/mat3';
 
-const lambertian_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
-    let scatter_direction = vec3RandomInHemisphere(hit.normal);
-
-    // Catch degenerate scatter direction
-    // if (vec3NearZero(scatter_direction))
-    //     scatter_direction = hit.normal;
-    raySet(bounce.scattered, hit.p, vec3Unit1(scatter_direction), r_in.time);
-    bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
-    bounce.sampling_pdf = 0.5 / Math.PI;
+const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
+    const mat = mat3FromZ1(hit.normal);
+    const scatter_direction = mulMat3Vec3_2(mat, vec3RandCosineUnit());
+    raySet(bounce.scattered, hit.p, scatter_direction, r_in.time);
+    bounce.attenuation.set(material.albedo.value(hit.u, hit.v, hit.p));
+    bounce.sampling_pdf = vec3Dot(scatter_direction, hit.normal) / Math.PI;
     return true;
 };
 
