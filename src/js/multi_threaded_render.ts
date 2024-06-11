@@ -14,6 +14,9 @@ export async function multiThreadedRender(thread_number: number, render_paramete
         scene_creation_random_numbers,
         line_order
     } = render_parameters;
+
+    thread_number = Math.min(thread_number, samples_per_pixel);
+
     //todo: make it so that every thread handles first few lines quickly, and then slows down.
     //      In that case we'll get some image quickly and then its refinement will still be apparent
 

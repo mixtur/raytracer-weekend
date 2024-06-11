@@ -35,7 +35,7 @@ const jRand = new Uint16Array(image_height);
 for (let i = 0; i < image_height; i++) { jRand[i] = i; }
 permute(jRand);
 
-multiThreadedRender(8, {
+multiThreadedRender(globalThis?.navigator?.hardwareConcurrency ?? 4, {
     aspect_ratio,
     image_width,
     image_height,

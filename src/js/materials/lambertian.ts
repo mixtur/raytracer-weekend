@@ -18,4 +18,8 @@ const lambertian_scatter_pdf: ScatteringPDF = (r_in, hit, scattered): number => 
     return cos < 0 ? 0 : cos / Math.PI;
 };
 
-export const createLambertian = (albedo: Texture): MegaMaterial => createMegaMaterial(lambertian_scatter, lambertian_scatter_pdf, { albedo });
+export const createLambertian = (albedo: Texture): MegaMaterial => createMegaMaterial({
+    scatter: lambertian_scatter,
+    scattering_pdf: lambertian_scatter_pdf,
+    albedo
+});

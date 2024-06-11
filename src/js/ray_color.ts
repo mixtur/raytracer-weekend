@@ -3,9 +3,8 @@ import {
     color,
     Color,
     point3,
-    vec3Add2, vec3Dot,
+    vec3Dot,
     vec3MulS2, vec3MulS3,
-    vec3MulV2,
     vec3MulV3,
     vec3MulVAddV3,
     vec3MulVAddV4, vec3SqLen,
@@ -25,7 +24,7 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, depth: num
         // console.log('background');
         return background;
     }
-    const emitted = hit.material.emit.value(hit.u, hit.v, hit.p);
+    const emitted = hit.material.emit(hit.material, r, hit);
     if (!hit.material.scatter(hit.material, r, hit, bounce)) {
         // console.log('no hit');
         return emitted;
@@ -67,7 +66,7 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
             vec3MulVAddV4(totalEmission, totalAttenuation, background, totalEmission);
             break;
         }
-        const emission = hit.material.emit.value(hit.u, hit.v, hit.p);
+        const emission = hit.material.emit(hit.material, r, hit);
         vec3MulVAddV4(totalEmission, totalAttenuation, emission, totalEmission);
         if (hit.material.scatter(hit.material, r, hit, bounce)) {
             const on_light = point3(randomMinMax(213, 343), 554, randomMinMax(227, 332));

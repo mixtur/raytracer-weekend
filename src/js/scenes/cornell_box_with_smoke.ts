@@ -1,10 +1,7 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
-import { HittableList } from '../hittable/hittable_list';
 import { sColor } from '../texture/solid_color';
-import { YZRect } from '../hittable/yz_rect';
-import { XZRect } from '../hittable/xz_rect';
-import { XYRect } from '../hittable/xy_rect';
+import { Quad } from '../hittable/quad';
 import { color, point3, vec3 } from '../math/vec3';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
@@ -22,12 +19,12 @@ const light = createDiffuseLight(sColor(7, 7, 7));
 
 export const cornell_box_with_smoke: Scene = {
     root_hittable: new BVHNode([
-        new YZRect(0,   555, 0,   555, 555, green),
-        new YZRect(0,   555, 0,   555, 0,   red),
-        new XZRect(113, 443, 127, 432, 554, light),
-        new XZRect(0,   555, 0,   555, 0,   white),
-        new XZRect(0,   555, 0,   555, 555, white),
-        new XYRect(0,   555, 0,   555, 555, white),
+        new Quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green),
+        new Quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red),
+        new Quad(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light),
+        new Quad(point3(0,555,0), vec3(555,0,0), vec3(0,0,555), white),
+        new Quad(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white),
+        new Quad(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white),
 
         new ConstantMedium(
             new Translate(

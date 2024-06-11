@@ -28,7 +28,7 @@ export class HittableList implements Hittable {
         aabb.max.set(tmp.max);
         for (const obj of this.objects) {
             obj.get_bounding_box(time0, time1, tmp);
-            aabb.consume(tmp);
+            aabb.consumeAABB(tmp);
         }
     }
 }

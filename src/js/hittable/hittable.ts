@@ -1,8 +1,7 @@
 import { Ray } from "../math/ray";
 import { point3, Point3, vec3, Vec3, vec3Dot } from '../math/vec3';
 import { AABB } from './aabb';
-import { MegaMaterial } from '../materials/megamaterial';
-import { sColor } from '../texture/solid_color';
+import { createMegaMaterial, MegaMaterial } from '../materials/megamaterial';
 
 export interface HitRecord {
     p: Point3;
@@ -14,14 +13,10 @@ export interface HitRecord {
     v: number;
 }
 
-const dummyMaterial: MegaMaterial = {
-    scatter: () => false,
-    scattering_pdf: () => 1 / Math.PI * 4,
-    albedo: sColor(0, 0, 0),
+const dummyMaterial: MegaMaterial = createMegaMaterial({
     fuzz: NaN,
     ior: NaN,
-    emit: sColor(0, 0, 0)
-};
+});
 
 export const createEmptyHitRecord = (): HitRecord => {
     return {

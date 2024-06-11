@@ -1,4 +1,4 @@
-import { point3, Point3, vec3 } from '../math/vec3';
+import { point3, Point3, Vec3, vec3 } from '../math/vec3';
 import { Ray } from '../math/ray';
 
 export class AABB {
@@ -26,7 +26,7 @@ export class AABB {
         return true;
     }
 
-    consume(b: AABB): void {
+    consumeAABB(b: AABB): void {
         this.min[0] = Math.min(this.min[0], b.min[0]);
         this.min[1] = Math.min(this.min[1], b.min[1]);
         this.min[2] = Math.min(this.min[2], b.min[2]);
@@ -34,6 +34,31 @@ export class AABB {
         this.max[0] = Math.max(this.max[0], b.max[0]);
         this.max[1] = Math.max(this.max[1], b.max[1]);
         this.max[2] = Math.max(this.max[2], b.max[2]);
+    }
+
+    consumePoint(p: Vec3): void {
+        this.min[0] = Math.min(this.min[0], p[0]);
+        this.min[1] = Math.min(this.min[1], p[1]);
+        this.min[2] = Math.min(this.min[2], p[2]);
+
+        this.max[0] = Math.max(this.max[0], p[0]);
+        this.max[1] = Math.max(this.max[1], p[1]);
+        this.max[2] = Math.max(this.max[2], p[2]);
+    }
+
+    expand(padding: number): void {
+        if (this.max[0] === this.min[0]) {
+            this.min[0] -= padding;
+            this.max[0] += padding;
+        }
+        if (this.max[1] === this.min[1]) {
+            this.min[1] -= padding;
+            this.max[1] += padding;
+        }
+        if (this.max[2] === this.min[2]) {
+            this.min[2] -= padding;
+            this.max[2] += padding;
+        }
     }
 }
 

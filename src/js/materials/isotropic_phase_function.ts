@@ -4,8 +4,6 @@ import { vec3RandInUnitSphere } from '../math/vec3';
 import { createMegaMaterial, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
 import { HitRecord } from '../hittable/hittable';
 
-export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => createMegaMaterial(isotropic_phase_function_scatter, isotropic_phase_function_scattering_pdf, { albedo });
-
 export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     raySet(bounce.scattered, hit.p, vec3RandInUnitSphere(), r_in.time);
     bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
@@ -15,4 +13,11 @@ export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit
 
 export const isotropic_phase_function_scattering_pdf: ScatteringPDF = (r_in: Ray, hit: HitRecord, scattered: Ray): number => {
     return 1 / (Math.PI * 4);
-}
+};
+
+export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => createMegaMaterial({
+    scatter: isotropic_phase_function_scatter,
+    scattering_pdf: isotropic_phase_function_scattering_pdf,
+    albedo
+});
+

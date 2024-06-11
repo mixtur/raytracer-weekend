@@ -4,7 +4,7 @@ import { color, point3, vec3 } from '../math/vec3';
 import { HittableList } from '../hittable/hittable_list';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Sphere } from '../hittable/sphere';
-import { XYRect } from '../hittable/xy_rect';
+import { Quad } from '../hittable/quad';
 import { sColor } from '../texture/solid_color';
 import { createLambertian } from '../materials/lambertian';
 import { createDiffuseLight } from '../materials/diffuse_light';
@@ -15,7 +15,7 @@ export const simple_light: Scene = {
     root_hittable: new HittableList([
         new Sphere(point3(0, -1000, 0), 1000, createLambertian(perlinTexture)),
         new Sphere(point3(0, 2, 0), 2, createLambertian(perlinTexture)),
-        new XYRect(3, 5, 1, 3, -2, createDiffuseLight(sColor(0.5, 4, 1))),
+        new Quad(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), createDiffuseLight(sColor(0.5, 4, 1))),
         new Sphere(point3(0, 7, 0), 2, createDiffuseLight(sColor(4, 1, 0.5)))
     ]),
     create_camera(aspect_ratio: number): Camera {

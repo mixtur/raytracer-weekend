@@ -14,7 +14,6 @@ import { getPredefinedRandom, randomMinMax, randomScopeAsync } from '../math/ran
 import { ZXGrid } from '../hittable/zx-grid';
 import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { HittableList } from '../hittable/hittable_list';
-import { XZRect } from '../hittable/xz_rect';
 import { MovingSphere } from '../hittable/moving_sphere';
 import { Sphere } from '../hittable/sphere';
 import { ConstantMedium } from '../hittable/constant_medium';
@@ -30,6 +29,7 @@ import { createDielectric } from '../materials/dielectric';
 import { createMetal } from '../materials/metal';
 import { createIsotropicPhaseFunction } from '../materials/isotropic_phase_function';
 import { createLambertian } from '../materials/lambertian';
+import { Quad } from '../hittable/quad';
 
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     const rng = getPredefinedRandom(scene_creation_random_numbers);
@@ -56,7 +56,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
             const objects = new HittableList();
             objects.objects.push(boxes1);
             const light = createDiffuseLight(sColor(7, 7, 7));
-            objects.objects.push(new XZRect(123, 423, 147, 412, 554, light));
+            objects.objects.push(new Quad(point3(123, 554, 147), vec3(300,0,0), vec3(0,0,265), light));
 
             const center1 = point3(400, 400, 200);
             const center2 = vec3Add2(center1, vec3(30,0,0));
