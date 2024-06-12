@@ -1,17 +1,15 @@
 // Probability Distribution Function
 import {
     Point3,
-    vec3,
     Vec3,
     vec3Dot,
-    vec3RandCosineUnit,
-    vec3RandomInHemisphere,
+    vec3_rand_cosine_unit,
     vec3RandUnit,
     vec3RandUnitOnHemisphere,
     vec3Unit1
 } from './vec3';
-import { Mat3, mat3FromZ1, mulMat3Vec3_2 } from './mat3';
 import { Hittable } from '../hittable/hittable';
+import { mul_quat_vec3_2, Quat, quat_from_z_1 } from './quat';
 
 export interface PDF {
     value(direction: Vec3): number;
@@ -29,9 +27,9 @@ export class SpherePDF implements PDF {
 }
 
 export class HemispherePDF implements PDF {
-    transform: Mat3;
+    quat: Quat;
     constructor(lobe_direction: Vec3) {
-        this.transform = mat3FromZ1(lobe_direction);
+        this.quat = quat_from_z_1(lobe_direction);
     }
 
     value(_direction: Vec3): number {
@@ -39,15 +37,15 @@ export class HemispherePDF implements PDF {
     }
 
     generate(): Vec3 {
-        return mulMat3Vec3_2(this.transform, vec3RandUnitOnHemisphere());
+        return mul_quat_vec3_2(this.quat, vec3RandUnitOnHemisphere());
     }
 }
 
 export class CosinePDF implements PDF {
-    transform: Mat3;
+    quat: Quat;
     lobe_direction: Vec3;
     constructor(lobe_direction: Vec3) {
-        this.transform = mat3FromZ1(lobe_direction);
+        this.quat = quat_from_z_1(lobe_direction);
         this.lobe_direction = vec3Unit1(lobe_direction);
     }
     value(direction: Vec3): number {
@@ -55,7 +53,7 @@ export class CosinePDF implements PDF {
         return Math.max(0, cosT / Math.PI);
     }
     generate(): Vec3 {
-        return mulMat3Vec3_2(this.transform, vec3RandCosineUnit());
+        return mul_quat_vec3_2(this.quat, vec3_rand_cosine_unit());
     }
 }
 
@@ -79,6 +77,7 @@ export class HittablePDF implements PDF {
 export class MixturePDF implements PDF {
     pdf1: PDF;
     pdf2: PDF;
+    selection = false;
     constructor(pdf1: PDF, pdf2: PDF) {
         this.pdf1 = pdf1;
         this.pdf2 = pdf2;
@@ -89,7 +88,8 @@ export class MixturePDF implements PDF {
     }
 
     generate(): Vec3 {
-        return Math.random() < 0.5
+        this.selection = Math.random() < 0.5;
+        return this.selection
             ? this.pdf1.generate()
             : this.pdf2.generate();
     }

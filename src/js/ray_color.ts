@@ -7,7 +7,7 @@ import {
     vec3MulS2, vec3MulS3,
     vec3MulV3,
     vec3MulVAddV3,
-    vec3MulVAddV4, vec3Set, vec3SqLen,
+    vec3MulVAddV4, vec3SqLen,
     vec3Sub2
 } from './math/vec3';
 import { createEmptyHitRecord, HitRecord, Hittable } from './hittable/hittable';

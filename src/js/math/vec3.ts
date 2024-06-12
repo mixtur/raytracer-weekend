@@ -118,13 +118,43 @@ export const vec3Cross2 = (a: Vec3, b: Vec3): Vec3 => {
     );
 };
 
-export const vec3Cross3 = (a: Vec3, b: Vec3, c: Vec3): void => {
-    const x = b[1] * c[2] - b[2] * c[1];
-    const y = b[2] * c[0] - b[0] * c[2];
-    a[2] = b[0] * c[1] - b[1] * c[0];
-    a[0] = x;
-    a[1] = y;
+export const vec3Cross3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+    const x =   a[1] * b[2] - a[2] * b[1];
+    const y =   a[2] * b[0] - a[0] * b[2];
+    result[2] = a[0] * b[1] - a[1] * b[0];
+    result[0] = x;
+    result[1] = y;
 };
+
+export const x_vec3 = vec3(1, 0, 0);
+export const y_vec3 = vec3(0, 1, 0);
+export const z_vec3 = vec3(0, 0, 1);
+
+export const vec3_orthogonal_1 = (v: Vec3): Vec3 => {
+    const t = v[0] > 0.9 ? y_vec3 : x_vec3;
+    return vec3Cross2(t, v);
+}
+
+export const vec3_orthogonal_2 = (result: Vec3, v: Vec3): void => {
+    const [x, y, z] = v;
+    const ax = Math.abs(x);
+    const ay = Math.abs(y);
+    const az = Math.abs(z);
+
+    if (ax <= ay && ax <= az) {
+        result[0] = 0;
+        result[1] = z;
+        result[2] = -y;
+    } else if (ay <= az) {
+        result[0] = -z;
+        result[1] = 0;
+        result[2] = x;
+    } else {
+        result[0] = y;
+        result[1] = -x;
+        result[2] = 0;
+    }
+}
 
 export const vec3Unit1 = (a: Vec3): Vec3 => vec3MulS2(a, 1 / vec3Len(a));
 
@@ -242,7 +272,7 @@ export const vec3RandUnitOnHemisphere1 = (v: Vec3): void => {
 }
 
 
-export const vec3RandCosineUnit = (): Vec3 => {
+export const vec3_rand_cosine_unit = (): Vec3 => {
     const r1 = Math.random() * Math.PI * 2;
     const r2 = Math.random();
 

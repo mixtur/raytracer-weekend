@@ -4,8 +4,8 @@ import { createEmptyHitRecord, HitRecord, Hittable, set_face_normal } from "./hi
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';
 import { MegaMaterial } from '../materials/megamaterial';
-import { mat3FromZ1, mulMat3Vec3_2 } from '../math/mat3';
 import { clamp } from '../utils';
+import { mul_quat_vec3_2, quat_from_z_1 } from '../math/quat';
 
 
 const tmpHit = createEmptyHitRecord();
@@ -89,13 +89,13 @@ export class Sphere extends Hittable {
         const cos_theta_max = Math.sqrt(1 - clamp((this.radius ** 2) / vec3SqLen(cone_axis), 0, 1));
         const r1 = Math.random() * Math.PI * 2;
         const r2 = Math.random();
-        const matrix = mat3FromZ1(cone_axis);
+        const quat = quat_from_z_1(cone_axis);
         const cosT = 1 + r2 * (cos_theta_max - 1);
         const sinT = Math.sqrt(1 - cosT * cosT);
         const sinP = Math.sin(r1);
         const cosP = Math.cos(r1);
 
-        return mulMat3Vec3_2(matrix, vec3(
+        return mul_quat_vec3_2(quat, vec3(
             sinT * cosP,
             sinT * sinP,
             cosT

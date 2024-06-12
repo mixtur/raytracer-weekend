@@ -5,10 +5,11 @@ It is written in TypeScript.
 It has some performance improvements over the source material.
 Namely, this implementation
 - uses grid instead of BVH when applicable
-- tests against a box use less math
-- uses arena allocators for everything. It is less of a problem in the books, because they use C++ examples, but in JS it makes a notable difference because raytracing tends to create a lot of temporary objects, and GC is not happy about it.
+- uses cheaper box intersection tests
+- uses arena allocators for everything. It is less of a problem in the books, because they use C++ for code examples, but in JS it makes a notable difference because raytracing tends to create a lot of temporary objects, and GC is not happy about it.
 - multithreading. The book only mentions it, this implementation actually does it.
 - actually fixes NaN problem mentioned in the last book
+- uses quaternions for changing PDFs orientations instead of matrices 
 
 
 ```bash
@@ -18,7 +19,9 @@ Namely, this implementation
 ```
 
 TODO:
-- quaternions instead of linear matrices
+- enforce naming conventions
+- generalize scopes
+- be consistent with order of arguments in math
 - create arenas for new objects from Book 3
 - make progressive enhancement more obvious (in multithreaded variant cast less rays in the beginning, and more towards the end)
 - report completeness to the page, not in console
