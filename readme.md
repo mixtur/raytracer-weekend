@@ -1,15 +1,13 @@
-This is my take on the great [Ray tracing in one weekend](https://raytracing.github.io/books/RayTracingInOneWeekend.html) series.
+This is my take on the great [Ray tracing in one weekend](https://raytracing.github.io) series.
 
 It is written in TypeScript.
 
-It has some performance improvements over the source material.
-Namely, this implementation
-- uses grid instead of BVH when applicable
-- uses cheaper box intersection tests
-- uses arena allocators for everything. It is less of a problem in the books, because they use C++ for code examples, but in JS it makes a notable difference because raytracing tends to create a lot of temporary objects, and GC is not happy about it.
-- multithreading. The book only mentions it, this implementation actually does it.
-- actually fixes NaN problem mentioned in the last book
-- uses quaternions for changing PDFs orientations instead of matrices 
+The following additional features are implemented
+- grid instead of BVH when applicable
+- cheaper box intersection tests
+- arena allocators for everything. It is less of a problem in the books, because they use C++ for code examples, but in JS it makes a notable difference because raytracing tends to create a lot of temporary objects, and GC is not happy about it.
+- multithreaded rendering
+- quaternions for changing PDFs orientations 
 
 
 ```bash
@@ -20,6 +18,7 @@ Namely, this implementation
 
 TODO:
 - enforce naming conventions
+- investigate noise in book2_final_scene
 - generalize scopes
 - be consistent with order of arguments in math
 - create arenas for new objects from Book 3

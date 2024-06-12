@@ -5,7 +5,6 @@ import earthUrl from './earthmap.jpg';
 import { Camera } from '../camera';
 import { ImageTexture } from '../texture/image_texture';
 import { createLambertian } from '../materials/lambertian';
-import { HittableList } from '../hittable/hittable_list';
 
 export const create_earth_scene = async (): Promise<Scene> => {
     const earthImageBitmap = await createImageBitmap(
@@ -13,7 +12,7 @@ export const create_earth_scene = async (): Promise<Scene> => {
     );
     return {
         root_hittable: new Sphere(point3(0, 0, 0), 2, createLambertian(new ImageTexture(earthImageBitmap))),
-        light: new HittableList([]),
+        light: null,
         create_camera: (aspect_ratio: number): Camera => {
             const look_from = point3(13, 2, 3);
             const look_at = point3(0, 0, 0);

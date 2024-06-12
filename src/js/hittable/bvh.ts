@@ -2,16 +2,19 @@ import { HitRecord, Hittable } from './hittable';
 import { AABB, surrounding_box } from './aabb';
 import { Ray } from '../math/ray';
 import { randomIntMinMax } from '../math/random';
+import { Vec3 } from '../math/vec3';
 
 const b0 = AABB.createEmpty();
 const b1 = AABB.createEmpty();
 export class BVHNode extends Hittable {
+    size: number;
     left: Hittable;
     right: Hittable;
     aabb: AABB;
 
     constructor(objects: Hittable[], time0: number, time1: number) {
         super();
+        this.size = objects.length;
         switch (objects.length) {
             case 0:
                 throw new Error('cannot create an empty BVH node');
@@ -52,5 +55,24 @@ export class BVHNode extends Hittable {
     get_bounding_box(time0: number, time1: number, aabb: AABB): void {
         aabb.min.set(this.aabb.min);
         aabb.max.set(this.aabb.max);
+    }
+
+    pdf_value(origin: Vec3, direction: Vec3): number {
+        if (this.left === this.right) return this.left.pdf_value(origin, direction);
+
+        const lCount = this.left instanceof BVHNode ? this.left.size : 1;
+        const rCount = this.size - lCount;
+
+        return (this.left.pdf_value(origin, direction) * lCount + this.right.pdf_value(origin, direction) * rCount) / this.size;
+    }
+
+    random(origin: Vec3): Vec3 {
+        if (this.left === this.right) return this.left.random(origin);
+
+        const lCount = this.left instanceof BVHNode ? this.left.size : 1;
+
+        return Math.random() * this.size < lCount
+            ? this.left.random(origin)
+            : this.right.random(origin);
     }
 }

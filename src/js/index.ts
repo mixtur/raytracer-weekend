@@ -3,8 +3,8 @@ import { createArrayWriter, createCanvasColorWriter } from './color-writers';
 import { multiThreadedRender } from './multi_threaded_render';
 import { randomIntMinMax } from './math/random';
 
-const aspect_ratio = 1;
-const image_width = 500;
+const aspect_ratio = 4/3;
+const image_width = 840;
 const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 1000;
 const max_depth = 50;

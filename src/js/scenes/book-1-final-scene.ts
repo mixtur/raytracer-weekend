@@ -14,7 +14,7 @@ import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { sColor, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
-import { getPredefinedRandom, random, randomMinMax, randomScopeAsync, randomScopeSync } from '../math/random';
+import { getPredefinedRandom, random, randomMinMax, randomScopeSync } from '../math/random';
 import { MovingSphere } from '../hittable/moving_sphere';
 import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';
@@ -24,7 +24,6 @@ import { createLambertian } from '../materials/lambertian';
 import { createMetal } from '../materials/metal';
 import { createDielectric } from '../materials/dielectric';
 import { MegaMaterial } from '../materials/megamaterial';
-import { HittableList } from '../hittable/hittable_list';
 
 function createLotsOfSpheres(scene_creation_random_numbers: number[]): Hittable {
     const rng = getPredefinedRandom(scene_creation_random_numbers);
@@ -98,7 +97,7 @@ const create_camera = (aspect_ratio: number): Camera => new Camera({
 
 export const book1_final_scene = (scene_creation_random_numbers: number[]): Scene => ({
     create_camera,
-    light: new HittableList([]),
+    light: null,
     root_hittable: createLotsOfSpheres(scene_creation_random_numbers),
     background: color(0.7, 0.8, 1.0)
 });

@@ -41,7 +41,7 @@ async function render({
 //    const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
-    const rayArenaAllocator = new ArenaVec3Allocator(2048);
+    const rayArenaAllocator = new ArenaVec3Allocator(4096);
     const quatAllocator = new ArenaQuatAllocator(640);
 
     const outputLineAllocator = new ArenaVec3Allocator(image_width);

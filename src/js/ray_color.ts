@@ -24,7 +24,7 @@ for (let i = 0; i < 100; i++) {
     bounceStack.push(createBounceRecord());
 }
 const scattered = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
-export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hittable, depth: number): Color => {
+export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
     const hit = hitStack[depth];
     const bounce = bounceStack[depth];
     if (depth <= 0) {
@@ -44,12 +44,14 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
     if (bounce.skip_pdf) {
         raySet(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
     } else {
-        const light_pdf = new HittablePDF(lights, hit.p);
-        const material_pdf = bounce.scatter_pdf;
-        const mix_pdf = new MixturePDF(light_pdf, material_pdf);
+        let pdf = bounce.scatter_pdf;
+        if (lights !== null) {
+            const light_pdf = new HittablePDF(lights, hit.p);
+            pdf = new MixturePDF(light_pdf, pdf);
+        }
 
-        raySet(scattered, hit.p, mix_pdf.generate(), r.time);
-        bounce.sampling_pdf = mix_pdf.value(scattered.direction);
+        raySet(scattered, hit.p, pdf.generate(), r.time);
+        bounce.sampling_pdf = pdf.value(scattered.direction);
 
         pdfFactor = hit.material.scattering_pdf(r, hit, scattered) / bounce.sampling_pdf;
     }
@@ -62,7 +64,7 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
     return vec3MulVAddV3(bounceColor, vec3MulS2(bounce.attenuation, pdfFactor), emitted);
 }
 
-export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, lights: Hittable, depth: number): Color => {
+export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
     const totalEmission = color(0, 0, 0);
     const totalAttenuation = color(1, 1, 1);
     for (let i = 0; i < depth; i++) {

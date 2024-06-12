@@ -8,6 +8,7 @@ export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit
     bounce.scatter_pdf = new SpherePDF();
     bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
     bounce.sampling_pdf = 1 / (4 * Math.PI);
+    bounce.skip_pdf = false;
     return true;
 };
 
