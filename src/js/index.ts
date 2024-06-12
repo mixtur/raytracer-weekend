@@ -1,7 +1,7 @@
-import { createArrayWriter, createCanvasColorWriter } from './color-writers';
+import { create_array_writer, create_canvas_color_writer } from './color-writers';
 // import { singleThreadedRender } from './single_threaded_render';
-import { multiThreadedRender } from './multi_threaded_render';
-import { randomIntMinMax } from './math/random';
+import { multi_threaded_render } from './multi_threaded_render';
+import { random_int_min_max } from './math/random';
 
 const aspect_ratio = 4/3;
 const image_width = 840;
@@ -9,8 +9,8 @@ const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 1000;
 const max_depth = 50;
 
-const writer = createCanvasColorWriter(image_width, image_height);
-// const writer = createArrayWriter(image_width, image_height, (array) => {
+const writer = create_canvas_color_writer(image_width, image_height);
+// const writer = create_array_writer(image_width, image_height, (array) => {
 //     console.log(array);
 // });
 
@@ -24,25 +24,25 @@ for (let i = 0; i < 2048; i++) {
 
 function permute(xs: Uint16Array): void {
     for (let i = xs.length - 1; i >= 0; i--) {
-        const j = randomIntMinMax(0, i);
+        const j = random_int_min_max(0, i);
         const t = xs[i];
         xs[i] = xs[j];
         xs[j] = t;
     }
 }
 
-const jRand = new Uint16Array(image_height);
-for (let i = 0; i < image_height; i++) { jRand[i] = i; }
-permute(jRand);
+const line_order = new Uint16Array(image_height);
+for (let i = 0; i < image_height; i++) { line_order[i] = i; }
+permute(line_order);
 
-multiThreadedRender(globalThis?.navigator?.hardwareConcurrency ?? 4, {
+multi_threaded_render(globalThis?.navigator?.hardwareConcurrency ?? 4, {
     aspect_ratio,
     image_width,
     image_height,
     samples_per_pixel,
     max_depth,
     scene_creation_random_numbers,
-    line_order: jRand
+    line_order
 }, writer).catch((e) => {
     console.log(e);
 });

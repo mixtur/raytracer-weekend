@@ -18,12 +18,12 @@ export class ArenaVec3Allocator implements Vec3Allocator {
     nextToAlloc: number = 0;
     dump: Float64Array;
     vectors: Array<Float64Array> = [];
-    constructor(maxVectors: number) {
-        const vectorByteLength = Float64Array.BYTES_PER_ELEMENT * 3;
-        const buffer = new ArrayBuffer(maxVectors * vectorByteLength);
+    constructor(max_vectors: number) {
+        const vector_byte_length = Float64Array.BYTES_PER_ELEMENT * 3;
+        const buffer = new ArrayBuffer(max_vectors * vector_byte_length);
         this.dump = new Float64Array(buffer);
-        for (let i = 0; i < maxVectors; i++) {
-            this.vectors.push(new Float64Array(buffer, i * vectorByteLength, 3));
+        for (let i = 0; i < max_vectors; i++) {
+            this.vectors.push(new Float64Array(buffer, i * vector_byte_length, 3));
         }
     }
     alloc(a: number, b: number, c: number): Vec3 {

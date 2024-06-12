@@ -1,11 +1,11 @@
 import {
     vec3,
     Vec3,
-    vec3Cross3,
-    vec3Dot,
+    vec3_cross3,
+    vec3_dot,
     vec3_orthogonal_2,
     z_vec3,
-    vec3Unit2
+    vec3_unit2
 } from './vec3';
 
 export type Quat = Float64Array;
@@ -13,11 +13,11 @@ export type Quat = Float64Array;
 export class ArenaQuatAllocator {
     nextToAlloc: number = 0;
     quats: Array<Float64Array> = [];
-    constructor(maxVectors: number) {
-        const quatByteLength = Float64Array.BYTES_PER_ELEMENT * 4;
-        const buffer = new ArrayBuffer(maxVectors * quatByteLength);
-        for (let i = 0; i < maxVectors; i++) {
-            this.quats.push(new Float64Array(buffer, i * quatByteLength, 4));
+    constructor(max_vectors: number) {
+        const quat_byte_length = Float64Array.BYTES_PER_ELEMENT * 4;
+        const buffer = new ArrayBuffer(max_vectors * quat_byte_length);
+        for (let i = 0; i < max_vectors; i++) {
+            this.quats.push(new Float64Array(buffer, i * quat_byte_length, 4));
         }
     }
     alloc(x: number, y: number, z: number, w: number): Quat {
@@ -38,18 +38,18 @@ export class ArenaQuatAllocator {
 
 let allocator = new ArenaQuatAllocator(64);
 export const quat_allocator_scope_sync = <T>(a: ArenaQuatAllocator, f: () => T): T => {
-    const prevAllocator = allocator;
+    const prev_allocator = allocator;
     allocator = a;
     const result = f();
-    allocator = prevAllocator;
+    allocator = prev_allocator;
     return result;
 };
 
 export const quat_allocator_scope_async = async <T>(a: ArenaQuatAllocator, f: () => Promise<T>): Promise<T> => {
-    const prevAllocator = allocator;
+    const prev_allocator = allocator;
     allocator = a;
     const result = await f();
-    allocator = prevAllocator;
+    allocator = prev_allocator;
     return result;
 };
 
@@ -82,13 +82,13 @@ const im = vec3(0, 0, 0);
 const tmp_vec = vec3(0, 0, 0);
 export const quat_from_z_1 = (_new_z: Vec3): Quat => {
     const new_z = tmp_vec;
-    vec3Unit2(new_z, _new_z);
-    vec3Cross3(im, z_vec3, new_z);
+    vec3_unit2(new_z, _new_z);
+    vec3_cross3(im, z_vec3, new_z);
     const result = quat(
         im[0],
         im[1],
         im[2],
-        vec3Dot(new_z, z_vec3) + 1
+        vec3_dot(new_z, z_vec3) + 1
     );
 
     const sq_len = quat_sq_len(result);
@@ -106,14 +106,14 @@ export const quat_from_z_1 = (_new_z: Vec3): Quat => {
 }
 
 export const quat_from_z_2 = (result: Quat, new_z: Vec3): void => {
-    vec3Cross3(im, z_vec3, new_z);
+    vec3_cross3(im, z_vec3, new_z);
     result[0] = im[0];
     result[1] = im[1];
     result[2] = im[2];
-    result[3] = vec3Dot(new_z, z_vec3) + 1;
+    result[3] = vec3_dot(new_z, z_vec3) + 1;
 
-    const sqLen = quat_sq_len(result);
-    if (sqLen < 0.00001) {
+    const sq_len = quat_sq_len(result);
+    if (sq_len < 0.00001) {
         vec3_orthogonal_2(im, new_z);
         result[0] = im[0];
         result[1] = im[1];
@@ -134,21 +134,19 @@ export const mul_quat_vec3_2 = (q: Quat, v: Vec3): Vec3 => {
     const ty = v[1];
     const tz = v[2];
 
-    const Ax = x + x;
-    const Ay = y + y;
-    const Az = z + z;
+    const ax = x + x;
+    const ay = y + y;
+    const az = z + z;
 
-    const Bx = y * tz - z * ty + w * tx;
-    const By = z * tx - x * tz + w * ty;
-    const Bz = x * ty - y * tx + w * tz;
+    const bx = y * tz - z * ty + w * tx;
+    const by = z * tx - x * tz + w * ty;
+    const bz = x * ty - y * tx + w * tz;
 
-    const result = vec3(
-        tx + Ay * Bz - Az * By,
-        ty + Az * Bx - Ax * Bz,
-        tz + Ax * By - Ay * Bx,
+    return vec3(
+        tx + ay * bz - az * by,
+        ty + az * bx - ax * bz,
+        tz + ax * by - ay * bx,
     );
-
-    return result;
 }
 
 export const mul_quat_vec3_3 = (result: Vec3, q: Quat, v: Vec3): void => {
@@ -161,15 +159,15 @@ export const mul_quat_vec3_3 = (result: Vec3, q: Quat, v: Vec3): void => {
     const ty = v[1];
     const tz = v[2];
 
-    const Ax = x + x;
-    const Ay = y + y;
-    const Az = z + z;
+    const ax = x + x;
+    const ay = y + y;
+    const az = z + z;
 
-    const Bx = y * tz - z * ty + w * tx;
-    const By = z * tx - x * tz + w * ty;
-    const Bz = x * ty - y * tx + w * tz;
+    const bx = y * tz - z * ty + w * tx;
+    const by = z * tx - x * tz + w * ty;
+    const bz = x * ty - y * tx + w * tz;
 
-    result[0] = tx + Ay * Bz - Az * By;
-    result[1] = ty + Az * Bx - Ax * Bz;
-    result[2] = tz + Ax * By - Ay * Bx;
+    result[0] = tx + ay * bz - az * by;
+    result[1] = ty + az * bx - ax * bz;
+    result[2] = tz + ax * by - ay * bx;
 }

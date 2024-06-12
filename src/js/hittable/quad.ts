@@ -1,20 +1,20 @@
-import { createEmptyHitRecord, HitRecord, Hittable, set_face_normal } from './hittable';
+import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from './hittable';
 import {
     Point3, vec3,
     Vec3,
-    vec3Add2,
-    vec3Add3,
-    vec3Cross2, vec3DivS2,
-    vec3Dot, vec3Len, vec3MulSAddV3, vec3MulSAddV4, vec3SqLen,
-    vec3Sub2, vec3Sub3,
-    vec3Unit2
+    vec3_add_2,
+    vec3_add_3,
+    vec3_cross2, vec3_divs_2,
+    vec3_dot, vec3_len, vec3_muls_addv_3, vec3_muls_addv_4, vec3_sq_len,
+    vec3_sub_2, vec3_sub_3,
+    vec3_unit2
 } from '../math/vec3';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB } from './aabb';
-import { ray, Ray, rayAt2, raySet } from '../math/ray';
+import { ray, Ray, ray_at2, ray_set } from '../math/ray';
 
-const tmpHit = createEmptyHitRecord();
-const tmpRay = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
+const tmp_hit = create_empty_hit_record();
+const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
 
 export class Quad extends Hittable {
     q: Point3;
@@ -33,20 +33,20 @@ export class Quad extends Hittable {
         this.u = u;
         this.v = v;
         this.mat = mat;
-        this.normal = vec3Cross2(u, v);
-        this.area = vec3Len(this.normal);
-        this.w = vec3DivS2(this.normal, vec3Dot(this.normal, this.normal));
-        vec3Unit2(this.normal, this.normal);
-        this.d = vec3Dot(q, this.normal);
+        this.normal = vec3_cross2(u, v);
+        this.area = vec3_len(this.normal);
+        this.w = vec3_divs_2(this.normal, vec3_dot(this.normal, this.normal));
+        vec3_unit2(this.normal, this.normal);
+        this.d = vec3_dot(q, this.normal);
 
         this.aabb = AABB.createEmpty();
         this.aabb.consumePoint(q);
 
-        const t = vec3Add2(q, u);
+        const t = vec3_add_2(q, u);
         this.aabb.consumePoint(t);
-        vec3Add3(t, q, v);
+        vec3_add_3(t, q, v);
         this.aabb.consumePoint(t);
-        vec3Add3(t, t, u);
+        vec3_add_3(t, t, u);
         this.aabb.consumePoint(t);
 
         this.aabb.expand(0.0001);
@@ -58,21 +58,21 @@ export class Quad extends Hittable {
     }
 
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
-        const denom = vec3Dot(this.normal, r.direction);
+        const denom = vec3_dot(this.normal, r.direction);
 
         if (Math.abs(denom) < 1e-8) {
             return false;
         }
 
-        const t = (this.d - vec3Dot(this.normal, r.origin)) / denom;
+        const t = (this.d - vec3_dot(this.normal, r.origin)) / denom;
         if (t < t_min || t > t_max) {
             return false;
         }
 
-        const intersection = rayAt2(r, t);
-        const planar_hitpt_vector = vec3Sub2(intersection, this.q);
-        const a = vec3Dot(this.w, vec3Cross2(planar_hitpt_vector, this.v));
-        const b = vec3Dot(this.w, vec3Cross2(this.u, planar_hitpt_vector));
+        const intersection = ray_at2(r, t);
+        const planar_hitpt_vector = vec3_sub_2(intersection, this.q);
+        const a = vec3_dot(this.w, vec3_cross2(planar_hitpt_vector, this.v));
+        const b = vec3_dot(this.w, vec3_cross2(this.u, planar_hitpt_vector));
 
         if (!this.is_interior(a, b, hit)) {
             return false;
@@ -99,13 +99,13 @@ export class Quad extends Hittable {
     }
 
     pdf_value(origin: Vec3, direction: Vec3): number {
-        raySet(tmpRay, origin, direction, 0);
-        if (!this.hit(tmpRay, 0.00001, Infinity, tmpHit)) {
+        ray_set(tmp_ray, origin, direction, 0);
+        if (!this.hit(tmp_ray, 0.00001, Infinity, tmp_hit)) {
             return 0;
         }
 
-        const distance_squared = tmpHit.t * tmpHit.t * vec3SqLen(direction);
-        const cos = Math.abs(vec3Dot(direction, this.normal)) / vec3Len(direction);
+        const distance_squared = tmp_hit.t * tmp_hit.t * vec3_sq_len(direction);
+        const cos = Math.abs(vec3_dot(direction, this.normal)) / vec3_len(direction);
 
         return distance_squared / (cos * this.area);
     }
@@ -113,9 +113,9 @@ export class Quad extends Hittable {
     random(origin: Vec3): Vec3 {
         const r1 = Math.random();
         const r2 = Math.random();
-        const p = vec3MulSAddV3(this.u, r1, this.q);
-        vec3MulSAddV4(p, this.v, r2, p);
-        vec3Sub3(p, p, origin);
+        const p = vec3_muls_addv_3(this.u, r1, this.q);
+        vec3_muls_addv_4(p, this.v, r2, p);
+        vec3_sub_3(p, p, origin);
         return p;
     }
 }

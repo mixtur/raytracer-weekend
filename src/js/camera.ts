@@ -1,17 +1,17 @@
 import {
     Point3,
     Vec3,
-    vec3Add2,
-    vec3Add3, vec3Cross2,
-    vec3DivS2,
-    vec3MulS2, vec3MulS3, vec3MulSAddV4, vec3RandInUnitDisk,
-    vec3Sub2,
-    vec3Sub3,
-    vec3Unit1
+    vec3_add_2,
+    vec3_add_3, vec3_cross2,
+    vec3_divs_2,
+    vec3_muls_2, vec3_muls_3, vec3_muls_addv_4, vec3_rand_in_unit_disk,
+    vec3_sub_2,
+    vec3_sub_3,
+    vec3_unit1
 } from './math/vec3';
-import { Ray, rayAllocator } from './math/ray';
+import { Ray, ray_allocator } from './math/ray';
 import { degrees_to_radians } from './utils';
-import { randomMinMax } from './math/random';
+import { random_min_max } from './math/random';
 
 export class Camera {
     origin: Point3;
@@ -51,46 +51,46 @@ export class Camera {
         const viewport_height = 2 * h;
         const viewport_width = aspect_ratio * viewport_height;
 
-        this.w = vec3Unit1(vec3Sub2(look_from, look_at));
-        this.u = vec3Unit1(vec3Cross2(v_up, this.w));
-        this.v = vec3Cross2(this.w, this.u);
+        this.w = vec3_unit1(vec3_sub_2(look_from, look_at));
+        this.u = vec3_unit1(vec3_cross2(v_up, this.w));
+        this.v = vec3_cross2(this.w, this.u);
 
         this.time0 = time0;
         this.time1 = time1;
 
         this.origin = look_from;
-        this.horizontal = vec3MulS2(this.u, viewport_width * focus_dist);
-        this.vertical = vec3MulS2(this.v, viewport_height * focus_dist);
-        this.lower_left_corner = vec3Sub2(
+        this.horizontal = vec3_muls_2(this.u, viewport_width * focus_dist);
+        this.vertical = vec3_muls_2(this.v, viewport_height * focus_dist);
+        this.lower_left_corner = vec3_sub_2(
             this.origin,
-            vec3Add2(
-                vec3Add2(
-                    vec3DivS2(this.horizontal, 2),
-                    vec3DivS2(this.vertical, 2)
+            vec3_add_2(
+                vec3_add_2(
+                    vec3_divs_2(this.horizontal, 2),
+                    vec3_divs_2(this.vertical, 2)
                 ),
-                vec3MulS2(this.w, focus_dist)
+                vec3_muls_2(this.w, focus_dist)
             )
         );
         this.lens_radius = aperture / 2;
     }
 
     get_ray(u: number, v: number): Ray {
-        const rd = vec3RandInUnitDisk();
-        vec3MulS3(rd, rd, this.lens_radius);
-        const offset = vec3MulS2(this.u, rd[0]);
-        vec3MulSAddV4(offset, this.v, rd[1], offset)
+        const rd = vec3_rand_in_unit_disk();
+        vec3_muls_3(rd, rd, this.lens_radius);
+        const offset = vec3_muls_2(this.u, rd[0]);
+        vec3_muls_addv_4(offset, this.v, rd[1], offset)
 
-        const direction = vec3Sub2(this.lower_left_corner, offset);
-        vec3Add3(direction, direction, vec3MulS2(this.horizontal, u));
-        vec3Add3(direction, direction, vec3MulS2(this.vertical, v));
-        vec3Sub3(direction, direction, this.origin);
+        const direction = vec3_sub_2(this.lower_left_corner, offset);
+        vec3_add_3(direction, direction, vec3_muls_2(this.horizontal, u));
+        vec3_add_3(direction, direction, vec3_muls_2(this.vertical, v));
+        vec3_sub_3(direction, direction, this.origin);
 
-        vec3Add3(offset, offset, this.origin);
-        rayAllocator.reset();
-        return rayAllocator.reuse(
+        vec3_add_3(offset, offset, this.origin);
+        ray_allocator.reset();
+        return ray_allocator.reuse(
             offset,
             direction,
-            randomMinMax(this.time0, this.time1)
+            random_min_max(this.time0, this.time1)
         );
     }
 }

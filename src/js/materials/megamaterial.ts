@@ -1,5 +1,5 @@
 import { Texture } from '../texture/texture';
-import { sColor } from '../texture/solid_color';
+import { solid_color } from '../texture/solid_color';
 import { ray, Ray } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
 import { color, Color, vec3 } from '../math/vec3';
@@ -27,7 +27,7 @@ export type EmitFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord) => Col
 export type ScatterFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord) => boolean;
 export type ScatteringPDF = (r_in: Ray, hit: HitRecord, scattered: Ray) => number;
 
-export const createBounceRecord = (): BounceRecord => {
+export const create_bounce_record = (): BounceRecord => {
     return {
         scatter_pdf: new SpherePDF(),
         attenuation: color(0, 0, 0),
@@ -37,18 +37,18 @@ export const createBounceRecord = (): BounceRecord => {
     }
 };
 
-export const defaultScatter: ScatterFunction = () => false;
-export const defaultScatteringPDF: ScatteringPDF = () => 0;
-export const defaultEmit: EmitFunction = (mat, r_in, hit) => mat.emissive.value(hit.u, hit.v, hit.p);
+export const default_scatter: ScatterFunction = () => false;
+export const default_scattering_pdf: ScatteringPDF = () => 0;
+export const default_emit: EmitFunction = (mat, r_in, hit) => mat.emissive.value(hit.u, hit.v, hit.p);
 
-export const createMegaMaterial = (config: Partial<MegaMaterial>): MegaMaterial => {
+export const create_mega_material = (config: Partial<MegaMaterial>): MegaMaterial => {
     return {
-        scatter: config.scatter ?? defaultScatter,
-        scattering_pdf: config.scattering_pdf ?? defaultScatteringPDF,
-        emit: config.emit ?? defaultEmit,
+        scatter: config.scatter ?? default_scatter,
+        scattering_pdf: config.scattering_pdf ?? default_scattering_pdf,
+        emit: config.emit ?? default_emit,
         ior: config.ior ?? 0,
-        emissive: config.emissive ?? sColor(0, 0, 0),
-        albedo: config.albedo ?? sColor(0, 0, 0),
+        emissive: config.emissive ?? solid_color(0, 0, 0),
+        albedo: config.albedo ?? solid_color(0, 0, 0),
         fuzz: config.fuzz ?? 0
     };
 }

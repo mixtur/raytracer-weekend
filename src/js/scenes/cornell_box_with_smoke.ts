@@ -1,29 +1,29 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
-import { sColor } from '../texture/solid_color';
+import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
 import { color, point3, vec3 } from '../math/vec3';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
 import { ConstantMedium } from '../hittable/constant_medium';
-import { createDiffuseLight } from '../materials/diffuse_light';
-import { createLambertian } from '../materials/lambertian';
-import { createIsotropicPhaseFunction } from '../materials/isotropic_phase_function';
+import { create_diffuse_light } from '../materials/diffuse_light';
+import { create_lambertian } from '../materials/lambertian';
+import { create_isotropic_phase_function } from '../materials/isotropic_phase_function';
 import { BVHNode } from '../hittable/bvh';
 
-const red = createLambertian(sColor(.65, .05, .05));
-const white = createLambertian(sColor(.73, .73, .73));
-const green = createLambertian(sColor(.12, .45, .15));
-const light = createDiffuseLight(sColor(7, 7, 7));
+const red = create_lambertian(solid_color(.65, .05, .05));
+const white = create_lambertian(solid_color(.73, .73, .73));
+const green = create_lambertian(solid_color(.12, .45, .15));
+const light = create_diffuse_light(solid_color(7, 7, 7));
 
-const lightHittable = new Quad(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light);
+const light_hittable = new Quad(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light);
 
 export const cornell_box_with_smoke: Scene = {
     root_hittable: new BVHNode([
         new Quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green),
         new Quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red),
-        lightHittable,
+        light_hittable,
         new Quad(point3(0,555,0), vec3(555,0,0), vec3(0,0,555), white),
         new Quad(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white),
         new Quad(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white),
@@ -37,7 +37,7 @@ export const cornell_box_with_smoke: Scene = {
                 vec3(265, 0, 295)
             ),
             0.01,
-            createIsotropicPhaseFunction(sColor(0, 0, 0))
+            create_isotropic_phase_function(solid_color(0, 0, 0))
         ),
 
         new ConstantMedium(
@@ -49,11 +49,11 @@ export const cornell_box_with_smoke: Scene = {
                 vec3(130, 0, 65)
             ),
             0.01,
-            createIsotropicPhaseFunction(sColor(1, 1, 1))
+            create_isotropic_phase_function(solid_color(1, 1, 1))
         )
     ], 0, 1),
 
-    light: lightHittable,
+    light: light_hittable,
 
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(278, 278, -800);

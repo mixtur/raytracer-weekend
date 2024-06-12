@@ -13,10 +13,10 @@ export class AABB {
 
     hit(r: Ray, t_min: number, t_max: number): boolean {
         for (let a = 0; a < 3; a++) {
-            const invD = 1 / r.direction[a];
-            let t0 = (this.min[a] - r.origin[a]) * invD;
-            let t1 = (this.max[a] - r.origin[a]) * invD;
-            if (invD < 0) { const t = t0; t0 = t1; t1 = t; }
+            const inv_d = 1 / r.direction[a];
+            let t0 = (this.min[a] - r.origin[a]) * inv_d;
+            let t1 = (this.max[a] - r.origin[a]) * inv_d;
+            if (inv_d < 0) { const t = t0; t0 = t1; t1 = t; }
             t_min = Math.max(t0, t_min);
             t_max = Math.min(t1, t_max);
             if (t_max <= t_min) {

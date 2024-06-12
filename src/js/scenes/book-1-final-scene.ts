@@ -3,50 +3,50 @@ import {
     color,
     point3,
     vec3,
-    vec3Add2,
-    vec3AllocatorScopeSync,
-    vec3Len,
-    vec3Rand,
-    vec3RandMinMax2,
-    vec3Sub2
+    vec3_add_2,
+    vec3_allocator_scope_sync,
+    vec3_len,
+    vec3_rand,
+    vec3_rand_min_max2,
+    vec3_sub_2
 } from '../math/vec3';
 import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
-import { sColor, SolidColor } from '../texture/solid_color';
+import { solid_color, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
-import { getPredefinedRandom, random, randomMinMax, randomScopeSync } from '../math/random';
+import { get_predefined_random, random, random_min_max, random_scope_sync } from '../math/random';
 import { MovingSphere } from '../hittable/moving_sphere';
 import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';
 import { Camera } from '../camera';
 import { Scene } from './scene';
-import { createLambertian } from '../materials/lambertian';
-import { createMetal } from '../materials/metal';
-import { createDielectric } from '../materials/dielectric';
+import { create_lambertian } from '../materials/lambertian';
+import { create_metal } from '../materials/metal';
+import { create_dielectric } from '../materials/dielectric';
 import { MegaMaterial } from '../materials/megamaterial';
 
-function createLotsOfSpheres(scene_creation_random_numbers: number[]): Hittable {
-    const rng = getPredefinedRandom(scene_creation_random_numbers);
-    return randomScopeSync(rng, () => {
-        return vec3AllocatorScopeSync(new ArenaVec3Allocator(1024 * 1024), () => {
-            const worldObjects: Hittable[] = [];
-            const ground_material = createLambertian(new Checker3DTexture(sColor(0.2, 0.3, 0.1), sColor(0.9, 0.9, 0.9)));
-            worldObjects.push(new Sphere(point3(0, -1000, 0), 1000, ground_material));
+function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittable {
+    const rng = get_predefined_random(scene_creation_random_numbers);
+    return random_scope_sync(rng, () => {
+        return vec3_allocator_scope_sync(new ArenaVec3Allocator(1024 * 1024), () => {
+            const world_objects: Hittable[] = [];
+            const ground_material = create_lambertian(new Checker3DTexture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9)));
+            world_objects.push(new Sphere(point3(0, -1000, 0), 1000, ground_material));
             const objects = [];
             for (let a = -11; a < 11; a++) {
                 for (let b = -11; b < 11; b++) {
                     const choose_mat = random();
                     const center1 = point3(a + 0.2 + 0.6 * random(), 0.2, b + 0.2 + 0.6 * random());
-                    if (vec3Len(vec3Sub2(center1, point3(4, 0.2, 0))) > 0.9) {
+                    if (vec3_len(vec3_sub_2(center1, point3(4, 0.2, 0))) > 0.9) {
                         let sphere_mat: MegaMaterial;
                         if (choose_mat < 0.8) {
-                            sphere_mat = createLambertian(new SolidColor(vec3Rand()));
+                            sphere_mat = create_lambertian(new SolidColor(vec3_rand()));
                         } else if (choose_mat < 0.95) {
-                            sphere_mat = createMetal(new SolidColor(vec3RandMinMax2(0.5, 1)), randomMinMax(0, 0.5));
+                            sphere_mat = create_metal(new SolidColor(vec3_rand_min_max2(0.5, 1)), random_min_max(0, 0.5));
                         } else {
-                            sphere_mat = createDielectric(1.5);
+                            sphere_mat = create_dielectric(1.5);
                         }
-                        const center2 = vec3Add2(center1, vec3(0, randomMinMax(0, 0.5), 0));
+                        const center2 = vec3_add_2(center1, vec3(0, random_min_max(0, 0.5), 0));
                         objects.push({
                             xCell: a + 11,
                             zCell: b + 11,
@@ -57,24 +57,24 @@ function createLotsOfSpheres(scene_creation_random_numbers: number[]): Hittable 
             }
             const grid = new ZXGrid(22, 22, 0.9, 1, vec3(-11, 0, -11));
             for (const obj of objects) { grid.addHittable(obj.xCell, obj.zCell, obj.obj); }
-            worldObjects.push(grid);
+            world_objects.push(grid);
 
             // const bvh = new BVHNode(objects.map(o => o.obj), 0, 1);
-            // worldObjects.push(bvh);
+            // world_objects.push(bvh);
 
             // const plainList = new HittableList(objects.map(o => o.obj));
-            // worldObjects.push(plainList);
+            // world_objects.push(plainList);
 
-            const mat1 = createDielectric(1.5);
-            const mat2 = createLambertian(new SolidColor(color(0.4, 0.2, 0.1)));
-            const mat3 = createMetal(new SolidColor(color(0.7, 0.6, 0.5)), 0.0);
+            const mat1 = create_dielectric(1.5);
+            const mat2 = create_lambertian(new SolidColor(color(0.4, 0.2, 0.1)));
+            const mat3 = create_metal(new SolidColor(color(0.7, 0.6, 0.5)), 0.0);
 
-            worldObjects.push(new Sphere(point3(0, 1, 0), 1.0, mat1));
-            worldObjects.push(new Sphere(point3(-4, 1, 0), 1.0, mat2));
-            worldObjects.push(new Sphere(point3(4, 1, 0), 1.0, mat3));
+            world_objects.push(new Sphere(point3(0, 1, 0), 1.0, mat1));
+            world_objects.push(new Sphere(point3(-4, 1, 0), 1.0, mat2));
+            world_objects.push(new Sphere(point3(4, 1, 0), 1.0, mat3));
 
-            return new BVHNode(worldObjects, 0, 1);
-            // return new HittableList(worldObjects);
+            return new BVHNode(world_objects, 0, 1);
+            // return new HittableList(world_objects);
         });
     });
 }
@@ -98,6 +98,6 @@ const create_camera = (aspect_ratio: number): Camera => new Camera({
 export const book1_final_scene = (scene_creation_random_numbers: number[]): Scene => ({
     create_camera,
     light: null,
-    root_hittable: createLotsOfSpheres(scene_creation_random_numbers),
+    root_hittable: create_lots_of_spheres(scene_creation_random_numbers),
     background: color(0.7, 0.8, 1.0)
 });

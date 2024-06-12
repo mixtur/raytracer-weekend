@@ -1,6 +1,6 @@
 import { Texture } from '../texture/texture';
-import { vec3Dot, vec3Len } from '../math/vec3';
-import { createMegaMaterial, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
+import { vec3_dot, vec3_len } from '../math/vec3';
+import { create_mega_material, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
 import { CosinePDF } from '../math/pdf';
 
 const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
@@ -11,11 +11,11 @@ const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 };
 
 const lambertian_scatter_pdf: ScatteringPDF = (r_in, hit, scattered): number => {
-    const cos = vec3Dot(hit.normal, scattered.direction) / (vec3Len(scattered.direction) * vec3Len(hit.normal));
+    const cos = vec3_dot(hit.normal, scattered.direction) / (vec3_len(scattered.direction) * vec3_len(hit.normal));
     return cos < 0 ? 0 : cos / Math.PI;
 };
 
-export const createLambertian = (albedo: Texture): MegaMaterial => createMegaMaterial({
+export const create_lambertian = (albedo: Texture): MegaMaterial => create_mega_material({
     scatter: lambertian_scatter,
     scattering_pdf: lambertian_scatter_pdf,
     albedo

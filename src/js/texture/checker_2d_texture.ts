@@ -6,11 +6,11 @@ export class Checker2DTexture implements Texture {
     odd: Texture;
     uFrequency: number;
     vFrequency: number;
-    constructor(even: Texture, odd: Texture, uFrequency: number, vFrequency: number) {
+    constructor(even: Texture, odd: Texture, u_frequency: number, v_frequency: number) {
         this.even = even;
         this.odd = odd;
-        this.uFrequency = uFrequency;
-        this.vFrequency = vFrequency;
+        this.uFrequency = u_frequency;
+        this.vFrequency = v_frequency;
     }
 
     value(u: number, v: number, p: Point3): Color {

@@ -1,35 +1,35 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
 import { HittableList } from '../hittable/hittable_list';
-import { sColor } from '../texture/solid_color';
+import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
-import { color, point3, vec3, vec3AllocatorScopeSync } from '../math/vec3';
+import { color, point3, vec3, vec3_allocator_scope_sync } from '../math/vec3';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
-import { createLambertian } from '../materials/lambertian';
-import { createDiffuseLight } from '../materials/diffuse_light';
+import { create_lambertian } from '../materials/lambertian';
+import { create_diffuse_light } from '../materials/diffuse_light';
 import { ArenaVec3Allocator } from '../math/vec3_allocators';
-import { createMetal } from '../materials/metal';
-import { createDielectric } from '../materials/dielectric';
+import { create_metal } from '../materials/metal';
+import { create_dielectric } from '../materials/dielectric';
 import { Sphere } from '../hittable/sphere';
 
-const sceneVec3Allocator = new ArenaVec3Allocator(128);
+const scene_vec3_allocator = new ArenaVec3Allocator(128);
 
-const hittables = vec3AllocatorScopeSync(sceneVec3Allocator, () => {
-    const aluminum = createMetal(sColor(0.8, 0.85, 0.88), 0);
-    const glass = createDielectric(1.5);
-    const red = createLambertian(sColor(.65, .05, .05));
-    const white = createLambertian(sColor(.73, .73, .73));
-    const green = createLambertian(sColor(.12, .45, .15));
-    const light = createDiffuseLight(sColor(15, 15, 15));
+const hittables = vec3_allocator_scope_sync(scene_vec3_allocator, () => {
+    const aluminum = create_metal(solid_color(0.8, 0.85, 0.88), 0);
+    const glass = create_dielectric(1.5);
+    const red = create_lambertian(solid_color(.65, .05, .05));
+    const white = create_lambertian(solid_color(.73, .73, .73));
+    const green = create_lambertian(solid_color(.12, .45, .15));
+    const light = create_diffuse_light(solid_color(15, 15, 15));
 
-    const lightHittable = new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
+    const light_hittable = new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
 
     const root = new HittableList([
         new Quad(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green),
         new Quad(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red),
-        lightHittable,
+        light_hittable,
         new Quad(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
         new Quad(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
         new Quad(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white),
@@ -54,7 +54,7 @@ const hittables = vec3AllocatorScopeSync(sceneVec3Allocator, () => {
     return {
         root,
         light: new HittableList([
-            lightHittable,
+            light_hittable,
             new Sphere(point3(190,90,190), 90, glass)
         ])
     };

@@ -1,5 +1,5 @@
 import { Texture } from '../texture/texture';
-import { createMegaMaterial, EmitFunction, MegaMaterial, ScatterFunction } from './megamaterial';
+import { create_mega_material, EmitFunction, MegaMaterial, ScatterFunction } from './megamaterial';
 import { color } from '../math/vec3';
 
 export const diffuse_light_scatter: ScatterFunction = () => false;
@@ -11,7 +11,7 @@ export const diffuse_light_emit: EmitFunction = (mat, r_in, hit) => {
     return black;
 }
 
-export const createDiffuseLight = (emissive: Texture): MegaMaterial => createMegaMaterial({
+export const create_diffuse_light = (emissive: Texture): MegaMaterial => create_mega_material({
     scatter: diffuse_light_scatter,
     emit: diffuse_light_emit,
     emissive

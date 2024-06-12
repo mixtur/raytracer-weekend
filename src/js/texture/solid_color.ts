@@ -11,4 +11,4 @@ export class SolidColor implements Texture {
     }
 }
 
-export const sColor = (r: number, g: number, b: number) => new SolidColor(color(r, g, b));
+export const solid_color = (r: number, g: number, b: number) => new SolidColor(color(r, g, b));

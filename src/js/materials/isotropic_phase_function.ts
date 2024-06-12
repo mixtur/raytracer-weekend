@@ -1,6 +1,6 @@
 import { Texture } from '../texture/texture';
 import { Ray } from '../math/ray';
-import { createMegaMaterial, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
+import { create_mega_material, MegaMaterial, ScatterFunction, ScatteringPDF } from './megamaterial';
 import { HitRecord } from '../hittable/hittable';
 import { SpherePDF } from '../math/pdf';
 
@@ -16,7 +16,7 @@ export const isotropic_phase_function_scattering_pdf: ScatteringPDF = (r_in: Ray
     return 1 / (Math.PI * 4);
 };
 
-export const createIsotropicPhaseFunction = (albedo: Texture): MegaMaterial => createMegaMaterial({
+export const create_isotropic_phase_function = (albedo: Texture): MegaMaterial => create_mega_material({
     scatter: isotropic_phase_function_scatter,
     scattering_pdf: isotropic_phase_function_scattering_pdf,
     albedo

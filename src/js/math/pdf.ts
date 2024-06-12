@@ -2,11 +2,11 @@
 import {
     Point3,
     Vec3,
-    vec3Dot,
+    vec3_dot,
     vec3_rand_cosine_unit,
-    vec3RandUnit,
-    vec3RandUnitOnHemisphere,
-    vec3Unit1
+    vec3_rand_unit,
+    vec3_rand_unit_on_hemisphere,
+    vec3_unit1
 } from './vec3';
 import { Hittable } from '../hittable/hittable';
 import { mul_quat_vec3_2, Quat, quat_from_z_1 } from './quat';
@@ -22,7 +22,7 @@ export class SpherePDF implements PDF {
     }
 
     generate(): Vec3 {
-        return vec3RandUnit();
+        return vec3_rand_unit();
     }
 }
 
@@ -37,7 +37,7 @@ export class HemispherePDF implements PDF {
     }
 
     generate(): Vec3 {
-        return mul_quat_vec3_2(this.quat, vec3RandUnitOnHemisphere());
+        return mul_quat_vec3_2(this.quat, vec3_rand_unit_on_hemisphere());
     }
 }
 
@@ -46,11 +46,11 @@ export class CosinePDF implements PDF {
     lobe_direction: Vec3;
     constructor(lobe_direction: Vec3) {
         this.quat = quat_from_z_1(lobe_direction);
-        this.lobe_direction = vec3Unit1(lobe_direction);
+        this.lobe_direction = vec3_unit1(lobe_direction);
     }
     value(direction: Vec3): number {
-        const cosT = vec3Dot(vec3Unit1(direction), this.lobe_direction);
-        return Math.max(0, cosT / Math.PI);
+        const cos_t = vec3_dot(vec3_unit1(direction), this.lobe_direction);
+        return Math.max(0, cos_t / Math.PI);
     }
     generate(): Vec3 {
         return mul_quat_vec3_2(this.quat, vec3_rand_cosine_unit());

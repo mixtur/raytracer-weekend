@@ -1,7 +1,7 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
-import { point3, vec3, vec3Set } from '../math/vec3';
-import { Ray, rayAllocator } from '../math/ray';
+import { point3, vec3, vec3_set } from '../math/vec3';
+import { Ray, ray_allocator } from '../math/ray';
 import { degrees_to_radians } from '../utils';
 
 export class RotateY extends Hittable {
@@ -15,25 +15,25 @@ export class RotateY extends Hittable {
         const cos = this.sin_theta = Math.sin(rad_angle);
         const sin = this.cos_theta = Math.cos(rad_angle);
         this.obj = obj;
-        const objAABB = AABB.createEmpty();
-        obj.get_bounding_box(0, 1, objAABB);//todo: 0..1?
+        const obj_aabb = AABB.createEmpty();
+        obj.get_bounding_box(0, 1, obj_aabb);//todo: 0..1?
 
         const aabb = this.aabb = new AABB(
-            point3( Infinity, objAABB.min[1],  Infinity),
-            point3(-Infinity, objAABB.max[1], -Infinity)
+            point3( Infinity, obj_aabb.min[1],  Infinity),
+            point3(-Infinity, obj_aabb.max[1], -Infinity)
         );
         for (let i = 0; i < 2; i++) {
             for (let k = 0; k < 2; k++) {
-                const x = i * objAABB.min[0] + (1 - i) * objAABB.max[0];
-                const z = k * objAABB.min[2] + (1 - k) * objAABB.max[2];
+                const x = i * obj_aabb.min[0] + (1 - i) * obj_aabb.max[0];
+                const z = k * obj_aabb.min[2] + (1 - k) * obj_aabb.max[2];
 
-                const newX =  cos * x + sin * z;
-                const newZ = -sin * x + cos * z;
+                const new_x =  cos * x + sin * z;
+                const new_z = -sin * x + cos * z;
 
-                aabb.min[0] = Math.min(aabb.min[0], newX);
-                aabb.max[0] = Math.max(aabb.max[0], newX);
-                aabb.min[2] = Math.min(aabb.min[2], newZ);
-                aabb.max[2] = Math.max(aabb.max[2], newZ);
+                aabb.min[0] = Math.min(aabb.min[0], new_x);
+                aabb.max[0] = Math.max(aabb.max[0], new_x);
+                aabb.min[2] = Math.min(aabb.min[2], new_z);
+                aabb.max[2] = Math.max(aabb.max[2], new_z);
             }
         }
     }
@@ -52,17 +52,17 @@ export class RotateY extends Hittable {
             sin_theta * direction[0] + cos_theta * direction[2]
         );
 
-        const r_rotated = rayAllocator.alloc(new_origin, new_direction, r.time);
+        const r_rotated = ray_allocator.alloc(new_origin, new_direction, r.time);
 
         if (!this.obj.hit(r_rotated, t_min, t_max, hit)) return false;
 
-        vec3Set(hit.p,
+        vec3_set(hit.p,
              cos_theta * hit.p[0] + sin_theta * hit.p[2],
             hit.p[1],
             -sin_theta * hit.p[0] + cos_theta * hit.p[2],
         );
 
-        vec3Set(hit.normal,
+        vec3_set(hit.normal,
             cos_theta * hit.normal[0] + sin_theta * hit.normal[2],
             hit.normal[1],
             -sin_theta * hit.normal[0] + cos_theta * hit.normal[2]

@@ -5,13 +5,13 @@ import { clamp } from '../utils';
 export class ImageTexture implements Texture {
     private readonly imageData: ImageData;
     constructor(bmp: ImageBitmap) {
-        const tmpCanvas = new OffscreenCanvas(bmp.width, bmp.height);
-        const ctx = tmpCanvas.getContext('2d');
+        const tmp_canvas = new OffscreenCanvas(bmp.width, bmp.height);
+        const ctx = tmp_canvas.getContext('2d');
         if (ctx === null) {
             throw new Error('cannot acquire canvas 2d context');
         }
         ctx.drawImage(bmp, 0, 0);
-        this.imageData = ctx.getImageData(0, 0, tmpCanvas.width, tmpCanvas.height);
+        this.imageData = ctx.getImageData(0, 0, tmp_canvas.width, tmp_canvas.height);
     }
 
     value(u: number, v: number, p: Point3): Color {

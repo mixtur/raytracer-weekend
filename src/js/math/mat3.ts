@@ -1,4 +1,4 @@
-import { vec3, Vec3, vec3Cross2, vec3Unit1 } from './vec3';
+import { vec3, Vec3, vec3_cross2, vec3_unit1 } from './vec3';
 
 //matrices are column-major
 export type Mat3 = Float64Array;
@@ -6,11 +6,11 @@ export type Mat3 = Float64Array;
 export class ArenaMat3Allocator {
     nextToAlloc: number = 0;
     matrices: Array<Float64Array> = [];
-    constructor(maxVectors: number) {
-        const matrixByteLength = Float64Array.BYTES_PER_ELEMENT * 9;
-        const buffer = new ArrayBuffer(maxVectors * matrixByteLength);
-        for (let i = 0; i < maxVectors; i++) {
-            this.matrices.push(new Float64Array(buffer, i * matrixByteLength, 9));
+    constructor(max_vectors: number) {
+        const matrix_byte_length = Float64Array.BYTES_PER_ELEMENT * 9;
+        const buffer = new ArrayBuffer(max_vectors * matrix_byte_length);
+        for (let i = 0; i < max_vectors; i++) {
+            this.matrices.push(new Float64Array(buffer, i * matrix_byte_length, 9));
         }
     }
     alloc(a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number): Mat3 {
@@ -37,19 +37,19 @@ export class ArenaMat3Allocator {
 }
 
 let allocator = new ArenaMat3Allocator(64);
-export const mat3AllocatorScopeSync = <T>(a: ArenaMat3Allocator, f: () => T): T => {
-    const prevAllocator = allocator;
+export const mat3_allocator_scope_sync = <T>(a: ArenaMat3Allocator, f: () => T): T => {
+    const prev_allocator = allocator;
     allocator = a;
     const result = f();
-    allocator = prevAllocator;
+    allocator = prev_allocator;
     return result;
 };
 
-export const mat3AllocatorScopeAsync = async <T>(a: ArenaMat3Allocator, f: () => Promise<T>): Promise<T> => {
-    const prevAllocator = allocator;
+export const mat3_allocator_scope_async = async <T>(a: ArenaMat3Allocator, f: () => Promise<T>): Promise<T> => {
+    const prev_allocator = allocator;
     allocator = a;
     const result = await f();
-    allocator = prevAllocator;
+    allocator = prev_allocator;
     return result;
 };
 
@@ -58,7 +58,7 @@ export const mat3 = (a: number, b: number, c: number, d: number, e: number, f: n
     return allocator.alloc(a ,b, c, d, e, f, g, h, i);
 }
 
-export const mulMat3Vec3_2 = (mat: Mat3, vec: Vec3): Vec3 => {
+export const mul_mat3_vec3_2 = (mat: Mat3, vec: Vec3): Vec3 => {
     const x = vec[0];
     const y = vec[1];
     const z = vec[2];
@@ -69,7 +69,7 @@ export const mulMat3Vec3_2 = (mat: Mat3, vec: Vec3): Vec3 => {
     );
 };
 
-export const mulMat3Vec3_3 = (mat: Mat3, vec: Vec3, result: Vec3): void => {
+export const mul_mat3_vec3_3 = (mat: Mat3, vec: Vec3, result: Vec3): void => {
     const x = vec[0];
     const y = vec[1];
     const z = vec[2];
@@ -79,12 +79,11 @@ export const mulMat3Vec3_3 = (mat: Mat3, vec: Vec3, result: Vec3): void => {
     result[2] = x * mat[2] + y * mat[5] + z * mat[8];
 };
 
-//todo: use quaternions for that
-export const mat3FromZ1 = (base_z: Vec3): Mat3 => {
-    const z = vec3Unit1(base_z);
+export const mat3_from_z_1 = (base_z: Vec3): Mat3 => {
+    const z = vec3_unit1(base_z);
     const a = (Math.abs(base_z[0]) < 0.9) ? vec3(1, 0, 0) : vec3(0, 1, 0);
-    const x = vec3Cross2(z, a);
-    const y = vec3Cross2(z, x);
+    const x = vec3_cross2(z, a);
+    const y = vec3_cross2(z, x);
 
     return mat3(
         x[0], x[1], x[2],
@@ -93,11 +92,11 @@ export const mat3FromZ1 = (base_z: Vec3): Mat3 => {
     );
 }
 
-export const mat3FromZ2 = (base_z: Vec3, result: Mat3): void => {
-    const z = vec3Unit1(base_z);
+export const mat3_from_z_2 = (base_z: Vec3, result: Mat3): void => {
+    const z = vec3_unit1(base_z);
     const a = (Math.abs(base_z[0]) < 0.9) ? vec3(1, 0, 0) : vec3(0, 1, 0);
-    const x = vec3Cross2(z, a);
-    const y = vec3Cross2(z, x);
+    const x = vec3_cross2(z, a);
+    const y = vec3_cross2(z, x);
 
     result[0] = x[0];
     result[1] = x[1];

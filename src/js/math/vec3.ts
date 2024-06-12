@@ -1,28 +1,28 @@
-import { random, randomMinMax } from './random';
+import { random, random_min_max } from './random';
 import { ArenaVec3Allocator, GCVec3Allocator, Vec3Allocator } from './vec3_allocators';
 
 export type Vec3 = Float64Array;
 export type Color = Vec3;
 export type Point3 = Vec3;
 
-export const gcAllocator = new GCVec3Allocator();
-export const defaultAllocator = new ArenaVec3Allocator(1024);
+export const gc_allocator = new GCVec3Allocator();
+export const default_allocator = new ArenaVec3Allocator(1024);
 
-let allocator: Vec3Allocator = defaultAllocator;
-export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };
-export const vec3AllocatorScopeSync = <T>(a: Vec3Allocator, f: () => T): T => {
-    const prevAllocator = allocator;
+let allocator: Vec3Allocator = default_allocator;
+export const vec3_set_allocator = (a: Vec3Allocator): void => { allocator = a; };
+export const vec3_allocator_scope_sync = <T>(a: Vec3Allocator, f: () => T): T => {
+    const prev_allocator = allocator;
     allocator = a;
     const result = f();
-    allocator = prevAllocator;
+    allocator = prev_allocator;
     return result;
 };
 
-export const vec3AllocatorScopeAsync = async <T>(a: Vec3Allocator, f: () => Promise<T>): Promise<T> => {
-    const prevAllocator = allocator;
+export const vec3_allocator_scope_async = async <T>(a: Vec3Allocator, f: () => Promise<T>): Promise<T> => {
+    const prev_allocator = allocator;
     allocator = a;
     const result = await f();
-    allocator = prevAllocator;
+    allocator = prev_allocator;
     return result;
 };
 
@@ -31,52 +31,52 @@ export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x
 export const color = vec3;
 export const point3 = vec3;
 
-export const vec3Set = (v: Vec3, x: number, y: number, z: number): void => {
+export const vec3_set = (v: Vec3, x: number, y: number, z: number): void => {
     v[0] = x;
     v[1] = y;
     v[2] = z;
 }
 
-export const vec3Sub2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-export const vec3Sub3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+export const vec3_sub_2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+export const vec3_sub_3 = (result: Vec3, a: Vec3, b: Vec3): void => {
     result[0] = a[0] - b[0];
     result[1] = a[1] - b[1];
     result[2] = a[2] - b[2];
 };
 
-export const vec3Add2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] + b[0], a[1] + b[1], a[2] + b[2]);
-export const vec3Add3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+export const vec3_add_2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] + b[0], a[1] + b[1], a[2] + b[2]);
+export const vec3_add_3 = (result: Vec3, a: Vec3, b: Vec3): void => {
     result[0] = a[0] + b[0];
     result[1] = a[1] + b[1];
     result[2] = a[2] + b[2];
 };
 
-export const vec3MulS2 = (a: Vec3, s: number): Vec3 => vec3(a[0] * s, a[1] * s, a[2] * s);
-export const vec3MulS3 = (a: Vec3, b: Vec3, s: number): void => {
+export const vec3_muls_2 = (a: Vec3, s: number): Vec3 => vec3(a[0] * s, a[1] * s, a[2] * s);
+export const vec3_muls_3 = (a: Vec3, b: Vec3, s: number): void => {
     a[0] = b[0] * s;
     a[1] = b[1] * s;
     a[2] = b[2] * s;
 };
 
-export const vec3DivS2 = (a: Vec3, s: number): Vec3 => vec3(a[0] / s, a[1] / s, a[2] / s);
-export const vec3DivS3 = (a: Vec3, b: Vec3, s: number): void => {
+export const vec3_divs_2 = (a: Vec3, s: number): Vec3 => vec3(a[0] / s, a[1] / s, a[2] / s);
+export const vec3_divs_3 = (a: Vec3, b: Vec3, s: number): void => {
     a[0] = b[0] / s;
     a[1] = b[1] / s;
     a[2] = b[2] / s;
 };
 
-export const vec3Len = (a: Vec3): number => Math.hypot(a[0], a[1], a[2]);
-export const vec3SqLen = (a: Vec3): number => a[0] ** 2 + a[1] ** 2 + a[2] ** 2;
+export const vec3_len = (a: Vec3): number => Math.hypot(a[0], a[1], a[2]);
+export const vec3_sq_len = (a: Vec3): number => a[0] ** 2 + a[1] ** 2 + a[2] ** 2;
 
-export const vec3MulV2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] * b[0], a[1] * b[1], a[2] * b[2]);
-export const vec3MulV3 = (a: Vec3, b: Vec3, c: Vec3): void => {
+export const vec3_mulv_2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] * b[0], a[1] * b[1], a[2] * b[2]);
+export const vec3_mulv_3 = (a: Vec3, b: Vec3, c: Vec3): void => {
     a[0] = b[0] * c[0];
     a[1] = b[1] * c[1];
     a[2] = b[2] * c[2];
 };
 
 // a * b + c
-export const vec3MulVAddV3 = (a: Vec3, b: Vec3, c: Vec3): Vec3 => {
+export const vec3_mulv_addv_3 = (a: Vec3, b: Vec3, c: Vec3): Vec3 => {
     return vec3(
         a[0] * b[0] + c[0],
         a[1] * b[1] + c[1],
@@ -84,13 +84,13 @@ export const vec3MulVAddV3 = (a: Vec3, b: Vec3, c: Vec3): Vec3 => {
     );
 }
 
-export const vec3MulVAddV4 = (result: Vec3, a: Vec3, b: Vec3, c: Vec3): void => {
+export const vec3_mulv_addv_4 = (result: Vec3, a: Vec3, b: Vec3, c: Vec3): void => {
     result[0] = a[0] * b[0] + c[0];
     result[1] = a[1] * b[1] + c[1];
     result[2] = a[2] * b[2] + c[2];
 }
 
-export const vec3MulSAddV3 = (a: Vec3, b: number, c: Vec3): Vec3 => {
+export const vec3_muls_addv_3 = (a: Vec3, b: number, c: Vec3): Vec3 => {
     return vec3(
         a[0] * b + c[0],
         a[1] * b + c[1],
@@ -98,19 +98,19 @@ export const vec3MulSAddV3 = (a: Vec3, b: number, c: Vec3): Vec3 => {
     );
 };
 
-export const vec3MulSAddV4 = (result: Vec3, a: Vec3, b: number, c: Vec3): void => {
+export const vec3_muls_addv_4 = (result: Vec3, a: Vec3, b: number, c: Vec3): void => {
     result[0] = a[0] * b + c[0];
     result[1] = a[1] * b + c[1];
     result[2] = a[2] * b + c[2];
 }
 
-export const vec3Dot = (a: Vec3, b: Vec3): number => {
+export const vec3_dot = (a: Vec3, b: Vec3): number => {
     return a[0] * b[0]
          + a[1] * b[1]
          + a[2] * b[2];
 }
 
-export const vec3Cross2 = (a: Vec3, b: Vec3): Vec3 => {
+export const vec3_cross2 = (a: Vec3, b: Vec3): Vec3 => {
     return vec3(
         a[1] * b[2] - a[2] * b[1],
         a[2] * b[0] - a[0] * b[2],
@@ -118,7 +118,7 @@ export const vec3Cross2 = (a: Vec3, b: Vec3): Vec3 => {
     );
 };
 
-export const vec3Cross3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+export const vec3_cross3 = (result: Vec3, a: Vec3, b: Vec3): void => {
     const x =   a[1] * b[2] - a[2] * b[1];
     const y =   a[2] * b[0] - a[0] * b[2];
     result[2] = a[0] * b[1] - a[1] * b[0];
@@ -132,7 +132,7 @@ export const z_vec3 = vec3(0, 0, 1);
 
 export const vec3_orthogonal_1 = (v: Vec3): Vec3 => {
     const t = v[0] > 0.9 ? y_vec3 : x_vec3;
-    return vec3Cross2(t, v);
+    return vec3_cross2(t, v);
 }
 
 export const vec3_orthogonal_2 = (result: Vec3, v: Vec3): void => {
@@ -156,11 +156,11 @@ export const vec3_orthogonal_2 = (result: Vec3, v: Vec3): void => {
     }
 }
 
-export const vec3Unit1 = (a: Vec3): Vec3 => vec3MulS2(a, 1 / vec3Len(a));
+export const vec3_unit1 = (a: Vec3): Vec3 => vec3_muls_2(a, 1 / vec3_len(a));
 
-export const vec3Unit2 = (result: Vec3, a: Vec3): void => vec3DivS3(result, a, vec3Len(a));
+export const vec3_unit2 = (result: Vec3, a: Vec3): void => vec3_divs_3(result, a, vec3_len(a));
 
-export const vec3Mix3 = (a: Vec3, b: Vec3, t: number): Vec3 => {
+export const vec3_mix3 = (a: Vec3, b: Vec3, t: number): Vec3 => {
     const q = 1 - t;
     return vec3(
         q * a[0] + t * b[0],
@@ -169,106 +169,106 @@ export const vec3Mix3 = (a: Vec3, b: Vec3, t: number): Vec3 => {
     );
 };
 
-export const vec3Mix4 = (result: Vec3, a: Vec3, b: Vec3, t: number): void => {
+export const vec3_mix4 = (result: Vec3, a: Vec3, b: Vec3, t: number): void => {
     const q = 1 - t;
     result[0] = q * a[0] + t * b[0];
     result[1] = q * a[1] + t * b[1];
     result[2] = q * a[2] + t * b[2];
 };
 
-export const vec3Negate1 = (a: Vec3): Vec3 => {
+export const vec3_negate1 = (a: Vec3): Vec3 => {
     return vec3(-a[0], -a[1], -a[2]);
 };
 
-export const vec3Negate2 = (result: Vec3, a: Vec3): void => {
+export const vec3_negate2 = (result: Vec3, a: Vec3): void => {
     result[0] = -a[0];
     result[1] = -a[1];
     result[2] = -a[2];
 };
 
-export const vec3Rand = (): Vec3 => vec3(random(), random(), random());
-export const vec3Rand1 = (v: Vec3): void => {
+export const vec3_rand = (): Vec3 => vec3(random(), random(), random());
+export const vec3_rand1 = (v: Vec3): void => {
     v[0] = random();
     v[1] = random();
     v[2] = random();
 }
 
-export const vec3RandMinMax2 = (min: number, max: number): Vec3 => vec3(randomMinMax(min, max), randomMinMax(min, max), randomMinMax(min, max));
-export const vec3RandMinMax3 = (v: Vec3, min: number, max: number): void => {
-    v[0] = randomMinMax(min, max);
-    v[1] = randomMinMax(min, max);
-    v[2] = randomMinMax(min, max);
+export const vec3_rand_min_max2 = (min: number, max: number): Vec3 => vec3(random_min_max(min, max), random_min_max(min, max), random_min_max(min, max));
+export const vec3_rand_min_max3 = (v: Vec3, min: number, max: number): void => {
+    v[0] = random_min_max(min, max);
+    v[1] = random_min_max(min, max);
+    v[2] = random_min_max(min, max);
 };
 
-export const vec3RandInUnitSphere = (): Vec3 => {
-    const v = vec3RandMinMax2(-1, 1);
-    while (vec3SqLen(v) >= 1) {
-        vec3RandMinMax3(v, -1, 1);
+export const vec3_rand_in_unit_sphere = (): Vec3 => {
+    const v = vec3_rand_min_max2(-1, 1);
+    while (vec3_sq_len(v) >= 1) {
+        vec3_rand_min_max3(v, -1, 1);
     }
     return v;
 };
 
-export const vec3RandInUnitSphere1 = (v: Vec3): void => {
-    vec3RandMinMax3(v, -1, 1);
-    while (vec3SqLen(v) >= 1) {
-        vec3RandMinMax3(v, -1, 1);
+export const vec3_rand_in_unit_sphere1 = (v: Vec3): void => {
+    vec3_rand_min_max3(v, -1, 1);
+    while (vec3_sq_len(v) >= 1) {
+        vec3_rand_min_max3(v, -1, 1);
     }
 };
 
-export const vec3RandUnit = (): Vec3 => {
+export const vec3_rand_unit = (): Vec3 => {
     const r1 = Math.random();
     const r2 = Math.random() * Math.PI * 2;
-    const cosT = 1 - 2 * r1;
-    const sinT = Math.sqrt(1 - cosT * cosT);
-    const sinP = Math.sin(r2);
-    const cosP = Math.cos(r2);
+    const cos_t = 1 - 2 * r1;
+    const sin_t = Math.sqrt(1 - cos_t * cos_t);
+    const cos_p = Math.cos(r2);
+    const sin_p = Math.sin(r2);
 
     return vec3(
-        sinT * cosP,
-        sinT * sinP,
-        cosT
+        sin_t * cos_p,
+        sin_t * sin_p,
+        cos_t
     );
 };
 
-export const vec3RandUnit1 = (v: Vec3): void => {
+export const vec3_rand_unit1 = (v: Vec3): void => {
     const r1 = Math.random();
     const r2 = Math.random() * Math.PI * 2;
-    const cosT = 1 - 2 * r1;
-    const sinT = Math.sqrt(1 - cosT * cosT);
-    const sinP = Math.sin(r2);
-    const cosP = Math.cos(r2);
+    const cos_t = 1 - 2 * r1;
+    const sin_t = Math.sqrt(1 - cos_t * cos_t);
+    const cos_p = Math.cos(r2);
+    const sin_p = Math.sin(r2);
 
-    v[0] = sinT * cosP;
-    v[1] = sinT * sinP;
-    v[2] = cosT;
+    v[0] = sin_t * cos_p;
+    v[1] = sin_t * sin_p;
+    v[2] = cos_t;
 };
 
-export const vec3RandUnitOnHemisphere = (): Vec3 => {
+export const vec3_rand_unit_on_hemisphere = (): Vec3 => {
     const r1 = Math.random();
     const r2 = Math.random() * Math.PI * 2;
-    const cosT = r1;// which is the same as 1 - r1
-    const sinT = Math.sqrt(1 - cosT * cosT);
-    const sinP = Math.sin(r2);
-    const cosP = Math.cos(r2);
+    const cos_t = r1;// which is the same as 1 - r1
+    const sin_t = Math.sqrt(1 - cos_t * cos_t);
+    const sin_p = Math.sin(r2);
+    const cos_p = Math.cos(r2);
 
     return vec3(
-        sinT * cosP,
-        sinT * sinP,
-        cosT
+        sin_t * cos_p,
+        sin_t * sin_p,
+        cos_t
     );
 }
 
-export const vec3RandUnitOnHemisphere1 = (v: Vec3): void => {
+export const vec3_rand_unit_on_hemisphere1 = (v: Vec3): void => {
     const r1 = Math.random();
     const r2 = Math.random() * Math.PI * 2;
-    const cosT = r1;// which is the same as 1 - r1
-    const sinT = Math.sqrt(1 - cosT * cosT);
-    const sinP = Math.sin(r2);
-    const cosP = Math.cos(r2);
+    const cos_t = r1;// which is the same as 1 - r1
+    const sin_t = Math.sqrt(1 - cos_t * cos_t);
+    const sin_p = Math.sin(r2);
+    const cos_p = Math.cos(r2);
 
-    v[0] = sinT * cosP;
-    v[1] = sinT * sinP;
-    v[2] = cosT;
+    v[0] = sin_t * cos_p;
+    v[1] = sin_t * sin_p;
+    v[2] = cos_t;
 }
 
 
@@ -276,67 +276,67 @@ export const vec3_rand_cosine_unit = (): Vec3 => {
     const r1 = Math.random() * Math.PI * 2;
     const r2 = Math.random();
 
-    const cosP = Math.cos(r1);
-    const sinP = Math.sin(r1);
-    const cosT = Math.sqrt(1 - r2);
-    const sinT = Math.sqrt(r2);
+    const cos_p = Math.cos(r1);
+    const sin_p = Math.sin(r1);
+    const cos_t = Math.sqrt(1 - r2);
+    const sin_t = Math.sqrt(r2);
 
     return vec3(
-        cosP * sinT,
-        sinP * sinT,
-        cosT
+        cos_p * sin_t,
+        sin_p * sin_t,
+        cos_t
     );
 }
 
-export const vec3RandCosineUnit1 = (v: Vec3): void => {
+export const vec3_rand_cosine_unit1 = (v: Vec3): void => {
     const r1 = Math.random() * Math.PI * 2;
     const r2 = Math.random();
 
-    const cosP = Math.cos(r1);
-    const sinP = Math.sin(r1);
-    const cosT = Math.sqrt(1 - r2);
-    const sinT = Math.sqrt(r2);
+    const cos_p = Math.cos(r1);
+    const sin_p = Math.sin(r1);
+    const cos_t = Math.sqrt(1 - r2);
+    const sin_t = Math.sqrt(r2);
 
-    v[0] = cosP * sinT;
-    v[1] = sinP * sinT;
-    v[2] = cosT;
+    v[0] = cos_p * sin_t;
+    v[1] = sin_p * sin_t;
+    v[2] = cos_t;
 }
 
-export const vec3RandomInHemisphere = (normal: Vec3) : Vec3 => {
-    const in_unit_sphere = vec3RandInUnitSphere();
-    return vec3Dot(in_unit_sphere, normal) < 0
-        ? vec3Negate1(in_unit_sphere)
+export const vec3_random_in_hemisphere = (normal: Vec3) : Vec3 => {
+    const in_unit_sphere = vec3_rand_in_unit_sphere();
+    return vec3_dot(in_unit_sphere, normal) < 0
+        ? vec3_negate1(in_unit_sphere)
         : in_unit_sphere;
 };
 
-export const vec3NearZero = (v: Vec3): boolean => {
+export const vec3_near_zero = (v: Vec3): boolean => {
     const eps = 1e-8;
     return Math.abs(v[0]) < eps && Math.abs(v[1]) < eps && Math.abs(v[2]) < eps;
 };
 
-export const vec3Reflect = (v: Vec3, normal: Vec3): Vec3 => {
-    const result = vec3MulS2(normal, 2 * vec3Dot(v, normal));
-    vec3Sub3(result, v, result);
+export const vec3_reflect = (v: Vec3, normal: Vec3): Vec3 => {
+    const result = vec3_muls_2(normal, 2 * vec3_dot(v, normal));
+    vec3_sub_3(result, v, result);
     return result;
 };
 
-export const vec3Refract = (v: Vec3, normal: Vec3, ior: number): Vec3 => {
-    const cos_theta = -vec3Dot(normal, v);
-    const v_proj = vec3MulS2(normal, cos_theta);
+export const vec3_refract = (v: Vec3, normal: Vec3, ior: number): Vec3 => {
+    const cos_theta = -vec3_dot(normal, v);
+    const v_proj = vec3_muls_2(normal, cos_theta);
     const out_x_dir = v_proj;
-    vec3Add3(out_x_dir, v, v_proj);
+    vec3_add_3(out_x_dir, v, v_proj);
     const out_x = out_x_dir;
-    vec3MulS3(out_x, out_x_dir, ior);
-    const out_y = vec3MulS2(normal, -Math.sqrt(1 - vec3SqLen(out_x)));
-    vec3Add3(out_x, out_x, out_y);
+    vec3_muls_3(out_x, out_x_dir, ior);
+    const out_y = vec3_muls_2(normal, -Math.sqrt(1 - vec3_sq_len(out_x)));
+    vec3_add_3(out_x, out_x, out_y);
     return out_x;
 };
 
 
-export const vec3RandInUnitDisk = (): Vec3 => {
+export const vec3_rand_in_unit_disk = (): Vec3 => {
     while (true) {
-        const p = vec3(randomMinMax(-1, 1), randomMinMax(-1, 1), 0);
-        if (vec3SqLen(p) >= 1) continue;
+        const p = vec3(random_min_max(-1, 1), random_min_max(-1, 1), 0);
+        if (vec3_sq_len(p) >= 1) continue;
         return p;
     }
 }

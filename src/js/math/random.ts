@@ -1,8 +1,8 @@
 export type Random = () => number;
 
-let currentRandom: Random = Math.random;
+let current_random: Random = Math.random;
 
-export const getPredefinedRandom = (numbers: number[]): Random => {
+export const get_predefined_random = (numbers: number[]): Random => {
     let i = 0;
     const N = numbers.length;
     return () => {
@@ -11,29 +11,29 @@ export const getPredefinedRandom = (numbers: number[]): Random => {
     };
 }
 
-export const random = () => currentRandom();
+export const random = () => current_random();
 
-export const randomScopeSync = <T>(randomFunc: Random, scope: () => T): T => {
-    const prevRandom = currentRandom;
-    currentRandom = randomFunc;
+export const random_scope_sync = <T>(random_func: Random, scope: () => T): T => {
+    const prev_random = current_random;
+    current_random = random_func;
     const result = scope();
-    currentRandom = prevRandom;
+    current_random = prev_random;
     return result;
 }
 
-export const randomScopeAsync = async <T>(randomFunc: Random, scope: () => Promise<T>): Promise<T> => {
-    const prevRandom = currentRandom;
-    currentRandom = randomFunc;
+export const random_scope_async = async <T>(random_func: Random, scope: () => Promise<T>): Promise<T> => {
+    const prev_random = current_random;
+    current_random = random_func;
     const result = await scope();
-    currentRandom = prevRandom;
+    current_random = prev_random;
     return result;
 }
 
 
-export const randomMinMax = (min: number, max: number): number => {
-    return min + (max - min) * currentRandom();
+export const random_min_max = (min: number, max: number): number => {
+    return min + (max - min) * current_random();
 };
 
-export const randomIntMinMax = (min: number, max: number): number => {
-    return Math.floor(randomMinMax(min, max + 1));
+export const random_int_min_max = (min: number, max: number): number => {
+    return Math.floor(random_min_max(min, max + 1));
 }

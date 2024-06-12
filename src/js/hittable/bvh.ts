@@ -1,7 +1,7 @@
 import { HitRecord, Hittable } from './hittable';
 import { AABB, surrounding_box } from './aabb';
 import { Ray } from '../math/ray';
-import { randomIntMinMax } from '../math/random';
+import { random_int_min_max } from '../math/random';
 import { Vec3 } from '../math/vec3';
 
 const b0 = AABB.createEmpty();
@@ -26,14 +26,16 @@ export class BVHNode extends Hittable {
                 this.right = objects[1];
                 break;
             default:
-                const axis = randomIntMinMax(0, 2);
-                objects.sort((a, b) => {
-                    a.get_bounding_box(time0, time1, b0);
-                    b.get_bounding_box(time0, time1, b1);
-                    return b0.min[axis] - b1.min[axis];
-                });
-                this.left = new BVHNode(objects.slice(0, Math.floor(objects.length / 2)), time0, time1);
-                this.right = new BVHNode(objects.slice(Math.floor(objects.length / 2)), time0, time1);
+                {
+                    const axis = random_int_min_max(0, 2);
+                    objects.sort((a, b) => {
+                        a.get_bounding_box(time0, time1, b0);
+                        b.get_bounding_box(time0, time1, b1);
+                        return b0.min[axis] - b1.min[axis];
+                    });
+                    this.left = new BVHNode(objects.slice(0, Math.floor(objects.length / 2)), time0, time1);
+                    this.right = new BVHNode(objects.slice(Math.floor(objects.length / 2)), time0, time1);
+                }
                 break;
         }
 
@@ -60,18 +62,18 @@ export class BVHNode extends Hittable {
     pdf_value(origin: Vec3, direction: Vec3): number {
         if (this.left === this.right) return this.left.pdf_value(origin, direction);
 
-        const lCount = this.left instanceof BVHNode ? this.left.size : 1;
-        const rCount = this.size - lCount;
+        const l_count = this.left instanceof BVHNode ? this.left.size : 1;
+        const r_count = this.size - l_count;
 
-        return (this.left.pdf_value(origin, direction) * lCount + this.right.pdf_value(origin, direction) * rCount) / this.size;
+        return (this.left.pdf_value(origin, direction) * l_count + this.right.pdf_value(origin, direction) * r_count) / this.size;
     }
 
     random(origin: Vec3): Vec3 {
         if (this.left === this.right) return this.left.random(origin);
 
-        const lCount = this.left instanceof BVHNode ? this.left.size : 1;
+        const l_count = this.left instanceof BVHNode ? this.left.size : 1;
 
-        return Math.random() * this.size < lCount
+        return Math.random() * this.size < l_count
             ? this.left.random(origin)
             : this.right.random(origin);
     }

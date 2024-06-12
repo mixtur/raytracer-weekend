@@ -1,5 +1,5 @@
 import { Texture } from './texture';
-import { color, Color, Point3, vec3MulS2 } from '../math/vec3';
+import { color, Color, Point3, vec3_muls_2 } from '../math/vec3';
 import { Perlin } from './perlin';
 
 export class NoiseTexture implements Texture {
@@ -9,6 +9,6 @@ export class NoiseTexture implements Texture {
     }
     noise = new Perlin();
     value(u: number, v: number, p: Point3): Color {
-        return vec3MulS2(color(1, 1, 1), 0.5 * (1 + Math.sin(this.scale * p[2] + 10 * this.noise.turb(p, 7))));
+        return vec3_muls_2(color(1, 1, 1), 0.5 * (1 + Math.sin(this.scale * p[2] + 10 * this.noise.turb(p, 7))));
     }
 }

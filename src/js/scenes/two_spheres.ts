@@ -5,14 +5,14 @@ import { Hittable } from '../hittable/hittable';
 import { HittableList } from '../hittable/hittable_list';
 import { Sphere } from '../hittable/sphere';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
-import { sColor } from '../texture/solid_color';
-import { createLambertian } from '../materials/lambertian';
+import { solid_color } from '../texture/solid_color';
+import { create_lambertian } from '../materials/lambertian';
 
 const create_two_spheres = (): Hittable => {
-    const checker = new Checker3DTexture(sColor(0.2, 0.3, 0.1), sColor(0.9, 0.9, 0.9));
+    const checker = new Checker3DTexture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9));
     return new HittableList([
-        new Sphere(point3(0, -10, 0), 10, createLambertian(checker)),
-        new Sphere(point3(0, 10, 0), 10, createLambertian(checker))
+        new Sphere(point3(0, -10, 0), 10, create_lambertian(checker)),
+        new Sphere(point3(0, 10, 0), 10, create_lambertian(checker))
     ]);
 };
 

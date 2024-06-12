@@ -12,12 +12,11 @@ The following additional features are implemented
 
 ```bash
  # you'll need node.js and npm installed in your system
- npm install # there is just one dependency - esbuild. It is only needed to compile TS to JS, but since it is there anyway it also does bundling. 
+ npm install 
  npm start # serves the raytracer page on 0.0.0.0:8080
 ```
 
 TODO:
-- enforce naming conventions
 - investigate noise in book2_final_scene
 - generalize scopes
 - be consistent with order of arguments in math
