@@ -19,11 +19,12 @@ export function get_sphere_uv(p: Point3, uv: UV): void {
 
 const oc = vec3(0, 0, 0);
 const r_vector = vec3(0, 0, 0);
-export class Sphere implements Hittable {
+export class Sphere extends Hittable {
     center: Point3;
     radius: number = NaN;
     material: MegaMaterial;
     constructor(center: Point3, radius: number, material: MegaMaterial) {
+        super();
         this.center = center;
         this.radius = radius;
         this.material = material;

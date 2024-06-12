@@ -18,6 +18,7 @@ const create_two_spheres = (): Hittable => {
 
 export const two_spheres: Scene = {
     root_hittable: create_two_spheres(),
+    light: new HittableList([]),
 
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(13,2,3);

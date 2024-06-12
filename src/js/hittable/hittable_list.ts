@@ -2,10 +2,11 @@ import { Ray } from "../math/ray";
 import { HitRecord, Hittable } from "./hittable";
 import { AABB } from './aabb';
 
-export class HittableList implements Hittable {
+export class HittableList extends Hittable {
     objects: Hittable[];
 
     constructor(objects: Hittable[] = []) {
+        super();
         this.objects = objects;
     }
 

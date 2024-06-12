@@ -48,7 +48,7 @@ export async function singleThreadedRender({
                         const v = (j + sv) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
-                        vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, max_depth));
+                        vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
 
@@ -59,7 +59,7 @@ export async function singleThreadedRender({
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, max_depth));
+                    vec3Add3(pixelColor, pixelColor, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
                 writeColor(x, y, pixelColor, samples_per_pixel);
             }

@@ -6,7 +6,7 @@ export type Color = Vec3;
 export type Point3 = Vec3;
 
 export const gcAllocator = new GCVec3Allocator();
-export const defaultAllocator = new ArenaVec3Allocator(256);
+export const defaultAllocator = new ArenaVec3Allocator(1024);
 
 let allocator: Vec3Allocator = defaultAllocator;
 export const vec3SetAllocator = (a: Vec3Allocator): void => { allocator = a; };
@@ -212,6 +212,35 @@ export const vec3RandUnit1 = (v: Vec3): void => {
     v[1] = sinT * sinP;
     v[2] = cosT;
 };
+
+export const vec3RandUnitOnHemisphere = (): Vec3 => {
+    const r1 = Math.random();
+    const r2 = Math.random() * Math.PI * 2;
+    const cosT = r1;// which is the same as 1 - r1
+    const sinT = Math.sqrt(1 - cosT * cosT);
+    const sinP = Math.sin(r2);
+    const cosP = Math.cos(r2);
+
+    return vec3(
+        sinT * cosP,
+        sinT * sinP,
+        cosT
+    );
+}
+
+export const vec3RandUnitOnHemisphere1 = (v: Vec3): void => {
+    const r1 = Math.random();
+    const r2 = Math.random() * Math.PI * 2;
+    const cosT = r1;// which is the same as 1 - r1
+    const sinT = Math.sqrt(1 - cosT * cosT);
+    const sinP = Math.sin(r2);
+    const cosP = Math.cos(r2);
+
+    v[0] = sinT * cosP;
+    v[1] = sinT * sinP;
+    v[2] = cosT;
+}
+
 
 export const vec3RandCosineUnit = (): Vec3 => {
     const r1 = Math.random() * Math.PI * 2;

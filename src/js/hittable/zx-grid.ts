@@ -9,7 +9,7 @@ function get_t(val: number, o: number, d: number, default_t: number): number {
     return (val - o) / d;
 }
 
-export class ZXGrid implements Hittable {
+export class ZXGrid extends Hittable {
     cells: (Hittable | null)[] = [];
     cellSize: number;
     min: Vec3;
@@ -19,6 +19,7 @@ export class ZXGrid implements Hittable {
     aabb: AABB;
 
     constructor(x_cols: number, z_rows: number, ySize: number, cellSize: number, min: Vec3) {
+        super();
         this.x_cols = x_cols;
         this.z_rows = z_rows;
         this.cellSize = cellSize;

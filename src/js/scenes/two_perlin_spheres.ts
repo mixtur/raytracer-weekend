@@ -14,6 +14,8 @@ export const two_perlin_spheres: Scene = {
         new Sphere(point3(0, 2, 0), 2, createLambertian(pertext))
     ]),
 
+    light: new HittableList([]),
+
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(13,2,3);
         const look_at = point3(0,0,0);

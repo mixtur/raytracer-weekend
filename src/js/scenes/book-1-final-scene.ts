@@ -98,6 +98,7 @@ const create_camera = (aspect_ratio: number): Camera => new Camera({
 
 export const book1_final_scene = (scene_creation_random_numbers: number[]): Scene => ({
     create_camera,
+    light: new HittableList([]),
     root_hittable: createLotsOfSpheres(scene_creation_random_numbers),
     background: color(0.7, 0.8, 1.0)
 });

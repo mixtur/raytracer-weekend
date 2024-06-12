@@ -3,10 +3,11 @@ import { Vec3, vec3Add3, vec3Sub2 } from '../math/vec3';
 import { Ray, rayAllocator } from '../math/ray';
 import { AABB } from './aabb';
 
-export class Translate implements Hittable {
+export class Translate extends Hittable {
     obj: Hittable;
     displacement: Vec3;
     constructor(obj: Hittable, displacement: Vec3) {
+        super();
         this.obj = obj;
         this.displacement = displacement;
     }

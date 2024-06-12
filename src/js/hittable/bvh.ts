@@ -5,12 +5,13 @@ import { randomIntMinMax } from '../math/random';
 
 const b0 = AABB.createEmpty();
 const b1 = AABB.createEmpty();
-export class BVHNode implements Hittable {
+export class BVHNode extends Hittable {
     left: Hittable;
     right: Hittable;
     aabb: AABB;
 
     constructor(objects: Hittable[], time0: number, time1: number) {
+        super();
         switch (objects.length) {
             case 0:
                 throw new Error('cannot create an empty BVH node');

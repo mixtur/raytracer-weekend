@@ -42,7 +42,7 @@ async function render({
     const cam = scene.create_camera(aspect_ratio);
 
     const rayArenaAllocator = new ArenaVec3Allocator(2048);
-    const mat3ArenaAllocator = new ArenaMat3Allocator(64);
+    const mat3ArenaAllocator = new ArenaMat3Allocator(640);
 
     const outputLineAllocator = new ArenaVec3Allocator(image_width);
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
@@ -67,7 +67,7 @@ async function render({
                             const v = (j + sv) / (image_height - 1);
 
                             const r = cam.get_ray(u, v);
-                            vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
+                            vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                         }
                     }
 
@@ -79,7 +79,7 @@ async function render({
                         const v = (j + Math.random()) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
-                        vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, max_depth));
+                        vec3Add3(pixelColor, pixelColor, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
                 postMessage({y, pixels: outputLineAllocator.dump});

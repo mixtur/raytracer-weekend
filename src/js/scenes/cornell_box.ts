@@ -12,37 +12,48 @@ import { createDiffuseLight } from '../materials/diffuse_light';
 import { ArenaVec3Allocator } from '../math/vec3_allocators';
 
 const sceneVec3Allocator = new ArenaVec3Allocator(128);
-export const cornell_box: Scene = {
-    root_hittable: vec3AllocatorScopeSync(sceneVec3Allocator, () => {
-        const red = createLambertian(sColor(.65, .05, .05));
-        const white = createLambertian(sColor(.73, .73, .73));
-        const green = createLambertian(sColor(.12, .45, .15));
-        const light = createDiffuseLight(sColor(15, 15, 15));
 
-        return new HittableList([
-            new Quad(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green),
-            new Quad(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red),
-            new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light),
-            new Quad(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
-            new Quad(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
-            new Quad(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white),
+const hittables = vec3AllocatorScopeSync(sceneVec3Allocator, () => {
+    const red = createLambertian(sColor(.65, .05, .05));
+    const white = createLambertian(sColor(.73, .73, .73));
+    const green = createLambertian(sColor(.12, .45, .15));
+    const light = createDiffuseLight(sColor(15, 15, 15));
 
-            new Translate(
-                new RotateY(
-                    new Box(point3(0, 0, 0), point3(165, 330, 165), white),
-                    15
-                ),
-                vec3(265, 0, 295)
+    const lightHittable = new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
+
+    const root = new HittableList([
+        new Quad(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green),
+        new Quad(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red),
+        lightHittable,
+        new Quad(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
+        new Quad(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
+        new Quad(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white),
+
+        new Translate(
+            new RotateY(
+                new Box(point3(0, 0, 0), point3(165, 330, 165), white),
+                15
             ),
-            new Translate(
-                new RotateY(
-                    new Box(point3(0, 0, 0), point3(165, 165, 165), white),
-                    -18
-                ),
-                vec3(130, 0, 65)
-            )
-        ]);
-    }),
+            vec3(265, 0, 295)
+        ),
+        new Translate(
+            new RotateY(
+                new Box(point3(0, 0, 0), point3(165, 165, 165), white),
+                -18
+            ),
+            vec3(130, 0, 65)
+        )
+    ]);
+
+    return {
+        root,
+        light: lightHittable
+    };
+});
+
+export const cornell_box: Scene = {
+    root_hittable: hittables.root,
+    light: hittables.light,
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(278, 278, -800);
         const look_at = point3(278, 278, 0);

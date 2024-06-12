@@ -11,12 +11,18 @@ import { createDiffuseLight } from '../materials/diffuse_light';
 
 const perlinTexture = new NoiseTexture(4);
 
+const light1 = new Quad(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), createDiffuseLight(sColor(0.5, 4, 1)));
+const light2 = new Sphere(point3(0, 7, 0), 2, createDiffuseLight(sColor(4, 1, 0.5)));
 export const simple_light: Scene = {
     root_hittable: new HittableList([
         new Sphere(point3(0, -1000, 0), 1000, createLambertian(perlinTexture)),
         new Sphere(point3(0, 2, 0), 2, createLambertian(perlinTexture)),
-        new Quad(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), createDiffuseLight(sColor(0.5, 4, 1))),
-        new Sphere(point3(0, 7, 0), 2, createDiffuseLight(sColor(4, 1, 0.5)))
+        light1,
+        light2
+    ]),
+    light: new HittableList([
+        light1,
+        light2
     ]),
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(26, 3, 6);

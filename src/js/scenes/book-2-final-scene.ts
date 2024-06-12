@@ -56,7 +56,8 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
             const objects = new HittableList();
             objects.objects.push(boxes1);
             const light = createDiffuseLight(sColor(7, 7, 7));
-            objects.objects.push(new Quad(point3(123, 554, 147), vec3(300,0,0), vec3(0,0,265), light));
+            const lightHittable = new Quad(point3(123, 554, 147), vec3(300,0,0), vec3(0,0,265), light);
+            objects.objects.push(lightHittable);
 
             const center1 = point3(400, 400, 200);
             const center2 = vec3Add2(center1, vec3(30,0,0));
@@ -101,6 +102,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
 
             return {
                 root_hittable: objects,
+                light: lightHittable,
                 create_camera(aspect_ratio: number): Camera {
                     const look_from = point3(478, 278, -600);
                     const look_at = point3(278, 278, 0);

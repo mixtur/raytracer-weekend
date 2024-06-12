@@ -50,7 +50,15 @@ export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3): v
 };
 
 
-export interface Hittable {
-    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean;
-    get_bounding_box(time0: number, time1: number, aabb: AABB): void;
+export abstract class Hittable {
+    abstract hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean;
+    abstract get_bounding_box(time0: number, time1: number, aabb: AABB): void;
+
+    pdf_value(origin: Vec3, direction: Vec3): number {
+        return 0;
+    }
+
+    random(origin: Vec3): Vec3 {
+        return vec3(1, 0, 0);
+    }
 }

@@ -14,7 +14,7 @@ const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 };
 
 const lambertian_scatter_pdf: ScatteringPDF = (r_in, hit, scattered): number => {
-    const cos = vec3Dot(hit.normal, scattered.direction) / vec3Len(scattered.direction);
+    const cos = vec3Dot(hit.normal, scattered.direction) / (vec3Len(scattered.direction) * vec3Len(hit.normal));
     return cos < 0 ? 0 : cos / Math.PI;
 };
 

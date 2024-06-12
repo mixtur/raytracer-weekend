@@ -9,7 +9,7 @@ const tmp1 = vec3(0, 0, 0);
 const tmp2 = vec3(0, 0, 0);
 const oc = vec3(0, 0, 0);
 const r_vector = vec3(0, 0, 0);
-export class MovingSphere implements Hittable {
+export class MovingSphere extends Hittable {
     center0: Point3;
     center1: Point3;
     time0: number;
@@ -24,6 +24,7 @@ export class MovingSphere implements Hittable {
     }
 
     constructor(center0: Point3, center1: Point3, time0: number, time1: number, radius: number, material: MegaMaterial) {
+        super();
         this.center0 = center0;
         this.center1 = center1;
         this.time0 = time0;

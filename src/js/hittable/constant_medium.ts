@@ -6,12 +6,13 @@ import { MegaMaterial } from '../materials/megamaterial';
 
 const hit1 = createEmptyHitRecord();
 const hit2 = createEmptyHitRecord();
-export class ConstantMedium implements Hittable {
+export class ConstantMedium extends Hittable {
     boundary: Hittable;
     phase_function: MegaMaterial;
     neg_inv_density: number;
 
     constructor(boundary: Hittable, density: number, phase_function: MegaMaterial) {
+        super();
         this.boundary = boundary;
         this.neg_inv_density = -1 / density;
         this.phase_function = phase_function;

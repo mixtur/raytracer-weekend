@@ -10,11 +10,12 @@ function get_t(val: number, o: number, d: number, default_t: number): number {
     return (val - o) / d;
 }
 
-export class Box implements Hittable {
+export class Box extends Hittable {
     min: Point3;
     max: Point3;
     mat: MegaMaterial;
     constructor(p0: Point3, p1: Point3, mat: MegaMaterial) {
+        super();
         this.min = p0;
         this.max = p1;
         this.mat = mat;

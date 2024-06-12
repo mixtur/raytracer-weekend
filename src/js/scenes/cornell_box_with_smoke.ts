@@ -17,11 +17,13 @@ const white = createLambertian(sColor(.73, .73, .73));
 const green = createLambertian(sColor(.12, .45, .15));
 const light = createDiffuseLight(sColor(7, 7, 7));
 
+const lightHittable = new Quad(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light);
+
 export const cornell_box_with_smoke: Scene = {
     root_hittable: new BVHNode([
         new Quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green),
         new Quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red),
-        new Quad(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light),
+        lightHittable,
         new Quad(point3(0,555,0), vec3(555,0,0), vec3(0,0,555), white),
         new Quad(point3(0,0,0), vec3(555,0,0), vec3(0,0,555), white),
         new Quad(point3(0,0,555), vec3(555,0,0), vec3(0,555,0), white),
@@ -50,6 +52,8 @@ export const cornell_box_with_smoke: Scene = {
             createIsotropicPhaseFunction(sColor(1, 1, 1))
         )
     ], 0, 1),
+
+    light: lightHittable,
 
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(278, 278, -800);
