@@ -10,10 +10,15 @@ import { Translate } from '../hittable/translate';
 import { createLambertian } from '../materials/lambertian';
 import { createDiffuseLight } from '../materials/diffuse_light';
 import { ArenaVec3Allocator } from '../math/vec3_allocators';
+import { createMetal } from '../materials/metal';
+import { createDielectric } from '../materials/dielectric';
+import { Sphere } from '../hittable/sphere';
 
 const sceneVec3Allocator = new ArenaVec3Allocator(128);
 
 const hittables = vec3AllocatorScopeSync(sceneVec3Allocator, () => {
+    const aluminum = createMetal(sColor(0.8, 0.85, 0.88), 0);
+    const glass = createDielectric(1.5);
     const red = createLambertian(sColor(.65, .05, .05));
     const white = createLambertian(sColor(.73, .73, .73));
     const green = createLambertian(sColor(.12, .45, .15));
@@ -36,18 +41,22 @@ const hittables = vec3AllocatorScopeSync(sceneVec3Allocator, () => {
             ),
             vec3(265, 0, 295)
         ),
-        new Translate(
-            new RotateY(
-                new Box(point3(0, 0, 0), point3(165, 165, 165), white),
-                -18
-            ),
-            vec3(130, 0, 65)
-        )
+        new Sphere(point3(190,90,190), 90, glass),
+        // new Translate(
+        //     new RotateY(
+        //         new Box(point3(0, 0, 0), point3(165, 165, 165), white),
+        //         -18
+        //     ),
+        //     vec3(130, 0, 65)
+        // )
     ]);
 
     return {
         root,
-        light: lightHittable
+        light: new HittableList([
+            lightHittable,
+            new Sphere(point3(190,90,190), 90, glass)
+        ])
     };
 });
 

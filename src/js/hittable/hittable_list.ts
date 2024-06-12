@@ -1,6 +1,8 @@
 import { Ray } from "../math/ray";
 import { HitRecord, Hittable } from "./hittable";
 import { AABB } from './aabb';
+import { Vec3 } from '../math/vec3';
+import { randomIntMinMax } from '../math/random';
 
 export class HittableList extends Hittable {
     objects: Hittable[];
@@ -31,5 +33,17 @@ export class HittableList extends Hittable {
             obj.get_bounding_box(time0, time1, tmp);
             aabb.consumeAABB(tmp);
         }
+    }
+
+    pdf_value(origin: Vec3, direction: Vec3): number {
+        let pdf = 0;
+        for (let i = 0; i < this.objects.length; i++){
+            pdf += this.objects[i].pdf_value(origin, direction);
+        }
+        return pdf / this.objects.length;
+    }
+
+    random(origin: Vec3): Vec3 {
+        return this.objects[Math.floor(Math.random() * this.objects.length)].random(origin);
     }
 }

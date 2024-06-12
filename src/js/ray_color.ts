@@ -1,8 +1,8 @@
-import { Ray, raySet } from './math/ray';
+import { ray, Ray, raySet } from './math/ray';
 import {
     color,
     Color,
-    point3,
+    point3, vec3,
     vec3Dot,
     vec3MulS2, vec3MulS3,
     vec3MulV3,
@@ -13,7 +13,7 @@ import {
 import { createEmptyHitRecord, HitRecord, Hittable } from './hittable/hittable';
 import { BounceRecord, createBounceRecord } from './materials/megamaterial';
 import { randomMinMax } from './math/random';
-import { CosinePDF, HemispherePDF, HittablePDF, MixturePDF, SpherePDF } from './math/pdf';
+import { HittablePDF, MixturePDF } from './math/pdf';
 
 const hit = createEmptyHitRecord();
 const bounce = createBounceRecord();
@@ -23,6 +23,7 @@ for (let i = 0; i < 100; i++) {
     hitStack.push(createEmptyHitRecord());
     bounceStack.push(createBounceRecord());
 }
+const scattered = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
 export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hittable, depth: number): Color => {
     const hit = hitStack[depth];
     const bounce = bounceStack[depth];
@@ -39,19 +40,21 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
         return emitted;
     }
 
-    vec3Set(emitted, 0, 0, 0);
-    const light_pdf = new HittablePDF(lights, hit.p);
-    const cosine_pdf = new CosinePDF(hit.normal);
-    const mix_pdf = new MixturePDF(light_pdf, cosine_pdf);
+    let pdfFactor = 1;
+    if (bounce.skip_pdf) {
+        raySet(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
+    } else {
+        const light_pdf = new HittablePDF(lights, hit.p);
+        const material_pdf = bounce.scatter_pdf;
+        const mix_pdf = new MixturePDF(light_pdf, material_pdf);
 
-    const pdf = mix_pdf;
+        raySet(scattered, hit.p, mix_pdf.generate(), r.time);
+        bounce.sampling_pdf = mix_pdf.value(scattered.direction);
 
-    raySet(bounce.scattered, hit.p, pdf.generate(), r.time);
-    bounce.sampling_pdf = pdf.value(bounce.scattered.direction);
+        pdfFactor = hit.material.scattering_pdf(r, hit, scattered) / bounce.sampling_pdf;
+    }
 
-    const pdfFactor = hit.material.scattering_pdf(r, hit, bounce.scattered) / bounce.sampling_pdf;
-
-    const bounceColor = ray_color(bounce.scattered, background, world, lights, depth - 1);
+    const bounceColor = ray_color(scattered, background, world, lights, depth - 1);
     // vec3MulVAddV3 may not work because we can screw up the light source
     // if (Math.random() < 0.001) {
     //     console.log('ok', hit.material.scatter, hit.material.scattering_pdf(r, hit, bounce.scattered), bounce.sampling_pdf, emitted);
@@ -86,11 +89,11 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
             }
 
             bounce.sampling_pdf = distance_squared / (light_cosine * light_area);
-            const pdfFactor = hit.material.scattering_pdf(r, hit, bounce.scattered) /  bounce.sampling_pdf;
-            raySet(bounce.scattered, hit.p, to_light, r.time);
+            const pdfFactor = hit.material.scattering_pdf(r, hit, scattered) /  bounce.sampling_pdf;
+            raySet(scattered, hit.p, to_light, r.time);
 
             vec3MulV3(totalAttenuation, totalAttenuation, vec3MulS2(bounce.attenuation, pdfFactor));
-            r = bounce.scattered;
+            r = scattered;
         } else {
             break;
         }

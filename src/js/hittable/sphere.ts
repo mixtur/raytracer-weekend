@@ -1,10 +1,15 @@
-import { Ray, rayAt3 } from '../math/ray';
-import { Point3, vec3Dot, vec3, vec3DivS3, vec3Sub3 } from '../math/vec3';
-import { HitRecord, Hittable, set_face_normal } from "./hittable";
+import { ray, Ray, rayAt3, raySet } from '../math/ray';
+import { Point3, vec3Dot, vec3, vec3DivS3, vec3Sub3, Vec3, vec3Sub2, vec3SqLen } from '../math/vec3';
+import { createEmptyHitRecord, HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';
 import { MegaMaterial } from '../materials/megamaterial';
+import { mat3FromZ1, mulMat3Vec3_2 } from '../math/mat3';
+import { clamp } from '../utils';
 
+
+const tmpHit = createEmptyHitRecord();
+const tmpRay = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
 
 export function get_sphere_uv(p: Point3, uv: UV): void {
     // p: a given point on the sphere of radius one, centered at the origin.
@@ -65,5 +70,35 @@ export class Sphere extends Hittable {
         aabb.max[0] = this.center[0] + this.radius;
         aabb.max[1] = this.center[1] + this.radius;
         aabb.max[2] = this.center[2] + this.radius;
+    }
+
+    pdf_value(origin: Vec3, direction: Vec3): number {
+        raySet(tmpRay, origin, direction, 0);
+        if (!this.hit(tmpRay, 0.00001, Infinity, tmpHit)) {
+            return 0;
+        }
+        const cone_axis = vec3Sub2(this.center, origin);
+        const cos_theta_max = Math.sqrt(1 - clamp((this.radius ** 2) / vec3SqLen(cone_axis), 0, 1));
+        const solid_angle = 2 * Math.PI * (1 - cos_theta_max);
+
+        return 1 / solid_angle;
+    }
+
+    random(origin: Vec3): Vec3 {
+        const cone_axis = vec3Sub2(this.center, origin);
+        const cos_theta_max = Math.sqrt(1 - clamp((this.radius ** 2) / vec3SqLen(cone_axis), 0, 1));
+        const r1 = Math.random() * Math.PI * 2;
+        const r2 = Math.random();
+        const matrix = mat3FromZ1(cone_axis);
+        const cosT = 1 + r2 * (cos_theta_max - 1);
+        const sinT = Math.sqrt(1 - cosT * cosT);
+        const sinP = Math.sin(r1);
+        const cosP = Math.cos(r1);
+
+        return mulMat3Vec3_2(matrix, vec3(
+            sinT * cosP,
+            sinT * sinP,
+            cosT
+        ));
     }
 }

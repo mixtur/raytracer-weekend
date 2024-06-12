@@ -20,7 +20,8 @@ export const metal_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     const reflected = vec3Reflect(vec3Unit1(r_in.direction), hit.normal);
     vec3Add3(reflected, reflected, vec3MulS2(vec3RandInUnitSphere(), mat.fuzz));
     if (vec3Dot(reflected, hit.normal) <= 0) { return false; }
-    raySet(bounce.scattered, hit.p, reflected, r_in.time);
+    raySet(bounce.skip_pdf_ray, hit.p, reflected, r_in.time);
+    bounce.skip_pdf = true;
     bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
     return true;
 }

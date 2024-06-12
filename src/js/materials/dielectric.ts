@@ -26,7 +26,8 @@ export const dielectric_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
         ? vec3Reflect(unit_direction, hit.normal)
         : vec3Refract(unit_direction, hit.normal, refraction_ratio);
 
-    raySet(bounce.scattered, hit.p, direction, r_in.time)
+    raySet(bounce.skip_pdf_ray, hit.p, direction, r_in.time)
+    bounce.skip_pdf = true;
     vec3Set(bounce.attenuation, 1, 1, 1);
     return true;
 }

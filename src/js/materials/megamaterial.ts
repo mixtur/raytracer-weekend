@@ -3,6 +3,7 @@ import { sColor } from '../texture/solid_color';
 import { ray, Ray } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
 import { color, Color, vec3 } from '../math/vec3';
+import { PDF, SpherePDF } from '../math/pdf';
 
 export interface MegaMaterial {
     scatter: ScatterFunction;
@@ -15,9 +16,11 @@ export interface MegaMaterial {
 }
 
 export interface BounceRecord {
-    scattered: Ray;
     attenuation: Color;
+    scatter_pdf: PDF;
     sampling_pdf: number;
+    skip_pdf: boolean;
+    skip_pdf_ray: Ray;
 }
 
 export type EmitFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord) => Color;
@@ -26,9 +29,11 @@ export type ScatteringPDF = (r_in: Ray, hit: HitRecord, scattered: Ray) => numbe
 
 export const createBounceRecord = (): BounceRecord => {
     return {
-        scattered: ray(vec3(0, 0, 0), vec3(0, 0, 0), 0),
+        scatter_pdf: new SpherePDF(),
         attenuation: color(0, 0, 0),
-        sampling_pdf: NaN
+        sampling_pdf: NaN,
+        skip_pdf: false,
+        skip_pdf_ray: ray(vec3(0, 0, 0), vec3(0, 0, 0), 0)
     }
 };
 

@@ -79,6 +79,7 @@ export const mulMat3Vec3_3 = (mat: Mat3, vec: Vec3, result: Vec3): void => {
     result[2] = x * mat[2] + y * mat[5] + z * mat[8];
 };
 
+//todo: use quaternions for that
 export const mat3FromZ1 = (base_z: Vec3): Mat3 => {
     const z = vec3Unit1(base_z);
     const a = (Math.abs(base_z[0]) < 0.9) ? vec3(1, 0, 0) : vec3(0, 1, 0);
