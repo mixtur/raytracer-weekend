@@ -7,7 +7,7 @@ import { PDF, SpherePDF } from '../math/pdf';
 
 export interface MegaMaterial {
     scatter: ScatterFunction;
-    scattering_pdf: ScatteringPDF;
+    scattering_pdf: PDF;
     emit: EmitFunction;
     ior: number; // dielectric
     emissive: Texture;
@@ -17,6 +17,7 @@ export interface MegaMaterial {
 
 export interface BounceRecord {
     attenuation: Color;
+    // do we even need this now? isn't material.scattering_pdf enough?
     scatter_pdf: PDF;
     sampling_pdf: number;
     skip_pdf: boolean;
@@ -44,7 +45,7 @@ export const default_emit: EmitFunction = (mat, r_in, hit) => mat.emissive.value
 export const create_mega_material = (config: Partial<MegaMaterial>): MegaMaterial => {
     return {
         scatter: config.scatter ?? default_scatter,
-        scattering_pdf: config.scattering_pdf ?? default_scattering_pdf,
+        scattering_pdf: config.scattering_pdf ?? new SpherePDF(),
         emit: config.emit ?? default_emit,
         ior: config.ior ?? 0,
         emissive: config.emissive ?? solid_color(0, 0, 0),

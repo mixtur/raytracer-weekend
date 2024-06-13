@@ -19,7 +19,7 @@ export const create_canvas_color_writer = (image_width: number, image_height: nu
     canvas.height = image_height;
     document.body.appendChild(canvas);
 
-    const image_data = new ImageData(image_width, image_height, { colorSpace: "srgb" });
+    const image_data = new ImageData(image_width, image_height);
 
     return {
         write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number): void => {

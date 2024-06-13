@@ -136,7 +136,9 @@ export const vec3_orthogonal_1 = (v: Vec3): Vec3 => {
 }
 
 export const vec3_orthogonal_2 = (result: Vec3, v: Vec3): void => {
-    const [x, y, z] = v;
+    const x = v[0];
+    const y = v[1];
+    const z = v[2];
     const ax = Math.abs(x);
     const ay = Math.abs(y);
     const az = Math.abs(z);

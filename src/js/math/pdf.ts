@@ -42,12 +42,13 @@ export class HemispherePDF implements PDF {
 }
 
 export class CosinePDF implements PDF {
-    quat: Quat;
-    lobe_direction: Vec3;
-    constructor(lobe_direction: Vec3) {
+    quat!: Quat;
+    lobe_direction!: Vec3;
+    setDirection(lobe_direction: Vec3): void {
         this.quat = quat_from_z_1(lobe_direction);
         this.lobe_direction = vec3_unit1(lobe_direction);
     }
+
     value(direction: Vec3): number {
         const cos_t = vec3_dot(vec3_unit1(direction), this.lobe_direction);
         return Math.max(0, cos_t / Math.PI);
@@ -58,12 +59,8 @@ export class CosinePDF implements PDF {
 }
 
 export class HittablePDF implements PDF {
-    hittable: Hittable;
-    origin: Vec3;
-    constructor(hittable: Hittable, origin: Point3) {
-        this.hittable = hittable;
-        this.origin = origin;
-    }
+    hittable!: Hittable;
+    origin!: Vec3;
 
     value(direction: Vec3): number {
         return this.hittable.pdf_value(this.origin, direction);
@@ -75,13 +72,9 @@ export class HittablePDF implements PDF {
 }
 
 export class MixturePDF implements PDF {
-    pdf1: PDF;
-    pdf2: PDF;
+    pdf1!: PDF;
+    pdf2!: PDF;
     selection = false;
-    constructor(pdf1: PDF, pdf2: PDF) {
-        this.pdf1 = pdf1;
-        this.pdf2 = pdf2;
-    }
 
     value(direction: Vec3): number {
         return (this.pdf1.value(direction) + this.pdf2.value(direction)) / 2;

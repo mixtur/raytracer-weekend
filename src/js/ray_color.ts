@@ -24,6 +24,10 @@ for (let i = 0; i < 100; i++) {
     bounce_stack.push(create_bounce_record());
 }
 const scattered = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
+
+const light_pdf = new HittablePDF();
+const mix_pdf = new MixturePDF();
+
 export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
     const hit = hit_stack[depth];
     const bounce = bounce_stack[depth];
@@ -46,21 +50,20 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
     } else {
         let pdf = bounce.scatter_pdf;
         if (lights !== null) {
-            const light_pdf = new HittablePDF(lights, hit.p);
-            pdf = new MixturePDF(light_pdf, pdf);
+            light_pdf.hittable = lights;
+            light_pdf.origin = hit.p;
+            mix_pdf.pdf1 = light_pdf;
+            mix_pdf.pdf2 = pdf;
+            pdf = mix_pdf;
         }
 
         ray_set(scattered, hit.p, pdf.generate(), r.time);
         bounce.sampling_pdf = pdf.value(scattered.direction);
 
-        pdf_factor = hit.material.scattering_pdf(r, hit, scattered) / bounce.sampling_pdf;
+        pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / bounce.sampling_pdf;
     }
 
     const bounce_color = ray_color(scattered, background, world, lights, depth - 1);
-    // vec3MulVAddV3 may not work because we can screw up the light source
-    // if (Math.random() < 0.001) {
-    //     console.log('ok', hit.material.scatter, hit.material.scattering_pdf(r, hit, bounce.scattered), bounce.sampling_pdf, emitted);
-    // }
     return vec3_mulv_addv_3(bounce_color, vec3_muls_2(bounce.attenuation, pdf_factor), emitted);
 }
 
@@ -91,7 +94,7 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
             }
 
             bounce.sampling_pdf = distance_squared / (light_cosine * light_area);
-            const pdf_factor = hit.material.scattering_pdf(r, hit, scattered) /  bounce.sampling_pdf;
+            const pdf_factor = hit.material.scattering_pdf.value(scattered.direction) /  bounce.sampling_pdf;
             ray_set(scattered, hit.p, to_light, r.time);
 
             vec3_mulv_3(total_attenuation, total_attenuation, vec3_muls_2(bounce.attenuation, pdf_factor));

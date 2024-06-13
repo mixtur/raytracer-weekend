@@ -5,7 +5,9 @@ import { CosinePDF } from '../math/pdf';
 
 const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
     bounce.attenuation.set(material.albedo.value(hit.u, hit.v, hit.p));
-    bounce.scatter_pdf = new CosinePDF(hit.normal);
+    const scattering_pdf = material.scattering_pdf as CosinePDF;
+    scattering_pdf.setDirection(hit.normal);
+    bounce.scatter_pdf = scattering_pdf;
     bounce.skip_pdf = false;
     return true;
 };
@@ -17,6 +19,6 @@ const lambertian_scatter_pdf: ScatteringPDF = (r_in, hit, scattered): number => 
 
 export const create_lambertian = (albedo: Texture): MegaMaterial => create_mega_material({
     scatter: lambertian_scatter,
-    scattering_pdf: lambertian_scatter_pdf,
+    scattering_pdf: new CosinePDF(),
     albedo
 });

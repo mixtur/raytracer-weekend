@@ -5,9 +5,8 @@ import { HitRecord } from '../hittable/hittable';
 import { SpherePDF } from '../math/pdf';
 
 export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
-    bounce.scatter_pdf = new SpherePDF();
+    bounce.scatter_pdf = mat.scattering_pdf;
     bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
-    bounce.sampling_pdf = 1 / (4 * Math.PI);
     bounce.skip_pdf = false;
     return true;
 };
@@ -18,7 +17,7 @@ export const isotropic_phase_function_scattering_pdf: ScatteringPDF = (r_in: Ray
 
 export const create_isotropic_phase_function = (albedo: Texture): MegaMaterial => create_mega_material({
     scatter: isotropic_phase_function_scatter,
-    scattering_pdf: isotropic_phase_function_scattering_pdf,
+    scattering_pdf: new SpherePDF(),
     albedo
 });
 
