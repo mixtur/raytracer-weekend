@@ -1,3 +1,4 @@
+import * as fs from 'node:fs';
 import * as url from 'node:url';
 import * as path from 'node:path';
 import { createServer } from 'node:http';
@@ -59,6 +60,8 @@ async function start() {
         });
     });
 
+    fs.rmSync(DIR_DEVBUILD, { recursive: true, force: true });
+    fs.mkdirSync(DIR_DEVBUILD, { recursive: true });
     console.log(`Started HTTP server on http://${HOST}:${PORT}`);
     await esbuildContext.watch();
     console.log(`Started esbuild`);
