@@ -1,5 +1,6 @@
-import { Point3, vec3, Vec3, vec3_allocator_scope_sync } from './vec3';
+import { Point3, use_vec3_allocator, vec3, Vec3 } from './vec3';
 import { ArenaVec3Allocator } from './vec3_allocators';
+import { run_with_hooks } from '../utils';
 
 export type Ray = {
     origin: Vec3,
@@ -59,7 +60,10 @@ export class RayArenaAllocator {
     }
 }
 
-export const ray_allocator = vec3_allocator_scope_sync(new ArenaVec3Allocator(512), () => new RayArenaAllocator(256));
+export const ray_allocator = run_with_hooks(() => {
+    use_vec3_allocator(new ArenaVec3Allocator(512));
+    return new RayArenaAllocator(256);
+});
 
 export const ray_at2 = (ray: Ray, t: number): Vec3 => {
     return vec3(

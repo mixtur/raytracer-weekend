@@ -1,5 +1,6 @@
 import { random, random_min_max } from './random';
 import { ArenaVec3Allocator, GCVec3Allocator, Vec3Allocator } from './vec3_allocators';
+import { async_run_with_hooks, run_hook, run_with_hooks } from '../utils';
 
 export type Vec3 = Float64Array;
 export type Color = Vec3;
@@ -9,23 +10,13 @@ export const gc_allocator = new GCVec3Allocator();
 export const default_allocator = new ArenaVec3Allocator(1024);
 
 let allocator: Vec3Allocator = default_allocator;
-export const vec3_set_allocator = (a: Vec3Allocator): void => { allocator = a; };
-export const vec3_allocator_scope_sync = <T>(a: Vec3Allocator, f: () => T): T => {
+export const use_vec3_allocator = (a: Vec3Allocator) => run_hook(() => {
     const prev_allocator = allocator;
     allocator = a;
-    const result = f();
-    allocator = prev_allocator;
-    return result;
-};
-
-export const vec3_allocator_scope_async = async <T>(a: Vec3Allocator, f: () => Promise<T>): Promise<T> => {
-    const prev_allocator = allocator;
-    allocator = a;
-    const result = await f();
-    allocator = prev_allocator;
-    return result;
-};
-
+    return () => {
+        allocator = prev_allocator
+    };
+});
 
 export const vec3 = (x: number, y: number, z: number): Vec3 => allocator.alloc(x, y, z);
 export const color = vec3;

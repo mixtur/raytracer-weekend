@@ -1,6 +1,14 @@
 import { random_int_min_max } from '../math/random';
-import { Point3, vec3, Vec3, vec3_allocator_scope_sync, vec3_dot, vec3_muls_3, vec3_rand_min_max2 } from '../math/vec3';
+import {
+    Point3, use_vec3_allocator,
+    vec3,
+    Vec3,
+    vec3_dot,
+    vec3_muls_3,
+    vec3_rand_min_max2
+} from '../math/vec3';
 import { ArenaVec3Allocator } from '../math/vec3_allocators';
+import { run_with_hooks } from '../utils';
 
 const POINT_COUNT = 256;
 
@@ -45,9 +53,19 @@ function perlin_interp(c: Vec3[][][], u: number, v: number, w: number): number {
     return acc;
 }
 
-const trilinear_buffer = vec3_allocator_scope_sync(new ArenaVec3Allocator(8), () =>
-    [[[vec3(0, 0, 0), vec3(0, 0, 0)], [vec3(0, 0, 0), vec3(0, 0, 0)]], [[vec3(0, 0, 0), vec3(0, 0, 0)], [vec3(0, 0, 0), vec3(0, 0, 0)]]]
-);
+const trilinear_buffer = run_with_hooks(() => {
+    use_vec3_allocator(new ArenaVec3Allocator(8));
+    return [
+        [
+            [vec3(0, 0, 0), vec3(0, 0, 0)],
+            [vec3(0, 0, 0), vec3(0, 0, 0)]
+        ],
+        [
+            [vec3(0, 0, 0), vec3(0, 0, 0)],
+            [vec3(0, 0, 0), vec3(0, 0, 0)]
+        ]
+    ];
+});
 
 export class Perlin {
     rand_vecs: Vec3[];

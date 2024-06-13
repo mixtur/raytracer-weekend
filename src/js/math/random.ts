@@ -1,6 +1,15 @@
+import { async_run_with_hooks, run_hook, run_with_hooks } from '../utils';
+import { use_vec3_allocator } from './vec3';
+
 export type Random = () => number;
 
 let current_random: Random = Math.random;
+
+export const use_random = (random: Random) => run_hook(() => {
+    const prev_random = current_random;
+    current_random = random;
+    return () => { current_random = prev_random; }
+});
 
 export const get_predefined_random = (numbers: number[]): Random => {
     let i = 0;
@@ -12,23 +21,6 @@ export const get_predefined_random = (numbers: number[]): Random => {
 }
 
 export const random = () => current_random();
-
-export const random_scope_sync = <T>(random_func: Random, scope: () => T): T => {
-    const prev_random = current_random;
-    current_random = random_func;
-    const result = scope();
-    current_random = prev_random;
-    return result;
-}
-
-export const random_scope_async = async <T>(random_func: Random, scope: () => Promise<T>): Promise<T> => {
-    const prev_random = current_random;
-    current_random = random_func;
-    const result = await scope();
-    current_random = prev_random;
-    return result;
-}
-
 
 export const random_min_max = (min: number, max: number): number => {
     return min + (max - min) * current_random();

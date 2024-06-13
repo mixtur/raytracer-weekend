@@ -65,11 +65,12 @@ export async function multi_threaded_render(thread_number: number, render_parame
                 dump_line(y);
 
                 done_rays += image_width * samples_to_send;
-                const dt = performance.now() - t0;
-                const speed = done_rays / dt;
-                const estimated_total_time = total_rays / speed;
-
-                console.log(`[${format_time(dt)} / ${format_time(estimated_total_time)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays`);
+                if (Math.random() < 100 / (image_height * thread_number)) {
+                    const dt = performance.now() - t0;
+                    const speed = done_rays / dt;
+                    const estimated_total_time = total_rays / speed;
+                    console.log(`[${format_time(dt)} / ${format_time(estimated_total_time)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays`);
+                }
 
                 if (event_count === image_height) {
                     console.log(`Thread #${i} - done`);

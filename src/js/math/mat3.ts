@@ -1,4 +1,5 @@
 import { vec3, Vec3, vec3_cross2, vec3_unit1 } from './vec3';
+import { run_hook } from '../utils';
 
 //matrices are column-major
 export type Mat3 = Float64Array;
@@ -37,22 +38,11 @@ export class ArenaMat3Allocator {
 }
 
 let allocator = new ArenaMat3Allocator(64);
-export const mat3_allocator_scope_sync = <T>(a: ArenaMat3Allocator, f: () => T): T => {
-    const prev_allocator = allocator;
+export const use_mat3_allocator = (a: ArenaMat3Allocator) => run_hook(() => {
+    const prev = allocator;
     allocator = a;
-    const result = f();
-    allocator = prev_allocator;
-    return result;
-};
-
-export const mat3_allocator_scope_async = async <T>(a: ArenaMat3Allocator, f: () => Promise<T>): Promise<T> => {
-    const prev_allocator = allocator;
-    allocator = a;
-    const result = await f();
-    allocator = prev_allocator;
-    return result;
-};
-
+    return () => { allocator = prev; };
+});
 
 export const mat3 = (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number): Mat3 => {
     return allocator.alloc(a ,b, c, d, e, f, g, h, i);

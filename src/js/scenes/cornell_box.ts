@@ -3,7 +3,7 @@ import { Camera } from '../camera';
 import { HittableList } from '../hittable/hittable_list';
 import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
-import { color, point3, vec3, vec3_allocator_scope_sync } from '../math/vec3';
+import { color, point3, use_vec3_allocator, vec3 } from '../math/vec3';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
@@ -13,10 +13,11 @@ import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { create_metal } from '../materials/metal';
 import { create_dielectric } from '../materials/dielectric';
 import { Sphere } from '../hittable/sphere';
+import { run_with_hooks } from '../utils';
 
-const scene_vec3_allocator = new ArenaVec3Allocator(128);
+const hittables = run_with_hooks(() => {
+    use_vec3_allocator(new ArenaVec3Allocator(128));
 
-const hittables = vec3_allocator_scope_sync(scene_vec3_allocator, () => {
     const aluminum = create_metal(solid_color(0.8, 0.85, 0.88), 0);
     const glass = create_dielectric(1.5);
     const red = create_lambertian(solid_color(.65, .05, .05));

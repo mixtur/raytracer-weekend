@@ -7,6 +7,7 @@ import {
     z_vec3,
     vec3_unit2
 } from './vec3';
+import { run_hook } from '../utils';
 
 export type Quat = Float64Array;
 
@@ -37,21 +38,11 @@ export class ArenaQuatAllocator {
 }
 
 let allocator = new ArenaQuatAllocator(64);
-export const quat_allocator_scope_sync = <T>(a: ArenaQuatAllocator, f: () => T): T => {
+export const use_quat_allocator = (new_allocator: ArenaQuatAllocator) => run_hook(() => {
     const prev_allocator = allocator;
-    allocator = a;
-    const result = f();
-    allocator = prev_allocator;
-    return result;
-};
-
-export const quat_allocator_scope_async = async <T>(a: ArenaQuatAllocator, f: () => Promise<T>): Promise<T> => {
-    const prev_allocator = allocator;
-    allocator = a;
-    const result = await f();
-    allocator = prev_allocator;
-    return result;
-};
+    allocator = new_allocator;
+    return () => { allocator = prev_allocator; }
+});
 
 export const quat = (x: number, y: number, z: number, w: number): Quat => allocator.alloc(x, y, z, w);
 

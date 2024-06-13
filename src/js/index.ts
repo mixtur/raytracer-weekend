@@ -3,7 +3,7 @@ import { create_array_writer, create_canvas_color_writer } from './color-writers
 import { multi_threaded_render } from './multi_threaded_render';
 import { random_int_min_max } from './math/random';
 
-const aspect_ratio = 4/3;
+const aspect_ratio = 1;
 const image_width = 840;
 const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 1000;

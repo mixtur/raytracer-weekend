@@ -1,4 +1,4 @@
-import { vec3_add_3, vec3_allocator_scope_sync } from './math/vec3';
+import { use_vec3_allocator, vec3_add_3 } from './math/vec3';
 import { ray_color, ray_color_iterative } from './ray_color';
 import { RenderWorkerMessage } from './types';
 import { ArenaVec3Allocator } from './math/vec3_allocators';
@@ -8,7 +8,8 @@ import { simple_light } from './scenes/simple_light';
 import { cornell_box } from './scenes/cornell_box';
 import { book1_final_scene } from './scenes/book-1-final-scene';
 import { create_earth_scene } from './scenes/earth';
-import { ArenaQuatAllocator, quat_allocator_scope_sync } from './math/quat';
+import { ArenaQuatAllocator, use_quat_allocator } from './math/quat';
+import { run_with_hooks } from './utils';
 
 export interface RenderWorkerMessageData {
     y: number;
@@ -41,49 +42,49 @@ async function render({
 //    const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
-    const ray_allocator = new ArenaVec3Allocator(4096);
-    const quat_allocator = new ArenaQuatAllocator(640);
-
-    const output_line_allocator = new ArenaVec3Allocator(image_width);
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
 
-    quat_allocator_scope_sync(quat_allocator, () => {
-        vec3_allocator_scope_sync(ray_allocator, () => {
-            for (let _j = 0; _j < image_height; _j++) {
-                const j = local_order[_j];
-                const y = image_height -1 - j;
-                output_line_allocator.reset();
-                for (let i = 0; i < image_width; i++) {
-                    const pixel_color = output_line_allocator.alloc(0, 0, 0);
+    run_with_hooks(() => {
+        const vec3_allocator = new ArenaVec3Allocator(4096);
+        const quat_allocator = new ArenaQuatAllocator(640);
+        const output_line_allocator = new ArenaVec3Allocator(image_width);
 
-                    for (let sj = 0; sj < stratification_grid_size; sj++) {
-                        for (let si = 0; si < stratification_grid_size; si++) {
-                            ray_allocator.reset();
-                            quat_allocator.reset();
-                            const su = stratification_grid_step * (si + Math.random());
-                            const sv = stratification_grid_step * (sj + Math.random());
+        use_vec3_allocator(vec3_allocator);
+        use_quat_allocator(quat_allocator);
+        for (let _j = 0; _j < image_height; _j++) {
+            const j = local_order[_j];
+            const y = image_height -1 - j;
+            output_line_allocator.reset();
+            for (let i = 0; i < image_width; i++) {
+                const pixel_color = output_line_allocator.alloc(0, 0, 0);
 
-                            const u = (i + su) / (image_width - 1);
-                            const v = (j + sv) / (image_height - 1);
-
-                            const r = cam.get_ray(u, v);
-                            vec3_add_3(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
-                        }
-                    }
-
-
-                    for (let s = 0; s < stratification_remainder; s++) {
-                        ray_allocator.reset();
+                for (let sj = 0; sj < stratification_grid_size; sj++) {
+                    for (let si = 0; si < stratification_grid_size; si++) {
+                        vec3_allocator.reset();
                         quat_allocator.reset();
-                        const u = (i + Math.random()) / (image_width - 1);
-                        const v = (j + Math.random()) / (image_height - 1);
+                        const su = stratification_grid_step * (si + Math.random());
+                        const sv = stratification_grid_step * (sj + Math.random());
+
+                        const u = (i + su) / (image_width - 1);
+                        const v = (j + sv) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
                         vec3_add_3(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
-                postMessage({y, pixels: output_line_allocator.dump});
+
+
+                for (let s = 0; s < stratification_remainder; s++) {
+                    vec3_allocator.reset();
+                    quat_allocator.reset();
+                    const u = (i + Math.random()) / (image_width - 1);
+                    const v = (j + Math.random()) / (image_height - 1);
+
+                    const r = cam.get_ray(u, v);
+                    vec3_add_3(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
+                }
             }
-        });
+            postMessage({y, pixels: output_line_allocator.dump});
+        }
     });
 }

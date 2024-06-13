@@ -2,9 +2,11 @@ import { RenderParameters } from './types';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
 import { ArenaVec3Allocator } from './math/vec3_allocators';
-import { color, vec3_add_3, vec3_allocator_scope_async } from './math/vec3';
+import { color, use_vec3_allocator, vec3_add_3 } from './math/vec3';
 import { ray_color, ray_color_iterative } from './ray_color';
 import { ColorWriter } from './color-writers';
+import { async_run_with_hooks } from './utils';
+import { ArenaQuatAllocator, use_quat_allocator } from './math/quat';
 
 export async function single_threaded_render({
                                         aspect_ratio,
@@ -27,9 +29,12 @@ export async function single_threaded_render({
     const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
-    const ray_arena_allocator = new ArenaVec3Allocator(1024);
+    await async_run_with_hooks(async () => {
+        const vec3_allocator = new ArenaVec3Allocator(4096);
+        const quat_allocator = new ArenaQuatAllocator(640);
 
-    await vec3_allocator_scope_async(ray_arena_allocator, async () => {
+        use_vec3_allocator(vec3_allocator);
+        use_quat_allocator(quat_allocator);
         for (let j = 0; j < image_height; j++) {
             const mark = `scanline remaining ${image_height - j - 1}`;
             const y = image_height -1 - j;
@@ -40,7 +45,8 @@ export async function single_threaded_render({
 
                 for (let sj = 0; sj < stratification_grid_size; sj++) {
                     for (let si = 0; si < stratification_grid_size; si++) {
-                        ray_arena_allocator.reset();
+                        vec3_allocator.reset();
+                        quat_allocator.reset();
                         const su = stratification_grid_step * (si + Math.random());
                         const sv = stratification_grid_step * (sj + Math.random());
 
@@ -54,7 +60,8 @@ export async function single_threaded_render({
 
 
                 for (let s = 0; s < stratification_remainder; s++) {
-                    ray_arena_allocator.reset();
+                    vec3_allocator.reset();
+                    quat_allocator.reset();
                     const u = (i + Math.random()) / (image_width - 1);
                     const v = (j + Math.random()) / (image_height - 1);
 

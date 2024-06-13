@@ -18,3 +18,29 @@ export const format_time = (ms: number): string => {
 
     return `${pad_start(h, 2)}:${pad_start(m % 60, 2)}:${pad_start(s % 60, 2)}.${pad_start(ms % 1000, 3)}`;
 };
+
+const teardowns: Array<() => void> = [];
+export const run_with_hooks = <T>(f: () => T): T => {
+    teardowns.length = 0;
+    try {
+        return f();
+    } finally {
+        for (let i = 0; i < teardowns.length; i++){
+            teardowns[i]();
+        }
+    }
+};
+
+
+export const async_run_with_hooks = async <T>(f: () => Promise<T>): Promise<T> => {
+    teardowns.length = 0;
+    try {
+        return await f();
+    } finally {
+        for (let i = 0; i < teardowns.length; i++){
+            teardowns[i]();
+        }
+    }
+};
+
+export const run_hook = (f: () => () => void) => teardowns.push(f());
