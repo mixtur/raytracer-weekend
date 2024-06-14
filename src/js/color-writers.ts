@@ -23,7 +23,9 @@ export const create_canvas_color_writer = (image_width: number, image_height: nu
 
     return {
         write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number): void => {
-            let [r, g, b] = pixel_color;
+            let r = pixel_color[0];
+            let g = pixel_color[1];
+            let b = pixel_color[2];
             const scale = 1 / samples_per_pixel;
             r = Math.sqrt(r * scale);
             g = Math.sqrt(g * scale);
@@ -47,7 +49,9 @@ export const create_array_writer = (image_width: number, image_height: number, i
 
     return {
         write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number): void => {
-            let [r, g, b] = pixel_color;
+            let r = pixel_color[0];
+            let g = pixel_color[1];
+            let b = pixel_color[2];
             const scale = 1 / samples_per_pixel;
             r = Math.sqrt(r * scale);
             g = Math.sqrt(g * scale);
