@@ -18,7 +18,7 @@ export class MovingSphere extends Hittable {
     radius: number;
     material: MegaMaterial;
 
-    get_center(time: number, result: Vec3): void {
+    get_center(result: Vec3, time: number): void {
         const p = (time - this.time0) / this.dt;
         vec3_mix4(result, this.center0, this.center1, p);
     }
@@ -37,7 +37,7 @@ export class MovingSphere extends Hittable {
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const {radius} = this;
         const center = tmp1;
-        this.get_center(r.time, center);
+        this.get_center(center, r.time);
 
         vec3_sub_3(oc, r.origin, center);
         const a = vec3_dot(r.direction, r.direction);
@@ -69,8 +69,8 @@ export class MovingSphere extends Hittable {
         const c0 = tmp1;
         const c1 = tmp2;
 
-        this.get_center(time0, c0);
-        this.get_center(time1, c1);
+        this.get_center(c0, time0);
+        this.get_center(c1, time1);
         aabb.min[0] = Math.min(c0[0], c1[0]) - this.radius;
         aabb.min[1] = Math.min(c0[1], c1[1]) - this.radius;
         aabb.min[2] = Math.min(c0[2], c1[2]) - this.radius;

@@ -18,7 +18,6 @@ The following additional features are implemented
 
 TODO:
 - investigate noise in book2_final_scene
-- be consistent with order of arguments in math
 - make progressive enhancement more obvious (in multithreaded variant cast less rays in the beginning, and more towards the end)
 - report completeness to the page, not in console
 - fix noisy metals

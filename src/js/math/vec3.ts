@@ -43,27 +43,27 @@ export const vec3_add_3 = (result: Vec3, a: Vec3, b: Vec3): void => {
 };
 
 export const vec3_muls_2 = (a: Vec3, s: number): Vec3 => vec3(a[0] * s, a[1] * s, a[2] * s);
-export const vec3_muls_3 = (a: Vec3, b: Vec3, s: number): void => {
-    a[0] = b[0] * s;
-    a[1] = b[1] * s;
-    a[2] = b[2] * s;
+export const vec3_muls_3 = (result: Vec3, b: Vec3, s: number): void => {
+    result[0] = b[0] * s;
+    result[1] = b[1] * s;
+    result[2] = b[2] * s;
 };
 
 export const vec3_divs_2 = (a: Vec3, s: number): Vec3 => vec3(a[0] / s, a[1] / s, a[2] / s);
-export const vec3_divs_3 = (a: Vec3, b: Vec3, s: number): void => {
-    a[0] = b[0] / s;
-    a[1] = b[1] / s;
-    a[2] = b[2] / s;
+export const vec3_divs_3 = (result: Vec3, a: Vec3, s: number): void => {
+    result[0] = a[0] / s;
+    result[1] = a[1] / s;
+    result[2] = a[2] / s;
 };
 
 export const vec3_len = (a: Vec3): number => Math.hypot(a[0], a[1], a[2]);
 export const vec3_sq_len = (a: Vec3): number => a[0] ** 2 + a[1] ** 2 + a[2] ** 2;
 
 export const vec3_mulv_2 = (a: Vec3, b: Vec3): Vec3 => vec3(a[0] * b[0], a[1] * b[1], a[2] * b[2]);
-export const vec3_mulv_3 = (a: Vec3, b: Vec3, c: Vec3): void => {
-    a[0] = b[0] * c[0];
-    a[1] = b[1] * c[1];
-    a[2] = b[2] * c[2];
+export const vec3_mulv_3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+    result[0] = a[0] * b[0];
+    result[1] = a[1] * b[1];
+    result[2] = a[2] * b[2];
 };
 
 // a * b + c
@@ -187,10 +187,10 @@ export const vec3_rand1 = (v: Vec3): void => {
 }
 
 export const vec3_rand_min_max2 = (min: number, max: number): Vec3 => vec3(random_min_max(min, max), random_min_max(min, max), random_min_max(min, max));
-export const vec3_rand_min_max3 = (v: Vec3, min: number, max: number): void => {
-    v[0] = random_min_max(min, max);
-    v[1] = random_min_max(min, max);
-    v[2] = random_min_max(min, max);
+export const vec3_rand_min_max3 = (result: Vec3, min: number, max: number): void => {
+    result[0] = random_min_max(min, max);
+    result[1] = random_min_max(min, max);
+    result[2] = random_min_max(min, max);
 };
 
 export const vec3_rand_in_unit_sphere = (): Vec3 => {
@@ -201,10 +201,10 @@ export const vec3_rand_in_unit_sphere = (): Vec3 => {
     return v;
 };
 
-export const vec3_rand_in_unit_sphere1 = (v: Vec3): void => {
-    vec3_rand_min_max3(v, -1, 1);
-    while (vec3_sq_len(v) >= 1) {
-        vec3_rand_min_max3(v, -1, 1);
+export const vec3_rand_in_unit_sphere1 = (result: Vec3): void => {
+    vec3_rand_min_max3(result, -1, 1);
+    while (vec3_sq_len(result) >= 1) {
+        vec3_rand_min_max3(result, -1, 1);
     }
 };
 
@@ -223,7 +223,7 @@ export const vec3_rand_unit = (): Vec3 => {
     );
 };
 
-export const vec3_rand_unit1 = (v: Vec3): void => {
+export const vec3_rand_unit1 = (result: Vec3): void => {
     const r1 = Math.random();
     const r2 = Math.random() * Math.PI * 2;
     const cos_t = 1 - 2 * r1;
@@ -231,9 +231,9 @@ export const vec3_rand_unit1 = (v: Vec3): void => {
     const cos_p = Math.cos(r2);
     const sin_p = Math.sin(r2);
 
-    v[0] = sin_t * cos_p;
-    v[1] = sin_t * sin_p;
-    v[2] = cos_t;
+    result[0] = sin_t * cos_p;
+    result[1] = sin_t * sin_p;
+    result[2] = cos_t;
 };
 
 export const vec3_rand_unit_on_hemisphere = (): Vec3 => {
@@ -281,7 +281,7 @@ export const vec3_rand_cosine_unit = (): Vec3 => {
     );
 }
 
-export const vec3_rand_cosine_unit1 = (v: Vec3): void => {
+export const vec3_rand_cosine_unit1 = (result: Vec3): void => {
     const r1 = Math.random() * Math.PI * 2;
     const r2 = Math.random();
 
@@ -290,9 +290,9 @@ export const vec3_rand_cosine_unit1 = (v: Vec3): void => {
     const cos_t = Math.sqrt(1 - r2);
     const sin_t = Math.sqrt(r2);
 
-    v[0] = cos_p * sin_t;
-    v[1] = sin_p * sin_t;
-    v[2] = cos_t;
+    result[0] = cos_p * sin_t;
+    result[1] = sin_p * sin_t;
+    result[2] = cos_t;
 }
 
 export const vec3_random_in_hemisphere = (normal: Vec3) : Vec3 => {

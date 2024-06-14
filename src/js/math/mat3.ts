@@ -59,7 +59,7 @@ export const mul_mat3_vec3_2 = (mat: Mat3, vec: Vec3): Vec3 => {
     );
 };
 
-export const mul_mat3_vec3_3 = (mat: Mat3, vec: Vec3, result: Vec3): void => {
+export const mul_mat3_vec3_3 = (result: Vec3, mat: Mat3, vec: Vec3): void => {
     const x = vec[0];
     const y = vec[1];
     const z = vec[2];
@@ -82,7 +82,7 @@ export const mat3_from_z_1 = (base_z: Vec3): Mat3 => {
     );
 }
 
-export const mat3_from_z_2 = (base_z: Vec3, result: Mat3): void => {
+export const mat3_from_z_2 = (result: Mat3, base_z: Vec3): void => {
     const z = vec3_unit1(base_z);
     const a = (Math.abs(base_z[0]) < 0.9) ? vec3(1, 0, 0) : vec3(0, 1, 0);
     const x = vec3_cross2(z, a);
