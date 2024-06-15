@@ -65,30 +65,31 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
             point3(0, 150, 145), 50, create_metal(solid_color(0.8, 0.8, 0.9), 1.0)
         ));
 
-        let boundary = new Sphere(point3(360,150,145), 70, create_dielectric(1.5));
-        objects.objects.push(boundary);
-        objects.objects.push(new ConstantMedium(boundary, 0.2, create_isotropic_phase_function(solid_color(0.2, 0.4, 0.9))));
-        boundary = new Sphere(point3(0, 0, 0), 5000, create_dielectric(1.5));
-        objects.objects.push(new ConstantMedium(boundary, .0001, create_isotropic_phase_function(solid_color(1, 1, 1))));
+        const subsurface_scattering_sphere = new Sphere(point3(360,150,145), 70, create_dielectric(1.5));
+        objects.objects.push(subsurface_scattering_sphere);
+        objects.objects.push(new ConstantMedium(subsurface_scattering_sphere, 0.2, create_isotropic_phase_function(solid_color(0.2, 0.4, 0.9))));
+
+        const fog_boundary = new Sphere(point3(0, 0, 0), 5000, create_dielectric(1.5));
+        objects.objects.push(new ConstantMedium(fog_boundary, .0001, create_isotropic_phase_function(solid_color(1, 1, 1))));
         const earth_image_bitmap = await createImageBitmap(
             await fetch(earthUrl).then(res => res.blob())
         );
 
         const emat = create_lambertian(new ImageTexture(earth_image_bitmap));
         objects.objects.push(new Sphere(point3(400,200,400), 100, emat));
-        const pertext = new NoiseTexture(0.1);
+        const pertext = new NoiseTexture(0.2);
         objects.objects.push(new Sphere(point3(220,280,300), 80, create_lambertian(pertext)));
 
-        const boxes2: Hittable[] = [];
+        const spheres: Hittable[] = [];
         const white = create_lambertian(solid_color(.73, .73, .73));
         const ns = 1000;
         for (let j = 0; j < ns; j++) {
-            boxes2.push(new Sphere(vec3_rand_min_max2(0,165), 10, white));
+            spheres.push(new Sphere(vec3_rand_min_max2(0,165), 10, white));
         }
 
         objects.objects.push(new Translate(
                 new RotateY(
-                    new BVHNode(boxes2, 0.0, 1.0),
+                    new BVHNode(spheres, 0.0, 1.0),
                     15
                 ),
                 vec3(-100,270,395)
@@ -97,7 +98,12 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
 
         return {
             root_hittable: objects,
-            light: light_hittable,
+            // light: null,
+            // light: light_hittable,
+            light: new HittableList([
+                light_hittable,
+                subsurface_scattering_sphere
+            ]),
             create_camera(aspect_ratio: number): Camera {
                 const look_from = point3(478, 278, -600);
                 const look_at = point3(278, 278, 0);

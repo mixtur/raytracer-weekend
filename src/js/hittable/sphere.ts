@@ -1,5 +1,15 @@
 import { ray, Ray, ray_at3, ray_set } from '../math/ray';
-import { Point3, vec3_dot, vec3, vec3_divs_3, vec3_sub_3, Vec3, vec3_sub_2, vec3_sq_len } from '../math/vec3';
+import {
+    Point3,
+    vec3_dot,
+    vec3,
+    vec3_divs_3,
+    vec3_sub_3,
+    Vec3,
+    vec3_sub_2,
+    vec3_sq_len,
+    vec3_rand_unit, vec3_add_3
+} from '../math/vec3';
 import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';
@@ -78,7 +88,13 @@ export class Sphere extends Hittable {
             return 0;
         }
         const cone_axis = vec3_sub_2(this.center, origin);
-        const cos_theta_max = Math.sqrt(1 - clamp((this.radius ** 2) / vec3_sq_len(cone_axis), 0, 1));
+        const radius_2 = this.radius ** 2;
+        const cone_axis_sq_len = vec3_sq_len(cone_axis);
+        if (cone_axis_sq_len <= radius_2) {
+            return 1 / (Math.PI * 4);
+        }
+
+        const cos_theta_max = Math.sqrt(1 - radius_2 / cone_axis_sq_len);
         const solid_angle = 2 * Math.PI * (1 - cos_theta_max);
 
         return 1 / solid_angle;
@@ -86,7 +102,13 @@ export class Sphere extends Hittable {
 
     random(origin: Vec3): Vec3 {
         const cone_axis = vec3_sub_2(this.center, origin);
-        const cos_theta_max = Math.sqrt(1 - clamp((this.radius ** 2) / vec3_sq_len(cone_axis), 0, 1));
+        const radius_2 = this.radius ** 2;
+        const cone_axis_sq_len = vec3_sq_len(cone_axis);
+        if (cone_axis_sq_len <= radius_2) {
+            return vec3_rand_unit();
+        }
+
+        const cos_theta_max = Math.sqrt(1 - radius_2 / cone_axis_sq_len);
         const r1 = Math.random() * Math.PI * 2;
         const r2 = Math.random();
         const quat = quat_from_z_1(cone_axis);

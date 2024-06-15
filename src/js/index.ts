@@ -4,7 +4,7 @@ import { multi_threaded_render } from './multi_threaded_render';
 import { random_int_min_max } from './math/random';
 
 const aspect_ratio = 1;
-const image_width = 840;
+const image_width = 800;
 const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 1000;
 const max_depth = 50;

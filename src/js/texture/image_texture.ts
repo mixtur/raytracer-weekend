@@ -24,6 +24,6 @@ export class ImageTexture implements Texture {
         const g = data[offset + 1];
         const b = data[offset + 2];
 
-        return color(r / 255, g / 255, b / 255);
+        return color((r / 255) ** 2.2, (g / 255) ** 2.2, (b / 255) ** 2.2);
     }
 }
