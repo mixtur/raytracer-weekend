@@ -2,7 +2,7 @@ import {
     Point3,
     Vec3,
     vec3_add_2,
-    vec3_add_3, vec3_cross2,
+    vec3_add_3, vec3_cross_2,
     vec3_divs_2,
     vec3_muls_2, vec3_muls_3, vec3_muls_addv_4, vec3_rand_in_unit_disk,
     vec3_sub_2,
@@ -52,8 +52,8 @@ export class Camera {
         const viewport_width = aspect_ratio * viewport_height;
 
         this.w = vec3_unit1(vec3_sub_2(look_from, look_at));
-        this.u = vec3_unit1(vec3_cross2(v_up, this.w));
-        this.v = vec3_cross2(this.w, this.u);
+        this.u = vec3_unit1(vec3_cross_2(v_up, this.w));
+        this.v = vec3_cross_2(this.w, this.u);
 
         this.time0 = time0;
         this.time1 = time1;

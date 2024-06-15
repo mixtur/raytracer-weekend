@@ -77,31 +77,31 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
         }
         const emission = hit.material.emit(hit.material, r, hit);
         vec3_mulv_addv_4(total_emission, total_attenuation, emission, total_emission);
-        if (hit.material.scatter(hit.material, r, hit, bounce)) {
-            const on_light = point3(random_min_max(213, 343), 554, random_min_max(227, 332));
-            const to_light = vec3_sub_2(on_light, hit.p);
-            const distance_squared = vec3_sq_len(to_light);
-            vec3_muls_3(to_light, to_light, 1 / Math.sqrt(distance_squared));
-
-            if (vec3_dot(to_light, hit.normal) < 0) {
-                break;
-            }
-
-            const light_area = (343 - 213) * (332 - 227);
-            const light_cosine = Math.abs(to_light[1]);
-            if (light_cosine < 0.000001) {
-                break;
-            }
-
-            bounce.sampling_pdf = distance_squared / (light_cosine * light_area);
-            const pdf_factor = hit.material.scattering_pdf.value(scattered.direction) /  bounce.sampling_pdf;
-            ray_set(scattered, hit.p, to_light, r.time);
-
-            vec3_mulv_3(total_attenuation, total_attenuation, vec3_muls_2(bounce.attenuation, pdf_factor));
-            r = scattered;
-        } else {
+        if (!hit.material.scatter(hit.material, r, hit, bounce)) {
             break;
         }
+
+        let pdf_factor = 1;
+        if (bounce.skip_pdf) {
+            ray_set(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
+        } else {
+            let pdf = bounce.scatter_pdf;
+            if (lights !== null) {
+                light_pdf.hittable = lights;
+                light_pdf.origin = hit.p;
+                mix_pdf.pdf1 = light_pdf;
+                mix_pdf.pdf2 = pdf;
+                pdf = mix_pdf;
+            }
+
+            ray_set(scattered, hit.p, pdf.generate(), r.time);
+            bounce.sampling_pdf = pdf.value(scattered.direction);
+
+            pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / bounce.sampling_pdf;
+        }
+
+        vec3_mulv_3(total_attenuation, total_attenuation, vec3_muls_2(bounce.attenuation, pdf_factor));
+        r = scattered;
     }
     return total_emission;
 };

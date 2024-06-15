@@ -4,7 +4,7 @@ import {
     Vec3,
     vec3_add_2,
     vec3_add_3,
-    vec3_cross2, vec3_divs_2,
+    vec3_cross_2, vec3_cross_3, vec3_divs_2,
     vec3_dot, vec3_len, vec3_muls_addv_3, vec3_muls_addv_4, vec3_sq_len,
     vec3_sub_2, vec3_sub_3,
     vec3_unit2
@@ -15,6 +15,7 @@ import { ray, Ray, ray_at2, ray_set } from '../math/ray';
 
 const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
+const tmp_cross = vec3(0, 0, 0);
 
 export class Quad extends Hittable {
     q: Point3;
@@ -33,7 +34,7 @@ export class Quad extends Hittable {
         this.u = u;
         this.v = v;
         this.mat = mat;
-        this.normal = vec3_cross2(u, v);
+        this.normal = vec3_cross_2(u, v);
         this.area = vec3_len(this.normal);
         this.w = vec3_divs_2(this.normal, vec3_dot(this.normal, this.normal));
         vec3_unit2(this.normal, this.normal);
@@ -71,8 +72,10 @@ export class Quad extends Hittable {
 
         const intersection = ray_at2(r, t);
         const planar_hitpt_vector = vec3_sub_2(intersection, this.q);
-        const a = vec3_dot(this.w, vec3_cross2(planar_hitpt_vector, this.v));
-        const b = vec3_dot(this.w, vec3_cross2(this.u, planar_hitpt_vector));
+        vec3_cross_3(tmp_cross, planar_hitpt_vector, this.v)
+        const a = vec3_dot(this.w, tmp_cross);
+        vec3_cross_3(tmp_cross, this.u, planar_hitpt_vector)
+        const b = vec3_dot(this.w, tmp_cross);
 
         if (!this.is_interior(a, b, hit)) {
             return false;

@@ -1,7 +1,7 @@
 import {
     vec3,
     Vec3,
-    vec3_cross3,
+    vec3_cross_3,
     vec3_dot,
     vec3_orthogonal_2,
     z_vec3,
@@ -74,7 +74,7 @@ const tmp_vec = vec3(0, 0, 0);
 export const quat_from_z_1 = (_new_z: Vec3): Quat => {
     const new_z = tmp_vec;
     vec3_unit2(new_z, _new_z);
-    vec3_cross3(im, z_vec3, new_z);
+    vec3_cross_3(im, z_vec3, new_z);
     const result = quat(
         im[0],
         im[1],
@@ -97,7 +97,7 @@ export const quat_from_z_1 = (_new_z: Vec3): Quat => {
 }
 
 export const quat_from_z_2 = (result: Quat, new_z: Vec3): void => {
-    vec3_cross3(im, z_vec3, new_z);
+    vec3_cross_3(im, z_vec3, new_z);
     result[0] = im[0];
     result[1] = im[1];
     result[2] = im[2];

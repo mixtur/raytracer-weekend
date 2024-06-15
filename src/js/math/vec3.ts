@@ -101,7 +101,7 @@ export const vec3_dot = (a: Vec3, b: Vec3): number => {
          + a[2] * b[2];
 }
 
-export const vec3_cross2 = (a: Vec3, b: Vec3): Vec3 => {
+export const vec3_cross_2 = (a: Vec3, b: Vec3): Vec3 => {
     return vec3(
         a[1] * b[2] - a[2] * b[1],
         a[2] * b[0] - a[0] * b[2],
@@ -109,7 +109,7 @@ export const vec3_cross2 = (a: Vec3, b: Vec3): Vec3 => {
     );
 };
 
-export const vec3_cross3 = (result: Vec3, a: Vec3, b: Vec3): void => {
+export const vec3_cross_3 = (result: Vec3, a: Vec3, b: Vec3): void => {
     const x =   a[1] * b[2] - a[2] * b[1];
     const y =   a[2] * b[0] - a[0] * b[2];
     result[2] = a[0] * b[1] - a[1] * b[0];
@@ -123,7 +123,7 @@ export const z_vec3 = vec3(0, 0, 1);
 
 export const vec3_orthogonal_1 = (v: Vec3): Vec3 => {
     const t = v[0] > 0.9 ? y_vec3 : x_vec3;
-    return vec3_cross2(t, v);
+    return vec3_cross_2(t, v);
 }
 
 export const vec3_orthogonal_2 = (result: Vec3, v: Vec3): void => {

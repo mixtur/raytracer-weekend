@@ -1,4 +1,4 @@
-import { vec3, Vec3, vec3_cross2, vec3_unit1 } from './vec3';
+import { vec3, Vec3, vec3_cross_2, vec3_unit1 } from './vec3';
 import { run_hook } from '../utils';
 
 //matrices are column-major
@@ -72,8 +72,8 @@ export const mul_mat3_vec3_3 = (result: Vec3, mat: Mat3, vec: Vec3): void => {
 export const mat3_from_z_1 = (base_z: Vec3): Mat3 => {
     const z = vec3_unit1(base_z);
     const a = (Math.abs(base_z[0]) < 0.9) ? vec3(1, 0, 0) : vec3(0, 1, 0);
-    const x = vec3_cross2(z, a);
-    const y = vec3_cross2(z, x);
+    const x = vec3_cross_2(z, a);
+    const y = vec3_cross_2(z, x);
 
     return mat3(
         x[0], x[1], x[2],
@@ -85,8 +85,8 @@ export const mat3_from_z_1 = (base_z: Vec3): Mat3 => {
 export const mat3_from_z_2 = (result: Mat3, base_z: Vec3): void => {
     const z = vec3_unit1(base_z);
     const a = (Math.abs(base_z[0]) < 0.9) ? vec3(1, 0, 0) : vec3(0, 1, 0);
-    const x = vec3_cross2(z, a);
-    const y = vec3_cross2(z, x);
+    const x = vec3_cross_2(z, a);
+    const y = vec3_cross_2(z, x);
 
     result[0] = x[0];
     result[1] = x[1];
