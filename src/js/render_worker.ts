@@ -14,6 +14,8 @@ import { run_with_hooks } from './utils';
 export interface RenderWorkerMessageData {
     y: number;
     pixels: Float64Array;
+    //assuming it can be different from line to line
+    samples_per_pixel: number;
 }
 
 onmessage = (ev: MessageEvent<RenderWorkerMessage>) => {
@@ -84,7 +86,12 @@ async function render({
                     vec3_add_3(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
             }
-            postMessage({y, pixels: output_line_allocator.dump});
+            const message: RenderWorkerMessageData = {
+                y,
+                pixels: output_line_allocator.dump,
+                samples_per_pixel
+            };
+            postMessage(message);
         }
     });
 }

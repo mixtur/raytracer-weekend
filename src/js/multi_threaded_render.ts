@@ -8,30 +8,30 @@ export async function multi_threaded_render(thread_number: number, render_parame
     const {
         image_width,
         image_height,
-        samples_per_pixel,
+        samples_per_pixel: total_samples_per_pixel,
         aspect_ratio,
         max_depth,
         scene_creation_random_numbers,
         line_order
     } = render_parameters;
 
-    thread_number = Math.min(thread_number, samples_per_pixel);
+    thread_number = Math.min(thread_number, total_samples_per_pixel);
 
     //todo: make it so that every thread handles first few lines quickly, and then slows down.
     //      In that case we'll get some image quickly and then its refinement will still be apparent
 
     const { write_color, dump_line, dump_image } = writer;
     const output_buffer = new Float64Array(image_width * image_height * 3);
-    const output_line_completeness = new Uint8Array(image_height);
+    const rays_casted_per_line = new Uint32Array(image_height);
     const promises = [];
     let samples_sent = 0;
-    const total_rays = image_width * image_height * samples_per_pixel;
+    const total_rays = image_width * image_height * total_samples_per_pixel;
     let done_rays = 0;
     const t0 = performance.now();
     for (let i = 0; i < thread_number; i++) {
         const worker = new Worker(new URL('./render_worker.js', import.meta.url), {type: 'module'});
         let event_count = 0;
-        const samples_to_send = Math.floor((i + 1) * samples_per_pixel / thread_number) - samples_sent;
+        const samples_to_send = Math.floor((i + 1) * total_samples_per_pixel / thread_number) - samples_sent;
         samples_sent += samples_to_send;
         // note: tried to use transferables explicitly, but it seems Chrome doesn't care. It even makes things slightly slower.
         worker.postMessage({
@@ -49,8 +49,8 @@ export async function multi_threaded_render(thread_number: number, render_parame
         promises.push(new Promise<void>(resolve => {
             worker.onmessage = (ev: MessageEvent): void => {
                 event_count++;
-                const {y, pixels} = ev.data as RenderWorkerMessageData;
-                const completeness = ++output_line_completeness[y];
+                const {y, pixels, samples_per_pixel} = ev.data as RenderWorkerMessageData;
+                rays_casted_per_line[y] += samples_per_pixel;
                 const y_offset = y * image_width * 3;
                 for (let line_component_index = 0; line_component_index < image_width * 3; line_component_index++) {
                     output_buffer[y_offset + line_component_index] += pixels[line_component_index];
@@ -60,7 +60,7 @@ export async function multi_threaded_render(thread_number: number, render_parame
                     tmp_color[0] = output_buffer[y_offset + x * 3];
                     tmp_color[1] = output_buffer[y_offset + x * 3 + 1];
                     tmp_color[2] = output_buffer[y_offset + x * 3 + 2];
-                    write_color(x, y, tmp_color, samples_per_pixel * completeness / thread_number);
+                    write_color(x, y, tmp_color, rays_casted_per_line[y]);
                 }
                 dump_line(y);
 
