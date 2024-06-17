@@ -17,9 +17,6 @@ export async function multi_threaded_render(thread_number: number, render_parame
 
     thread_number = Math.min(thread_number, total_samples_per_pixel);
 
-    //todo: make it so that every thread handles first few lines quickly, and then slows down.
-    //      In that case we'll get some image quickly and then its refinement will still be apparent
-
     const { write_color, dump_line, dump_image } = writer;
     const output_buffer = new Float64Array(image_width * image_height * 3);
     const rays_casted_per_line = new Uint32Array(image_height);
