@@ -1,21 +1,26 @@
-import { RenderParameters, RenderWorkerMessage } from './types';
+import { RenderParameters, RenderWorkerParametersMessage } from './types';
 import { ColorWriter } from './color-writers';
 import { RenderWorkerMessageData } from './render_worker';
 import { color } from './math/vec3';
-import { format_time } from './utils';
+import { ProgressReporter } from './progress-reporters';
 
-export async function multi_threaded_render(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter): Promise<void> {
+export async function multi_threaded_render(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter, progress_reporter: ProgressReporter): Promise<void> {
     const {
         image_width,
         image_height,
         samples_per_pixel: total_samples_per_pixel,
         aspect_ratio,
         max_depth,
-        scene_creation_random_numbers,
         line_order
     } = render_parameters;
 
     thread_number = Math.min(thread_number, total_samples_per_pixel);
+
+    //this is needed for all threads to work on the same scene, that is yet random. (didn't want to bother with seeded random)
+    const scene_creation_random_numbers = [];
+    for (let i = 0; i < 2048; i++) {
+        scene_creation_random_numbers.push(Math.random());
+    }
 
     const { write_color, dump_line, dump_image } = writer;
     const output_buffer = new Float64Array(image_width * image_height * 3);
@@ -23,7 +28,6 @@ export async function multi_threaded_render(thread_number: number, render_parame
     const promises = [];
     let samples_sent = 0;
     const total_rays = image_width * image_height * total_samples_per_pixel;
-    let done_rays = 0;
     const t0 = performance.now();
     for (let i = 0; i < thread_number; i++) {
         const worker = new Worker(new URL('./render_worker.js', import.meta.url), {type: 'module'});
@@ -40,7 +44,7 @@ export async function multi_threaded_render(thread_number: number, render_parame
             scene_creation_random_numbers,
             first_line_index: Math.floor(i / thread_number * image_height),
             line_order
-        } as RenderWorkerMessage);
+        } as RenderWorkerParametersMessage);
 
         const tmp_color = color(0, 0, 0);
         promises.push(new Promise<void>(resolve => {
@@ -60,26 +64,22 @@ export async function multi_threaded_render(thread_number: number, render_parame
                     write_color(x, y, tmp_color, rays_casted_per_line[y]);
                 }
                 dump_line(y);
-
-                done_rays += image_width * samples_to_send;
-                if (Math.random() < 100 / (image_height * thread_number)) {
-                    const dt = performance.now() - t0;
-                    const speed = done_rays / dt;
-                    const estimated_total_time = total_rays / speed;
-                    console.log(`[${format_time(dt)} / ${format_time(estimated_total_time)}]: casted ${(done_rays / total_rays * 100).toFixed(2).padStart(5)}% of all rays`);
-                }
+                const dt = performance.now() - t0;
+                progress_reporter.report(i, y, samples_per_pixel * image_width, total_rays, dt);
 
                 if (event_count === image_height) {
-                    console.log(`Thread #${i} - done`);
+                    progress_reporter.report_thread_done(i);
                     resolve();
                 }
             };
-        }))
+        }));
     }
 
     for (const p of promises) {
         await p;
     }
 
+    const total_time_ms = performance.now() - t0;
+    progress_reporter.report_done(total_rays, total_time_ms);
     dump_image();
 }

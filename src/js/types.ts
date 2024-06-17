@@ -4,10 +4,10 @@ export interface RenderParameters {
     image_height: number,
     samples_per_pixel: number,
     max_depth: number,
-    scene_creation_random_numbers: number[],
     line_order: Uint16Array
 }
 
-export interface RenderWorkerMessage extends RenderParameters {
+export interface RenderWorkerParametersMessage extends RenderParameters {
+    scene_creation_random_numbers: number[],
     first_line_index: number;
 }

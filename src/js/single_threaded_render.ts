@@ -13,13 +13,17 @@ export async function single_threaded_render({
                                         image_height,
                                         image_width,
                                         samples_per_pixel,
-                                        max_depth,
-                                        scene_creation_random_numbers
+                                        max_depth
                                     }: RenderParameters, writer: ColorWriter) {
     const { write_color, dump_line, dump_image } = writer;
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
     const stratification_grid_step = 1 / stratification_grid_size;
+
+    const scene_creation_random_numbers = [];
+    for (let i = 0; i < 2048; i++) {
+        scene_creation_random_numbers.push(Math.random());
+    }
 
 //    const scene = await create_earth_scene();
 //    const scene = lots_of_spheres;

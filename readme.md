@@ -5,10 +5,9 @@ It is written in TypeScript.
 The following additional features are implemented
 - grid instead of BVH when applicable
 - cheaper box intersection tests
-- arena allocators for everything. It is less of a problem in the books, because they use C++ for code examples, but in JS it makes a notable difference because raytracing tends to create a lot of temporary objects, and GC is not happy about it.
+- zero allocations while rendering
 - multithreaded rendering
-- quaternions for changing PDFs orientations 
-
+- quaternions for changing PDFs orientations
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -17,7 +16,6 @@ The following additional features are implemented
 ```
 
 TODO:
-- report completeness to the page, not in console
 - fix noisy metals
 - affine matrices
 - better tone mapping

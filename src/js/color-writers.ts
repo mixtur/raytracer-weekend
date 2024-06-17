@@ -7,7 +7,7 @@ export interface ColorWriter {
     write_color: (x: number, y: number, pixelColor: Color, samples_per_pixel: number) => void;
 }
 
-export const create_canvas_color_writer = (image_width: number, image_height: number): ColorWriter => {
+export const create_canvas_color_writer = (image_width: number, image_height: number, container: HTMLElement): ColorWriter => {
     const canvas = document.createElement('canvas');
     const _ctx = canvas.getContext('2d');
     if (_ctx === null) {
@@ -17,7 +17,7 @@ export const create_canvas_color_writer = (image_width: number, image_height: nu
     const ctx = _ctx;
     canvas.width = image_width;
     canvas.height = image_height;
-    document.body.appendChild(canvas);
+    container.appendChild(canvas);
 
     const image_data = new ImageData(image_width, image_height);
 

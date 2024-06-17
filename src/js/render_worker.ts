@@ -1,6 +1,6 @@
 import { use_vec3_allocator, vec3_add_3 } from './math/vec3';
 import { ray_color, ray_color_iterative } from './ray_color';
-import { RenderWorkerMessage } from './types';
+import { RenderWorkerParametersMessage } from './types';
 import { ArenaVec3Allocator } from './math/vec3_allocators';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
@@ -18,7 +18,7 @@ export interface RenderWorkerMessageData {
     samples_per_pixel: number;
 }
 
-onmessage = (ev: MessageEvent<RenderWorkerMessage>) => {
+onmessage = (ev: MessageEvent<RenderWorkerParametersMessage>) => {
     render(ev.data);
 };
 
@@ -28,20 +28,24 @@ async function render({
                           image_width,
                           samples_per_pixel,
                           max_depth,
-                          scene_creation_random_numbers,
                           line_order,
                           first_line_index
-                      }: RenderWorkerMessage): Promise<void> {
+                      }: RenderWorkerParametersMessage): Promise<void> {
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
     const stratification_grid_step = 1 / stratification_grid_size;
 
-//    const scene = await create_earth_scene();
-//    const scene = book1_final_scene(scene_creation_random_numbers);
-//    const scene = simple_light;
+    // const scene_creation_random_numbers = [];
+    // for (let i = 0; i < 2048; i++) {
+    //     scene_creation_random_numbers.push(Math.random());
+    // }
+
+    // const scene = await create_earth_scene();
+    // const scene = book1_final_scene(scene_creation_random_numbers);
+    // const scene = simple_light;
     const scene = cornell_box;
-//    const scene = cornell_box_with_smoke;
-//    const scene = await book2_final_scene(scene_creation_random_numbers);
+    // const scene = cornell_box_with_smoke;
+    // const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
 
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
