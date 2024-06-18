@@ -1,5 +1,5 @@
 import { create_array_writer, create_canvas_color_writer } from './color-writers';
-import { single_threaded_render } from './single_threaded_render';
+// import { single_threaded_render } from './single_threaded_render';
 import { multi_threaded_render } from './multi_threaded_render';
 import { generate_random_permutation_u16, generate_straight_order_u16 } from './utils';
 import { DomProgressReporter, ConsoleProgressReporter } from './progress-reporters';
@@ -7,7 +7,7 @@ import { DomProgressReporter, ConsoleProgressReporter } from './progress-reporte
 const aspect_ratio = 1;
 const image_width = 800;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 1000;
+const samples_per_pixel = 100;
 const max_depth = 50;
 
 const writer = create_canvas_color_writer(image_width, image_height, document.getElementById('render') as HTMLDivElement);
@@ -33,14 +33,14 @@ multi_threaded_render(thread_count, {
     console.log(e);
 });
 
-
-single_threaded_render({
-    aspect_ratio,
-    image_width,
-    image_height,
-    samples_per_pixel,
-    max_depth,
-    line_order: generate_random_permutation_u16(image_height)
-}, writer).catch((e) => {
-    console.log(e);
-});
+//
+// single_threaded_render({
+//     aspect_ratio,
+//     image_width,
+//     image_height,
+//     samples_per_pixel,
+//     max_depth,
+//     line_order: generate_random_permutation_u16(image_height)
+// }, writer).catch((e) => {
+//     console.log(e);
+// });

@@ -16,7 +16,6 @@ The following additional features are implemented
 ```
 
 TODO:
-- fix noisy metals
 - affine matrices
 - better tone mapping
 - HDR backgrounds

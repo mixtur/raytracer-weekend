@@ -32,4 +32,12 @@ export class Translate extends Hittable {
         vec3_add_3(aabb.min, aabb.min, this.displacement);
         vec3_add_3(aabb.max, aabb.max, this.displacement);
     }
+
+    random(origin: Vec3): Vec3 {
+        return this.obj.random(vec3_sub_2(origin, this.displacement));
+    }
+
+    pdf_value(origin: Vec3, direction: Vec3): number {
+        return this.obj.pdf_value(vec3_sub_2(origin, this.displacement), direction);
+    }
 }

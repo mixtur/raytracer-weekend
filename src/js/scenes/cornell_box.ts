@@ -26,7 +26,15 @@ const hittables = run_with_hooks(() => {
     const light = create_diffuse_light(solid_color(15, 15, 15));
 
     const light_hittable = new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
+    const metal_box = new Translate(
+        new RotateY(
+            new Box(point3(0, 0, 0), point3(165, 330, 165), aluminum),
+            15
+        ),
+        vec3(265, 0, 295)
+    );
 
+    const glass_sphere = new Sphere(point3(190,90,190), 90, glass);
     const root = new HittableList([
         new Quad(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green),
         new Quad(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red),
@@ -35,14 +43,8 @@ const hittables = run_with_hooks(() => {
         new Quad(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
         new Quad(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white),
 
-        new Translate(
-            new RotateY(
-                new Box(point3(0, 0, 0), point3(165, 330, 165), white),
-                15
-            ),
-            vec3(265, 0, 295)
-        ),
-        new Sphere(point3(190,90,190), 90, glass),
+        metal_box,
+        glass_sphere,
         // new Translate(
         //     new RotateY(
         //         new Box(point3(0, 0, 0), point3(165, 165, 165), white),
@@ -56,7 +58,8 @@ const hittables = run_with_hooks(() => {
         root,
         light: new HittableList([
             light_hittable,
-            new Sphere(point3(190,90,190), 90, glass)
+            glass_sphere,
+            metal_box
         ])
     };
 });

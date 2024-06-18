@@ -44,11 +44,11 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
         return emitted;
     }
 
+    let pdf = bounce.scatter_pdf;
     let pdf_factor = 1;
     if (bounce.skip_pdf) {
         ray_set(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
     } else {
-        let pdf = bounce.scatter_pdf;
         if (lights !== null) {
             light_pdf.hittable = lights;
             light_pdf.origin = hit.p;
@@ -64,7 +64,20 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
     }
 
     const bounce_color = ray_color(scattered, background, world, lights, depth - 1);
-    return vec3_mulv_addv_3(bounce_color, vec3_muls_2(bounce.attenuation, pdf_factor), emitted);
+    const result = vec3_mulv_addv_3(bounce_color, vec3_muls_2(bounce.attenuation, pdf_factor), emitted);
+    if (isNaN(result[0]) || isNaN(result[1]) || isNaN(result[2])) {
+        console.log(
+            pdf,
+            bounce,
+            pdf_factor,
+            emitted
+        );
+        debugger;
+        if (bounce.sampling_pdf === 0) {
+            pdf.value(scattered.direction);
+        }
+    }
+    return result;
 }
 
 export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {

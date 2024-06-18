@@ -74,12 +74,14 @@ const tmp_vec = vec3(0, 0, 0);
 export const quat_from_z_1 = (_new_z: Vec3): Quat => {
     const new_z = tmp_vec;
     vec3_unit2(new_z, _new_z);
-    vec3_cross_3(im, z_vec3, new_z);
+    // we use these two lines as a special case of vec3_cross_3(im, z_vec3, new_z);
+    im[0] = - new_z[1];
+    im[1] = new_z[0];
     const result = quat(
         im[0],
         im[1],
         im[2],
-        vec3_dot(new_z, z_vec3) + 1
+        new_z[2] + 1 // new_z[2] is a special case of vec3_dot(z_vec3, new_z)
     );
 
     const sq_len = quat_sq_len(result);
@@ -97,11 +99,12 @@ export const quat_from_z_1 = (_new_z: Vec3): Quat => {
 }
 
 export const quat_from_z_2 = (result: Quat, new_z: Vec3): void => {
-    vec3_cross_3(im, z_vec3, new_z);
+    im[0] = - new_z[1];
+    im[1] = new_z[0];
     result[0] = im[0];
     result[1] = im[1];
     result[2] = im[2];
-    result[3] = vec3_dot(new_z, z_vec3) + 1;
+    result[3] = new_z[2] + 1;
 
     const sq_len = quat_sq_len(result);
     if (sq_len < 0.00001) {

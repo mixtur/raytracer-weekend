@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
-import { point3, vec3, vec3_set } from '../math/vec3';
+import { point3, Vec3, vec3, vec3_set } from '../math/vec3';
 import { Ray, ray_allocator } from '../math/ray';
 import { degrees_to_radians } from '../utils';
 
@@ -76,5 +76,38 @@ export class RotateY extends Hittable {
     get_bounding_box(time0: number, time1: number, aabb: AABB): void {
         aabb.min.set(this.aabb.min);
         aabb.max.set(this.aabb.max);
+    }
+
+    random(origin: Vec3): Vec3 {
+        const { cos_theta, sin_theta } = this;
+        const new_origin = vec3(
+            cos_theta * origin[0] - sin_theta * origin[2],
+            origin[1],
+            sin_theta * origin[0] + cos_theta * origin[2]
+        );
+
+        const child_result = this.obj.random(new_origin);
+
+        return vec3(
+            cos_theta * child_result[0] + sin_theta * child_result[2],
+            child_result[1],
+            -sin_theta * child_result[0] + cos_theta * child_result[2]
+        );
+    }
+
+    pdf_value(origin: Vec3, direction: Vec3): number {
+        const { cos_theta, sin_theta } = this;
+        const new_origin = vec3(
+            cos_theta * origin[0] - sin_theta * origin[2],
+            origin[1],
+            sin_theta * origin[0] + cos_theta * origin[2]
+        );
+        const new_direction = vec3(
+            cos_theta * direction[0] - sin_theta * direction[2],
+            direction[1],
+            sin_theta * direction[0] + cos_theta * direction[2]
+        );
+
+        return this.obj.pdf_value(new_origin, new_direction);
     }
 }
