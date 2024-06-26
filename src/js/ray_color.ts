@@ -24,16 +24,12 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
         return color(0, 0, 0);
     }
     if (!world.hit(r, 0.0001, Infinity, hit)) {
-        // console.log('background');
         return background;
     }
     const emitted = hit.material.emit(hit.material, r, hit);
     if (!hit.material.scatter(hit.material, r, hit, bounce)) {
-        // console.log('no hit');
         return emitted;
     }
-
-    // console.log('hit');
 
     let pdf = bounce.scatter_pdf;
     let pdf_factor = 1;

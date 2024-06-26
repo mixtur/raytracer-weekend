@@ -78,7 +78,7 @@ const gen_unit = (use_result_arg) => {
     return gen_fn(name, signature, body, use_result_arg);
 }
 
-const gen_newz_rotation = (use_result_arg) => {
+const gen_newz_to_quat = (use_result_arg) => {
     const name = 'newz_to_quat';
     const signature = gen_signature(use_result_arg, sig('Quat', '_new_z: Vec3'));
     const body = [
@@ -118,6 +118,29 @@ const gen_newz_rotation = (use_result_arg) => {
 
     return gen_fn(name, signature, body, use_result_arg);
 };
+
+const gen_axis_angle_to_quat = (use_result_arg) => {
+    const name = 'axis_angle_to_quat';
+    const signature = gen_signature(use_result_arg, sig('Quat', 'axis: Vec3, angle: number'));
+    const preamble = [
+        `const halfAngle = angle * 0.5;`,
+        `const sin = Math.sin(halfAngle);`,
+    ].map(x => ind + x).join('\n');
+
+    const components = [
+        `sin * axis[0]`,
+        `sin * axis[1]`,
+        `sin * axis[2]`,
+        `Math.cos(halfAngle)`,
+    ];
+
+    const body = [
+        preamble,
+        gen_output(use_result_arg, 'quat', components)
+    ].join('\n\n');
+
+    return gen_fn(name, signature, body, use_result_arg);
+}
 
 const gen_mul_quat_vec = (use_result_arg) => {
     const name = 'mul_quat_vec3';
@@ -161,8 +184,9 @@ export const gen_quat_module = () => {
         preamble,
         ...[
             gen_unit,
-            gen_newz_rotation,
-            gen_mul_quat_vec
+            gen_newz_to_quat,
+            gen_mul_quat_vec,
+            gen_axis_angle_to_quat
         ].flatMap(f => [f(false), f(true)])
     ].join('\n\n') + '\n';
 

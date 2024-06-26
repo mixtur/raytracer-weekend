@@ -17,6 +17,7 @@ The following additional features are implemented
 
 TODO:
 - affine matrices
+- matrix-based camera
 - better tone mapping
 - HDR backgrounds
 - micro-facets

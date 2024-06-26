@@ -129,12 +129,12 @@ const dot_vec3 = (a, b) => {
 const gen_cross = (use_result_arg) => {
     const name = 'cross_vec3';
     const signature = gen_signature(use_result_arg, sig('Vec3', 'a: Vec3, b: Vec3'));
-    const components = [
-        `a[1] * b[2] - a[2] * b[1]`,
-        `a[2] * b[0] - a[0] * b[2]`,
-        `a[0] * b[1] - a[1] * b[0]`,
-    ];
-    const body = gen_output(use_result_arg, 'vec3', components);
+    const body = [
+        ind + `const x = a[1] * b[2] - a[2] * b[1];`,
+        ind + `const y = a[2] * b[0] - a[0] * b[2];`,
+        ind + `const z = a[0] * b[1] - a[1] * b[0];`,
+        gen_output(use_result_arg, 'vec3', ['x', 'y', 'z'])
+    ].join('\n');
     return gen_fn(name, signature, body, use_result_arg);
 }
 

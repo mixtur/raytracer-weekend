@@ -9,6 +9,7 @@ import { book1_final_scene } from './scenes/book-1-final-scene';
 import { create_earth_scene } from './scenes/earth';
 import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { run_with_hooks } from './utils';
+import { cornell_box_matrix } from './scenes/cornell_box_matrix';
 
 export interface RenderWorkerMessageData {
     y: number;
@@ -43,7 +44,8 @@ async function render({
     // const scene = await create_earth_scene();
     // const scene = book1_final_scene(scene_creation_random_numbers);
     // const scene = simple_light;
-    const scene = cornell_box;
+    // const scene = cornell_box;
+    const scene = cornell_box_matrix;
     // const scene = cornell_box_with_smoke;
     // const scene = await book2_final_scene(scene_creation_random_numbers);
     const cam = scene.create_camera(aspect_ratio);
