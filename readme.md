@@ -8,6 +8,7 @@ The following additional features are implemented
 - zero allocations while rendering
 - multithreaded rendering
 - quaternions for changing PDFs orientations
+- some gltf support
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -16,15 +17,12 @@ The following additional features are implemented
 ```
 
 TODO:
-- affine matrices
 - matrix-based camera
 - better tone mapping
 - HDR backgrounds
 - micro-facets
 - non-transparent dielectrics
-- triangles-based geometry
 - glTF
-  - positions only
   - add normals
   - albedo map
   - normal map

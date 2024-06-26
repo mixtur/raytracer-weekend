@@ -16,6 +16,7 @@ import { degrees_to_radians, run_with_hooks } from '../utils';
 import { Transform } from '../hittable/transform';
 import { trs_to_mat3x4 } from '../math/mat3.gen';
 import { axis_angle_to_quat, quat } from '../math/quat.gen';
+import { Triangle } from '../hittable/triangle';
 
 const hittables = run_with_hooks(() => {
     use_vec3_allocator(new ArenaVec3Allocator(128));
@@ -27,7 +28,12 @@ const hittables = run_with_hooks(() => {
     const green = create_lambertian(solid_color(.12, .45, .15));
     const light = create_diffuse_light(solid_color(15, 15, 15));
 
-    const light_hittable = new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
+    const light_hittable = new Triangle(
+        point3(343, 554, 332),
+        point3(213, 554, 332),
+        point3(343, 554, 227),
+        light
+    );
     const metal_box = new Transform(
         trs_to_mat3x4(
             vec3(265, 0, 295),
