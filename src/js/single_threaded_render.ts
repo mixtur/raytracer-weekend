@@ -1,12 +1,12 @@
 import { RenderParameters } from './types';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
-import { ArenaVec3Allocator } from './math/vec3_allocators';
-import { color, use_vec3_allocator, vec3_add_3 } from './math/vec3';
+import { two_spheres } from './scenes/two_spheres';
+import { add_vec3_r, ArenaVec3Allocator, color, use_vec3_allocator } from './math/vec3.gen';
 import { ray_color, ray_color_iterative } from './ray_color';
 import { ColorWriter } from './color-writers';
 import { async_run_with_hooks } from './utils';
-import { ArenaQuatAllocator, use_quat_allocator } from './math/quat';
+import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 
 export async function single_threaded_render({
                                         aspect_ratio,
@@ -29,8 +29,9 @@ export async function single_threaded_render({
 //    const scene = lots_of_spheres;
 //    const scene = simple_light;
 //    const scene = cornell_box;
-//    const scene = cornell_box_with_smoke;
-    const scene = await book2_final_scene(scene_creation_random_numbers);
+    const scene = cornell_box_with_smoke;
+//    const scene = await book2_final_scene(scene_creation_random_numbers);
+//    const scene = two_spheres;
     const cam = scene.create_camera(aspect_ratio);
 
     await async_run_with_hooks(async () => {
@@ -58,7 +59,7 @@ export async function single_threaded_render({
                         const v = (j + sv) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
-                        vec3_add_3(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
+                        add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
 
@@ -70,7 +71,7 @@ export async function single_threaded_render({
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3_add_3(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
+                    add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
                 write_color(x, y, pixel_color, samples_per_pixel);
             }

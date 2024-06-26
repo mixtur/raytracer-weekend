@@ -1,7 +1,7 @@
 import { create_empty_hit_record, HitRecord, Hittable } from './hittable';
 import { AABB } from './aabb';
 import { Ray, ray_at3 } from '../math/ray';
-import { vec3_len, vec3_set } from '../math/vec3';
+import { len_vec3, set_vec3 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 
 const hit1 = create_empty_hit_record();
@@ -31,14 +31,14 @@ export class ConstantMedium extends Hittable {
         if (hit1.t >= hit2.t) return false;//how can that happen?
         if (hit1.t < 0) { hit1.t = 0; }// or that?
 
-        const ray_length = vec3_len(r.direction);
+        const ray_length = len_vec3(r.direction);
         const distance_inside_boundary = (hit2.t - hit1.t) * ray_length;
         const hit_distance = this.neg_inv_density * Math.log(Math.random());
         if (hit_distance > distance_inside_boundary) return false;
 
         const t = hit1.t + hit_distance / ray_length;
         ray_at3(hit.p, r, t);
-        vec3_set(hit.normal, 1, 0, 0);
+        set_vec3(hit.normal, 1, 0, 0);
         hit.t = t;
         hit.material = this.phase_function;
         hit.u = 0;

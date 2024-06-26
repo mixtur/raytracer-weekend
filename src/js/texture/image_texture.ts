@@ -1,5 +1,5 @@
 import { Texture } from './texture';
-import { color, Color, Point3 } from '../math/vec3';
+import { color, Color, Point3 } from '../math/vec3.gen';
 import { clamp } from '../utils';
 
 export class ImageTexture implements Texture {

@@ -1,14 +1,13 @@
-import { use_vec3_allocator, vec3_add_3 } from './math/vec3';
+import { add_vec3_r, ArenaVec3Allocator, use_vec3_allocator } from './math/vec3.gen';
 import { ray_color, ray_color_iterative } from './ray_color';
 import { RenderWorkerParametersMessage } from './types';
-import { ArenaVec3Allocator } from './math/vec3_allocators';
 import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
 import { book2_final_scene } from './scenes/book-2-final-scene';
 import { simple_light } from './scenes/simple_light';
 import { cornell_box } from './scenes/cornell_box';
 import { book1_final_scene } from './scenes/book-1-final-scene';
 import { create_earth_scene } from './scenes/earth';
-import { ArenaQuatAllocator, use_quat_allocator } from './math/quat';
+import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { run_with_hooks } from './utils';
 
 export interface RenderWorkerMessageData {
@@ -29,7 +28,8 @@ async function render({
                           samples_per_pixel,
                           max_depth,
                           line_order,
-                          first_line_index
+                          first_line_index,
+                          scene_creation_random_numbers
                       }: RenderWorkerParametersMessage): Promise<void> {
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
@@ -75,7 +75,7 @@ async function render({
                         const v = (j + sv) / (image_height - 1);
 
                         const r = cam.get_ray(u, v);
-                        vec3_add_3(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
+                        add_vec3_r(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
 
@@ -87,7 +87,7 @@ async function render({
                     const v = (j + Math.random()) / (image_height - 1);
 
                     const r = cam.get_ray(u, v);
-                    vec3_add_3(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
+                    add_vec3_r(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
             }
             const message: RenderWorkerMessageData = {

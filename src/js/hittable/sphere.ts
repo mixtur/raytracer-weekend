@@ -1,21 +1,16 @@
 import { ray, Ray, ray_at3, ray_set } from '../math/ray';
 import {
-    Point3,
-    vec3_dot,
+    div_vec3_s_r,
+    dot_vec3,
+    Point3, rand_vec3_unit, sq_len_vec3, sub_vec3, sub_vec3_r,
     vec3,
-    vec3_divs_3,
-    vec3_sub_3,
-    Vec3,
-    vec3_sub_2,
-    vec3_sq_len,
-    vec3_rand_unit, vec3_add_3
-} from '../math/vec3';
+    Vec3
+} from '../math/vec3.gen';
 import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { UV } from '../texture/texture';
 import { MegaMaterial } from '../materials/megamaterial';
-import { clamp } from '../utils';
-import { mul_quat_vec3_2, quat_from_z_1 } from '../math/quat';
+import { mul_quat_vec3, newz_to_quat } from '../math/quat.gen';
 
 
 const tmp_hit = create_empty_hit_record();
@@ -47,10 +42,10 @@ export class Sphere extends Hittable {
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const {center, radius} = this;
 
-        vec3_sub_3(oc, r.origin, center);
-        const a = vec3_dot(r.direction, r.direction);
-        const half_b = vec3_dot(oc, r.direction);
-        const c = vec3_dot(oc, oc) - radius ** 2;
+        sub_vec3_r(oc, r.origin, center);
+        const a = dot_vec3(r.direction, r.direction);
+        const half_b = dot_vec3(oc, r.direction);
+        const c = dot_vec3(oc, oc) - radius ** 2;
         const D = half_b * half_b - a * c;
         if (D < 1e-10) return false;
         const sqrt_d = Math.sqrt(D);
@@ -63,8 +58,8 @@ export class Sphere extends Hittable {
         }
         const p = hit.p;
         ray_at3(p, r, t);
-        vec3_sub_3(r_vector, p, center)
-        vec3_divs_3(hit.normal, r_vector, radius)
+        sub_vec3_r(r_vector, p, center)
+        div_vec3_s_r(hit.normal, r_vector, radius)
         hit.t = t;
         hit.material = this.material;
         get_sphere_uv(hit.normal, hit);
@@ -87,9 +82,9 @@ export class Sphere extends Hittable {
         if (!this.hit(tmp_ray, 0.00001, Infinity, tmp_hit)) {
             return 0;
         }
-        const cone_axis = vec3_sub_2(this.center, origin);
+        const cone_axis = sub_vec3(this.center, origin);
         const radius_2 = this.radius ** 2;
-        const cone_axis_sq_len = vec3_sq_len(cone_axis);
+        const cone_axis_sq_len = sq_len_vec3(cone_axis);
         if (cone_axis_sq_len <= radius_2) {
             return 1 / (Math.PI * 4);
         }
@@ -101,23 +96,23 @@ export class Sphere extends Hittable {
     }
 
     random(origin: Vec3): Vec3 {
-        const cone_axis = vec3_sub_2(this.center, origin);
+        const cone_axis = sub_vec3(this.center, origin);
         const radius_2 = this.radius ** 2;
-        const cone_axis_sq_len = vec3_sq_len(cone_axis);
+        const cone_axis_sq_len = sq_len_vec3(cone_axis);
         if (cone_axis_sq_len <= radius_2) {
-            return vec3_rand_unit();
+            return rand_vec3_unit();
         }
 
         const cos_theta_max = Math.sqrt(1 - radius_2 / cone_axis_sq_len);
         const r1 = Math.random() * Math.PI * 2;
         const r2 = Math.random();
-        const quat = quat_from_z_1(cone_axis);
+        const quat = newz_to_quat(cone_axis);
         const cos_t = 1 + r2 * (cos_theta_max - 1);
         const sin_t = Math.sqrt(1 - cos_t * cos_t);
         const cos_p = Math.cos(r1);
         const sin_p = Math.sin(r1);
 
-        return mul_quat_vec3_2(quat, vec3(
+        return mul_quat_vec3(quat, vec3(
             sin_t * cos_p,
             sin_t * sin_p,
             cos_t

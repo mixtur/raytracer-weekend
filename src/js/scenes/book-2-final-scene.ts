@@ -1,11 +1,18 @@
 import { Scene } from './scene';
 import { Hittable } from '../hittable/hittable';
-import { color, point3, use_vec3_allocator, vec3, vec3_add_2, vec3_rand_min_max2 } from '../math/vec3';
+import {
+    add_vec3,
+    ArenaVec3Allocator,
+    color,
+    point3,
+    rand_vec3_min_max,
+    use_vec3_allocator,
+    vec3
+} from '../math/vec3.gen';
 import { solid_color } from '../texture/solid_color';
 import { Box } from '../hittable/box';
 import { get_predefined_random, random_min_max, use_random } from '../math/random';
 import { ZXGrid } from '../hittable/zx-grid';
-import { ArenaVec3Allocator } from '../math/vec3_allocators';
 import { HittableList } from '../hittable/hittable_list';
 import { MovingSphere } from '../hittable/moving_sphere';
 import { Sphere } from '../hittable/sphere';
@@ -55,7 +62,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
         objects.objects.push(light_hittable);
 
         const center1 = point3(400, 400, 200);
-        const center2 = vec3_add_2(center1, vec3(30,0,0));
+        const center2 = add_vec3(center1, vec3(30,0,0));
 
         const moving_sphere_material = create_lambertian(solid_color(0.7, 0.3, 0.1));
         objects.objects.push(new MovingSphere(center1, center2, 0, 1, 50, moving_sphere_material));
@@ -84,7 +91,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
         const white = create_lambertian(solid_color(.73, .73, .73));
         const ns = 1000;
         for (let j = 0; j < ns; j++) {
-            spheres.push(new Sphere(vec3_rand_min_max2(0,165), 10, white));
+            spheres.push(new Sphere(rand_vec3_min_max(0, 165), 10, white));
         }
 
         objects.objects.push(new Translate(

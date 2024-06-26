@@ -1,5 +1,5 @@
 import { HitRecord, Hittable } from './hittable';
-import { vec3, Vec3, vec3_add_2 } from '../math/vec3';
+import { add_vec3, vec3, Vec3 } from '../math/vec3.gen';
 import { Ray } from '../math/ray';
 import { AABB } from './aabb';
 
@@ -24,7 +24,7 @@ export class ZXGrid extends Hittable {
         this.z_rows = z_rows;
         this.cell_size = cell_size;
         this.min = min;
-        this.max = vec3_add_2(min, vec3(x_cols * cell_size, y_size, z_rows * cell_size));
+        this.max = add_vec3(min, vec3(x_cols * cell_size, y_size, z_rows * cell_size));
         for (let i = 0; i < z_rows * x_cols; i++) {
             this.cells[i] = null;
         }

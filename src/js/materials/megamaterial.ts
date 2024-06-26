@@ -2,7 +2,7 @@ import { Texture } from '../texture/texture';
 import { solid_color } from '../texture/solid_color';
 import { ray, Ray } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
-import { color, Color, vec3 } from '../math/vec3';
+import { color, Color, vec3 } from '../math/vec3.gen';
 import { PDF, SpherePDF } from '../math/pdf';
 
 export interface MegaMaterial {

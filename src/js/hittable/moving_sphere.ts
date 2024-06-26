@@ -1,5 +1,5 @@
 import { Ray, ray_at3 } from '../math/ray';
-import { Point3, vec3_dot, vec3, vec3_divs_3, vec3_mix4, Vec3, vec3_sub_3 } from '../math/vec3';
+import { div_vec3_s_r, dot_vec3, mix_vec3_r, Point3, sub_vec3_r, vec3, Vec3 } from '../math/vec3.gen';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
 import { get_sphere_uv } from './sphere';
@@ -20,7 +20,7 @@ export class MovingSphere extends Hittable {
 
     get_center(result: Vec3, time: number): void {
         const p = (time - this.time0) / this.dt;
-        vec3_mix4(result, this.center0, this.center1, p);
+        mix_vec3_r(result, this.center0, this.center1, p);
     }
 
     constructor(center0: Point3, center1: Point3, time0: number, time1: number, radius: number, material: MegaMaterial) {
@@ -39,10 +39,10 @@ export class MovingSphere extends Hittable {
         const center = tmp1;
         this.get_center(center, r.time);
 
-        vec3_sub_3(oc, r.origin, center);
-        const a = vec3_dot(r.direction, r.direction);
-        const half_b = vec3_dot(oc, r.direction);
-        const c = vec3_dot(oc, oc) - radius ** 2;
+        sub_vec3_r(oc, r.origin, center);
+        const a = dot_vec3(r.direction, r.direction);
+        const half_b = dot_vec3(oc, r.direction);
+        const c = dot_vec3(oc, oc) - radius ** 2;
         const D = half_b * half_b - a * c;
         if (D < 1e-10) return false;
         const sqrt_d = Math.sqrt(D);
@@ -55,8 +55,8 @@ export class MovingSphere extends Hittable {
         }
         const p = hit.p;
         ray_at3(p, r, t);
-        vec3_sub_3(r_vector, p, center)
-        vec3_divs_3(hit.normal, r_vector, radius);
+        sub_vec3_r(r_vector, p, center)
+        div_vec3_s_r(hit.normal, r_vector, radius);
         hit.t = t;
         hit.material = this.material;
         get_sphere_uv(hit.normal, hit);

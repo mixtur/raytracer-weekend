@@ -1,8 +1,7 @@
 import { Ray } from "../math/ray";
 import { HitRecord, Hittable } from "./hittable";
 import { AABB } from './aabb';
-import { Vec3 } from '../math/vec3';
-import { random_int_min_max } from '../math/random';
+import { Vec3 } from '../math/vec3.gen';
 
 export class HittableList extends Hittable {
     objects: Hittable[];

@@ -1,13 +1,11 @@
 import { random_int_min_max } from '../math/random';
 import {
-    Point3, use_vec3_allocator,
+    ArenaVec3Allocator,
+    dot_vec3, mul_vec3_s_r,
+    Point3, rand_vec3_min_max, use_vec3_allocator,
     vec3,
-    Vec3,
-    vec3_dot,
-    vec3_muls_3,
-    vec3_rand_min_max2
-} from '../math/vec3';
-import { ArenaVec3Allocator } from '../math/vec3_allocators';
+    Vec3
+} from '../math/vec3.gen';
 import { run_with_hooks } from '../utils';
 
 const POINT_COUNT = 256;
@@ -47,7 +45,7 @@ function perlin_interp(c: Vec3[][][], u: number, v: number, w: number): number {
                     (v - j) * scalar_weight,
                     (w - k) * scalar_weight
                 );
-                acc += vec3_dot(vector_weight, c[i][j][k]);
+                acc += dot_vec3(vector_weight, c[i][j][k]);
             }
 
     return acc;
@@ -75,7 +73,7 @@ export class Perlin {
     constructor() {
         const rand_vecs: Float64Array[] = this.rand_vecs = [];
         for (let i = 0; i < POINT_COUNT; i++) {
-            rand_vecs.push(vec3_rand_min_max2(-1, 1));
+            rand_vecs.push(rand_vec3_min_max(-1, 1));
         }
         this.x_perm = perlin_generate_perm();
         this.y_perm = perlin_generate_perm();
@@ -109,7 +107,7 @@ export class Perlin {
         for (let i = 0; i < depth; i++) {
             acc += weight * this.noise(temp_p);
             weight *= 0.5;
-            vec3_muls_3(temp_p, temp_p, 2);
+            mul_vec3_s_r(temp_p, temp_p, 2);
         }
         return Math.abs(acc);
     }

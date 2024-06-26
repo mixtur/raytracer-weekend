@@ -1,18 +1,7 @@
 import { ray, Ray, ray_set } from './math/ray';
-import {
-    color,
-    Color,
-    point3, vec3,
-    vec3_dot,
-    vec3_muls_2, vec3_muls_3,
-    vec3_mulv_3,
-    vec3_mulv_addv_3,
-    vec3_mulv_addv_4, vec3_sq_len,
-    vec3_sub_2
-} from './math/vec3';
+import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, vec3, } from './math/vec3.gen';
 import { create_empty_hit_record, HitRecord, Hittable } from './hittable/hittable';
 import { BounceRecord, create_bounce_record } from './materials/megamaterial';
-import { random_min_max } from './math/random';
 import { HittablePDF, MixturePDF } from './math/pdf';
 
 const hit = create_empty_hit_record();
@@ -44,6 +33,8 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
         return emitted;
     }
 
+    // console.log('hit');
+
     let pdf = bounce.scatter_pdf;
     let pdf_factor = 1;
     if (bounce.skip_pdf) {
@@ -64,20 +55,7 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
     }
 
     const bounce_color = ray_color(scattered, background, world, lights, depth - 1);
-    const result = vec3_mulv_addv_3(bounce_color, vec3_muls_2(bounce.attenuation, pdf_factor), emitted);
-    if (isNaN(result[0]) || isNaN(result[1]) || isNaN(result[2])) {
-        console.log(
-            pdf,
-            bounce,
-            pdf_factor,
-            emitted
-        );
-        debugger;
-        if (bounce.sampling_pdf === 0) {
-            pdf.value(scattered.direction);
-        }
-    }
-    return result;
+    return fma_vec3(bounce_color, mul_vec3_s(bounce.attenuation, pdf_factor), emitted);
 }
 
 export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
@@ -85,11 +63,11 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
     const total_attenuation = color(1, 1, 1);
     for (let i = 0; i < depth; i++) {
         if (!world.hit(r, 0.0001, Infinity, hit)) {
-            vec3_mulv_addv_4(total_emission, total_attenuation, background, total_emission);
+            fma_vec3_r(total_emission, total_attenuation, background, total_emission);
             break;
         }
         const emission = hit.material.emit(hit.material, r, hit);
-        vec3_mulv_addv_4(total_emission, total_attenuation, emission, total_emission);
+        fma_vec3_r(total_emission, total_attenuation, emission, total_emission);
         if (!hit.material.scatter(hit.material, r, hit, bounce)) {
             break;
         }
@@ -113,7 +91,7 @@ export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, 
             pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / bounce.sampling_pdf;
         }
 
-        vec3_mulv_3(total_attenuation, total_attenuation, vec3_muls_2(bounce.attenuation, pdf_factor));
+        mul_vec3_r(total_attenuation, total_attenuation, mul_vec3_s(bounce.attenuation, pdf_factor));
         r = scattered;
     }
     return total_emission;

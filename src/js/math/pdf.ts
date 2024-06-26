@@ -1,15 +1,12 @@
 // Probability Distribution Function
 import {
-    Point3,
-    Vec3,
-    vec3_dot,
-    vec3_rand_cosine_unit,
-    vec3_rand_unit,
-    vec3_rand_unit_on_hemisphere,
-    vec3_unit1
-} from './vec3';
+    dot_vec3, rand_vec3_cosine_unit,
+    rand_vec3_on_unit_hemisphere,
+    rand_vec3_unit, unit_vec3,
+    Vec3
+} from './vec3.gen';
 import { Hittable } from '../hittable/hittable';
-import { mul_quat_vec3_2, Quat, quat_from_z_1 } from './quat';
+import { mul_quat_vec3, newz_to_quat, Quat } from './quat.gen';
 
 export interface PDF {
     value(direction: Vec3): number;
@@ -22,14 +19,14 @@ export class SpherePDF implements PDF {
     }
 
     generate(): Vec3 {
-        return vec3_rand_unit();
+        return rand_vec3_unit();
     }
 }
 
 export class HemispherePDF implements PDF {
     quat: Quat;
     constructor(lobe_direction: Vec3) {
-        this.quat = quat_from_z_1(lobe_direction);
+        this.quat = newz_to_quat(lobe_direction);
     }
 
     value(_direction: Vec3): number {
@@ -37,7 +34,7 @@ export class HemispherePDF implements PDF {
     }
 
     generate(): Vec3 {
-        return mul_quat_vec3_2(this.quat, vec3_rand_unit_on_hemisphere());
+        return mul_quat_vec3(this.quat, rand_vec3_on_unit_hemisphere());
     }
 }
 
@@ -45,16 +42,16 @@ export class CosinePDF implements PDF {
     quat!: Quat;
     lobe_direction!: Vec3;
     setDirection(lobe_direction: Vec3): void {
-        this.quat = quat_from_z_1(lobe_direction);
-        this.lobe_direction = vec3_unit1(lobe_direction);
+        this.quat = newz_to_quat(lobe_direction);
+        this.lobe_direction = unit_vec3(lobe_direction);
     }
 
     value(direction: Vec3): number {
-        const cos_t = vec3_dot(vec3_unit1(direction), this.lobe_direction);
+        const cos_t = dot_vec3(unit_vec3(direction), this.lobe_direction);
         return Math.max(0, cos_t / Math.PI);
     }
     generate(): Vec3 {
-        return mul_quat_vec3_2(this.quat, vec3_rand_cosine_unit());
+        return mul_quat_vec3(this.quat, rand_vec3_cosine_unit());
     }
 }
 

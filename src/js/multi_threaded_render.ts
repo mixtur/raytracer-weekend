@@ -1,7 +1,7 @@
 import { RenderParameters, RenderWorkerParametersMessage } from './types';
 import { ColorWriter } from './color-writers';
 import { RenderWorkerMessageData } from './render_worker';
-import { color } from './math/vec3';
+import { color } from './math/vec3.gen';
 import { ProgressReporter } from './progress-reporters';
 
 export async function multi_threaded_render(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter, progress_reporter: ProgressReporter): Promise<void> {

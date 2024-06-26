@@ -1,5 +1,5 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
-import { Point3, Vec3, vec3, vec3_dot, vec3_len, vec3_muls_addv_3, vec3_sq_len, vec3_sub_2 } from '../math/vec3';
+import { len_vec3, Point3, sq_len_vec3, sub_vec3, Vec3, vec3 } from '../math/vec3.gen';
 import { Ray, ray_at3 } from '../math/ray';
 import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
@@ -153,7 +153,7 @@ export class Box extends Hittable {
             case 5: point_on_the_surface[2] = min[2]; break;
         }
 
-        return vec3_sub_2(point_on_the_surface, origin);
+        return sub_vec3(point_on_the_surface, origin);
     }
 
     pdf_value(origin: Vec3, direction: Vec3): number {
@@ -200,8 +200,8 @@ export class Box extends Hittable {
             return 0;
         }
 
-        const distance_squared = t_hit * t_hit * vec3_sq_len(direction);
-        const cos = Math.abs(direction[side % 3] / vec3_len(direction));
+        const distance_squared = t_hit * t_hit * sq_len_vec3(direction);
+        const cos = Math.abs(direction[side % 3] / len_vec3(direction));
 
         const a_xy = (this.max[0] - this.min[0]) * (this.max[1] - this.min[1]);
         const a_yz = (this.max[1] - this.min[1]) * (this.max[2] - this.min[2]);

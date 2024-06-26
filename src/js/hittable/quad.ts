@@ -1,14 +1,10 @@
 import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from './hittable';
 import {
-    Point3, vec3,
-    Vec3,
-    vec3_add_2,
-    vec3_add_3,
-    vec3_cross_2, vec3_cross_3, vec3_divs_2,
-    vec3_dot, vec3_len, vec3_muls_addv_3, vec3_muls_addv_4, vec3_sq_len,
-    vec3_sub_2, vec3_sub_3,
-    vec3_unit2
-} from '../math/vec3';
+    add_vec3, add_vec3_r,
+    cross_vec3, cross_vec3_r, div_vec3_s, dot_vec3, fma_vec3_s_vec3, fma_vec3_s_vec3_r, len_vec3,
+    Point3, sq_len_vec3, sub_vec3, sub_vec3_r, unit_vec3_r, vec3,
+    Vec3
+} from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB } from './aabb';
 import { ray, Ray, ray_at2, ray_set } from '../math/ray';
@@ -34,20 +30,20 @@ export class Quad extends Hittable {
         this.u = u;
         this.v = v;
         this.mat = mat;
-        this.normal = vec3_cross_2(u, v);
-        this.area = vec3_len(this.normal);
-        this.w = vec3_divs_2(this.normal, vec3_dot(this.normal, this.normal));
-        vec3_unit2(this.normal, this.normal);
-        this.d = vec3_dot(q, this.normal);
+        this.normal = cross_vec3(u, v);
+        this.area = len_vec3(this.normal);
+        this.w = div_vec3_s(this.normal, dot_vec3(this.normal, this.normal));
+        unit_vec3_r(this.normal, this.normal);
+        this.d = dot_vec3(q, this.normal);
 
         this.aabb = AABB.createEmpty();
         this.aabb.consumePoint(q);
 
-        const t = vec3_add_2(q, u);
+        const t = add_vec3(q, u);
         this.aabb.consumePoint(t);
-        vec3_add_3(t, q, v);
+        add_vec3_r(t, q, v);
         this.aabb.consumePoint(t);
-        vec3_add_3(t, t, u);
+        add_vec3_r(t, t, u);
         this.aabb.consumePoint(t);
 
         this.aabb.expand(0.0001);
@@ -59,23 +55,23 @@ export class Quad extends Hittable {
     }
 
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
-        const denom = vec3_dot(this.normal, r.direction);
+        const denom = dot_vec3(this.normal, r.direction);
 
         if (Math.abs(denom) < 1e-8) {
             return false;
         }
 
-        const t = (this.d - vec3_dot(this.normal, r.origin)) / denom;
+        const t = (this.d - dot_vec3(this.normal, r.origin)) / denom;
         if (t < t_min || t > t_max) {
             return false;
         }
 
         const intersection = ray_at2(r, t);
-        const planar_hitpt_vector = vec3_sub_2(intersection, this.q);
-        vec3_cross_3(tmp_cross, planar_hitpt_vector, this.v)
-        const a = vec3_dot(this.w, tmp_cross);
-        vec3_cross_3(tmp_cross, this.u, planar_hitpt_vector)
-        const b = vec3_dot(this.w, tmp_cross);
+        const planar_hitpt_vector = sub_vec3(intersection, this.q);
+        cross_vec3_r(tmp_cross, planar_hitpt_vector, this.v)
+        const a = dot_vec3(this.w, tmp_cross);
+        cross_vec3_r(tmp_cross, this.u, planar_hitpt_vector)
+        const b = dot_vec3(this.w, tmp_cross);
 
         if (!this.is_interior(a, b, hit)) {
             return false;
@@ -107,8 +103,8 @@ export class Quad extends Hittable {
             return 0;
         }
 
-        const distance_squared = tmp_hit.t * tmp_hit.t * vec3_sq_len(direction);
-        const cos = Math.abs(vec3_dot(direction, this.normal)) / vec3_len(direction);
+        const distance_squared = tmp_hit.t * tmp_hit.t * sq_len_vec3(direction);
+        const cos = Math.abs(dot_vec3(direction, this.normal)) / len_vec3(direction);
 
         return distance_squared / (cos * this.area);
     }
@@ -116,9 +112,9 @@ export class Quad extends Hittable {
     random(origin: Vec3): Vec3 {
         const r1 = Math.random();
         const r2 = Math.random();
-        const p = vec3_muls_addv_3(this.u, r1, this.q);
-        vec3_muls_addv_4(p, this.v, r2, p);
-        vec3_sub_3(p, p, origin);
+        const p = fma_vec3_s_vec3(this.u, r1, this.q);
+        fma_vec3_s_vec3_r(p, this.v, r2, p);
+        sub_vec3_r(p, p, origin);
         return p;
     }
 }

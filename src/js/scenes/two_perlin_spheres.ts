@@ -1,7 +1,7 @@
 import { HittableList } from '../hittable/hittable_list';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Sphere } from '../hittable/sphere';
-import { color, point3, vec3 } from '../math/vec3';
+import { color, point3, vec3 } from '../math/vec3.gen';
 import { Scene } from './scene';
 import { Camera } from '../camera';
 import { create_lambertian } from '../materials/lambertian';

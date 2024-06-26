@@ -9,14 +9,14 @@ export default tseslint.config(
             eslint.configs.recommended,
             ...tseslint.configs.recommended,
         ],
-        files: ['**/*.ts'],
+        files: ['src/**/*.ts', 'src/**/*.js'],
         rules: {
             "@typescript-eslint/naming-convention": [
                 "error",
                 {
                     "selector": "variableLike",
                     "format": ["snake_case", "UPPER_CASE"],
-                    "leadingUnderscore": "allow"
+                    "leadingUnderscore": "allowSingleOrDouble"
                 }
             ],
             "@typescript-eslint/no-unused-vars": "off",

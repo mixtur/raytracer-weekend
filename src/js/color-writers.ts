@@ -1,4 +1,4 @@
-import { Color } from './math/vec3';
+import { Color } from './math/vec3.gen';
 import { clamp } from './utils';
 
 export interface ColorWriter {

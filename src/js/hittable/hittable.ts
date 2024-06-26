@@ -1,5 +1,5 @@
 import { Ray } from "../math/ray";
-import { point3, Point3, vec3, Vec3, vec3_dot } from '../math/vec3';
+import { dot_vec3, point3, Point3, vec3, Vec3 } from '../math/vec3.gen';
 import { AABB } from './aabb';
 import { create_mega_material, MegaMaterial } from '../materials/megamaterial';
 
@@ -35,7 +35,7 @@ export const hit_record = (p: Point3, normal: Vec3, t: number, front_face: boole
 };
 
 export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3): void => {
-    hit.front_face = vec3_dot(r.direction, outward_normal) < 0;
+    hit.front_face = dot_vec3(r.direction, outward_normal) < 0;
     const n = hit.normal;
     const l = Math.hypot(n[0], n[1], n[2]);
     if (hit.front_face) {

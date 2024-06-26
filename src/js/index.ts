@@ -1,5 +1,5 @@
 import { create_array_writer, create_canvas_color_writer } from './color-writers';
-// import { single_threaded_render } from './single_threaded_render';
+import { single_threaded_render } from './single_threaded_render';
 import { multi_threaded_render } from './multi_threaded_render';
 import { generate_random_permutation_u16, generate_straight_order_u16 } from './utils';
 import { DomProgressReporter, ConsoleProgressReporter } from './progress-reporters';
@@ -33,7 +33,7 @@ multi_threaded_render(thread_count, {
     console.log(e);
 });
 
-//
+
 // single_threaded_render({
 //     aspect_ratio,
 //     image_width,

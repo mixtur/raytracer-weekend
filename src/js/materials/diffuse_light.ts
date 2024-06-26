@@ -1,6 +1,6 @@
 import { Texture } from '../texture/texture';
 import { create_mega_material, EmitFunction, MegaMaterial, ScatterFunction } from './megamaterial';
-import { color } from '../math/vec3';
+import { color } from '../math/vec3.gen';
 
 export const diffuse_light_scatter: ScatterFunction = () => false;
 export const black = color(0, 0, 0);

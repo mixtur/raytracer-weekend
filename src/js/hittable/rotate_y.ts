@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { AABB } from './aabb';
-import { point3, Vec3, vec3, vec3_set } from '../math/vec3';
+import { point3, set_vec3, Vec3, vec3 } from '../math/vec3.gen';
 import { Ray, ray_allocator } from '../math/ray';
 import { degrees_to_radians } from '../utils';
 
@@ -56,13 +56,13 @@ export class RotateY extends Hittable {
 
         if (!this.obj.hit(r_rotated, t_min, t_max, hit)) return false;
 
-        vec3_set(hit.p,
+        set_vec3(hit.p,
              cos_theta * hit.p[0] + sin_theta * hit.p[2],
             hit.p[1],
             -sin_theta * hit.p[0] + cos_theta * hit.p[2],
         );
 
-        vec3_set(hit.normal,
+        set_vec3(hit.normal,
             cos_theta * hit.normal[0] + sin_theta * hit.normal[2],
             hit.normal[1],
             -sin_theta * hit.normal[0] + cos_theta * hit.normal[2]

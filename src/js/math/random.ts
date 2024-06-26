@@ -1,5 +1,4 @@
-import { async_run_with_hooks, run_hook, run_with_hooks } from '../utils';
-import { use_vec3_allocator } from './vec3';
+import { run_hook } from '../utils';
 
 export type Random = () => number;
 

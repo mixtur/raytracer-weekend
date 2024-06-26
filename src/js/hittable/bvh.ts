@@ -2,7 +2,7 @@ import { HitRecord, Hittable } from './hittable';
 import { AABB, surrounding_box } from './aabb';
 import { Ray } from '../math/ray';
 import { random_int_min_max } from '../math/random';
-import { Vec3 } from '../math/vec3';
+import { Vec3 } from '../math/vec3.gen';
 
 const b0 = AABB.createEmpty();
 const b1 = AABB.createEmpty();

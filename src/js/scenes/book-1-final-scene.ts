@@ -1,15 +1,10 @@
 import { Hittable } from '../hittable/hittable';
 import {
-    color,
-    point3, use_vec3_allocator,
-    vec3,
-    vec3_add_2,
-    vec3_len,
-    vec3_rand,
-    vec3_rand_min_max2,
-    vec3_sub_2
-} from '../math/vec3';
-import { ArenaVec3Allocator } from '../math/vec3_allocators';
+    add_vec3, ArenaVec3Allocator,
+    color, len_vec3,
+    point3, rand_vec3, rand_vec3_min_max, sub_vec3, use_vec3_allocator,
+    vec3
+} from '../math/vec3.gen';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { solid_color, SolidColor } from '../texture/solid_color';
 import { Sphere } from '../hittable/sphere';
@@ -38,16 +33,16 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
             for (let b = -11; b < 11; b++) {
                 const choose_mat = random();
                 const center1 = point3(a + 0.2 + 0.6 * random(), 0.2, b + 0.2 + 0.6 * random());
-                if (vec3_len(vec3_sub_2(center1, point3(4, 0.2, 0))) > 0.9) {
+                if (len_vec3(sub_vec3(center1, point3(4, 0.2, 0))) > 0.9) {
                     let sphere_mat: MegaMaterial;
                     if (choose_mat < 0.8) {
-                        sphere_mat = create_lambertian(new SolidColor(vec3_rand()));
+                        sphere_mat = create_lambertian(new SolidColor(rand_vec3()));
                     } else if (choose_mat < 0.95) {
-                        sphere_mat = create_metal(new SolidColor(vec3_rand_min_max2(0.5, 1)), random_min_max(0, 0.5));
+                        sphere_mat = create_metal(new SolidColor(rand_vec3_min_max(0.5, 1)), random_min_max(0, 0.5));
                     } else {
                         sphere_mat = create_dielectric(1.5);
                     }
-                    const center2 = vec3_add_2(center1, vec3(0, random_min_max(0, 0.5), 0));
+                    const center2 = add_vec3(center1, vec3(0, random_min_max(0, 0.5), 0));
                     objects.push({
                         xCell: a + 11,
                         zCell: b + 11,

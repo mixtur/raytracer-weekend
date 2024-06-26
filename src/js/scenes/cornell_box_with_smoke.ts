@@ -2,7 +2,7 @@ import { Scene } from './scene';
 import { Camera } from '../camera';
 import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
-import { color, point3, vec3 } from '../math/vec3';
+import { color, point3, vec3 } from '../math/vec3.gen';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
