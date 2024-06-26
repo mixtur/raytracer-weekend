@@ -545,6 +545,30 @@ export const gen_trs_to_mat = (mat_layout) => (use_result_arg) => {
     throw new Error(`Unknown matrix layout`);
 }
 
+export const gen_transpose = (template) => (use_result_arg) => {
+    const mat_size = template.rows;
+    const preamble = [];
+    const components = [];
+    const mat_type_name = gen_type_name(template);
+    const mat_name = mat_type_name.toLowerCase();
+    const idx = get_idx_fn(template);
+    for (let col = 0; col < mat_size; col++) {
+        for (let row = 0; row < mat_size; row++) {
+            preamble.push(ind + `const m${col}${row} = mat[${idx(row, col)}]`);
+            components.push(`m${row}${col}`);
+        }
+    }
+
+    const name = `transpose_${mat_name}`;
+    const signature = gen_signature(use_result_arg, sig(mat_type_name, `mat: ${mat_type_name}`));
+    const body = [
+        preamble.join('\n'),
+        gen_output(use_result_arg, mat_name, components),
+    ].join('\n\n');
+
+    return gen_fn(name, signature, body, use_result_arg);
+}
+
 export const gen_mat_module = () => {
     const module_code = [
         `import {Vec3, vec3} from './vec3.gen'`,
@@ -583,6 +607,9 @@ export const gen_mat_module = () => {
             gen_inv_mat3,
             gen_inv_mat3x4,
             gen_inv_mat4,
+
+            gen_transpose(lin),
+            gen_transpose(hom),
 
             gen_trs_to_mat(lin),
             gen_trs_to_mat(aff),

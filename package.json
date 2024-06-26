@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node build/dev.mjs"
+    "start": "node src/codegen/gen_all.mjs && node build/dev.mjs"
   },
   "author": "",
   "license": "ISC",

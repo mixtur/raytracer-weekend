@@ -6,7 +6,7 @@ import {
     Mat3x4,
     mat3x4_to_mat3,
     mul_mat3_vec3, mul_mat3_vec3_r,
-    mul_mat3x4_vec3, mul_mat3x4_vec3_r
+    mul_mat3x4_vec3, mul_mat3x4_vec3_r, transpose_mat3
 } from '../math/mat3.gen';
 import { ray, Ray } from '../math/ray';
 import { AABB } from './aabb';
@@ -17,17 +17,22 @@ const tmp_point = point3_dirty();
 export class Transform implements Hittable {
     matrix: Mat3x4;
     linear: Mat3;
+    normal: Mat3;
 
     inv_matrix: Mat3x4;
     inv_linear: Mat3;
+    inv_normal: Mat3;
     object: Hittable;
     constructor(matrix: Mat3x4, object: Hittable) {
         this.matrix = matrix;
         this.linear = mat3x4_to_mat3(matrix);
+        const inverse_linear = invert_mat3(this.linear);
+        this.normal = transpose_mat3(inverse_linear);
 
         this.object = object;
         this.inv_matrix = invert_mat3x4(matrix);
-        this.inv_linear = invert_mat3(this.linear);
+        this.inv_linear = inverse_linear;
+        this.inv_normal = inverse_linear;
     }
 
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
@@ -39,7 +44,7 @@ export class Transform implements Hittable {
             return false;
         }
         mul_mat3x4_vec3_r(hit.p, this.matrix, hit.p);
-        mul_mat3_vec3_r(hit.normal, this.linear, hit.normal);
+        mul_mat3_vec3_r(hit.normal, this.normal, hit.normal);
         set_face_normal(hit, new_ray, hit.normal);
 
         return true;
