@@ -2,7 +2,7 @@ import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from '.
 import {
     add_vec3, add_vec3_r,
     cross_vec3, cross_vec3_r, div_vec3_s, dot_vec3, fma_vec3_s_vec3, fma_vec3_s_vec3_r, len_vec3,
-    Point3, sq_len_vec3, sub_vec3, sub_vec3_r, unit_vec3_r, vec3,
+    Point3, sq_len_vec3, sub_vec3, sub_vec3_r, unit_vec3, unit_vec3_r, vec3,
     Vec3
 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
@@ -12,6 +12,42 @@ import { ray, Ray, ray_at2, ray_set } from '../math/ray';
 const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
 const tmp_cross = vec3(0, 0, 0);
+
+export interface NormalStrategy {
+    get_normal(wb: number, wc: number): Vec3;
+}
+
+export class ConstantNormal implements NormalStrategy {
+    normal: Vec3;
+    constructor(a: Point3, b: Point3, c: Point3) {
+        const u = sub_vec3(b, a);
+        const v = sub_vec3(c, a);
+        this.normal = cross_vec3(u, v);
+    }
+    get_normal(): Vec3 {
+        return this.normal;
+    }
+}
+
+export class InterpolatedNormal implements NormalStrategy {
+    na: Vec3;
+    nb: Vec3;
+    nc: Vec3;
+    constructor(na: Vec3, nb: Vec3, nc: Vec3) {
+        this.na = na;
+        this.nb = nb;
+        this.nc = nc;
+    }
+    get_normal(wb: number, wc: number): Vec3 {
+        const wa = 1 - (wb + wc);
+        const {na, nb, nc} = this;
+        return unit_vec3(vec3(
+            na[0] * wa + nb[0] * wb + nc[0] * wc,
+            na[1] * wa + nb[1] * wb + nc[1] * wc,
+            na[2] * wa + nb[2] * wb + nc[2] * wc
+        ));
+    }
+}
 
 export class Triangle extends Hittable {
     q: Point3;
@@ -23,13 +59,16 @@ export class Triangle extends Hittable {
     w: Vec3;
     d: number;
     area: number;
+    normal_strategy: NormalStrategy;
 
-    constructor(a: Point3, b: Point3, c: Point3, mat: MegaMaterial) {
+    constructor(a: Point3, b: Point3, c: Point3, normal_strategy: NormalStrategy, mat: MegaMaterial) {
         super();
 
         const q = a;
         const u = sub_vec3(b, a);
         const v = sub_vec3(c, a);
+
+        this.normal_strategy = normal_strategy;
 
         this.q = q;
         this.u = u;
@@ -78,10 +117,13 @@ export class Triangle extends Hittable {
         }
 
         hit.t = t;
-        hit.normal.set(this.normal);
+
+        const normal = this.normal_strategy.get_normal(a, b);
+
+        hit.normal.set(normal);
         hit.p.set(intersection);
         hit.material = this.mat;
-        set_face_normal(hit, r, this.normal);
+        set_face_normal(hit, r, normal);
 
         return true;
     }

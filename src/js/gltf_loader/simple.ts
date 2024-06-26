@@ -3,7 +3,7 @@ import { GLTF2 } from './gltf_spec';
 import { GLDataType, GLPrimitiveMode } from './gl_types';
 import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
-import { Triangle } from '../hittable/triangle';
+import { ConstantNormal, InterpolatedNormal, Triangle } from '../hittable/triangle';
 import { BVHNode } from '../hittable/bvh';
 import {
     ArenaMat3x4Allocator,
@@ -63,8 +63,9 @@ export const load_gltf = async (url: string): Promise<Hittable> => {
 
         const parse_indexed_primitive = (p: GLTF2.Primitive) => {
             const indices = accessors[p.indices!];
-            const position_components = accessors[p.attributes.POSITION!];
+            const position_components = accessors[p.attributes.POSITION];
             const positions = [];
+            //todo: strided attributes
             for (let i = 0; i < position_components.length; i += 3) {
                 positions.push(vec3(
                     position_components[i],
@@ -72,6 +73,24 @@ export const load_gltf = async (url: string): Promise<Hittable> => {
                     position_components[i + 2],
                 ));
             }
+            const normals = [];
+            const has_normals = 'NORMAL' in p.attributes;
+            if (has_normals) {
+                console.log('normals');
+                const normals_components = accessors[p.attributes.NORMAL];
+                for (let i = 0; i < normals_components.length; i += 3) {
+                    normals.push(
+                        vec3(
+                            normals_components[i],
+                            normals_components[i + 1],
+                            normals_components[i + 2],
+                        )
+                    );
+                }
+            } else {
+                console.log('no normals');
+            }
+
             const mode = p.mode ?? GLPrimitiveMode.TRIANGLES;
             if (mode !== GLPrimitiveMode.TRIANGLES) {
                 throw new Error(`don't know how to parse primitive mode ${GLPrimitiveMode[mode]}`)
@@ -83,7 +102,11 @@ export const load_gltf = async (url: string): Promise<Hittable> => {
                 const b = positions[indices[i + 1]];
                 const c = positions[indices[i + 2]];
 
-                triangles.push(new Triangle(a, b, c, material));
+                const normal_strategy = has_normals
+                    ? new InterpolatedNormal(normals[indices[i]], normals[indices[i + 1]], normals[indices[i + 2]])
+                    : new ConstantNormal(a, b, c);
+
+                triangles.push(new Triangle(a, b, c, normal_strategy, material));
             }
 
             return new BVHNode(triangles, 0, 0);

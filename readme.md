@@ -23,7 +23,6 @@ TODO:
 - micro-facets
 - non-transparent dielectrics
 - glTF
-  - add normals
   - albedo map
   - normal map
   - metalness-roughness map
