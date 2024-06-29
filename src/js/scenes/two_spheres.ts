@@ -1,5 +1,5 @@
 import { Scene } from './scene';
-import { color, point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec3.gen';
 import { Camera } from '../camera';
 import { Hittable } from '../hittable/hittable';
 import { HittableList } from '../hittable/hittable_list';
@@ -7,6 +7,7 @@ import { Sphere } from '../hittable/sphere';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { solid_color } from '../texture/solid_color';
 import { create_lambertian } from '../materials/lambertian';
+import { Skybox } from '../hittable/skybox';
 
 const create_two_spheres = (): Hittable => {
     const checker = new Checker3DTexture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9));
@@ -36,5 +37,5 @@ export const two_spheres: Scene = {
             time1: 1
         })
     },
-    background: color(0.7, 0.8, 1.0)
+    background: Skybox.create_solid(0.7, 0.8, 1.0)
 }

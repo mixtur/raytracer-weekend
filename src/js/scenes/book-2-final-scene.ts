@@ -3,7 +3,6 @@ import { Hittable } from '../hittable/hittable';
 import {
     add_vec3,
     ArenaVec3Allocator,
-    color,
     point3,
     rand_vec3_min_max,
     use_vec3_allocator,
@@ -31,6 +30,9 @@ import { create_isotropic_phase_function } from '../materials/isotropic_phase_fu
 import { create_lambertian } from '../materials/lambertian';
 import { Quad } from '../hittable/quad';
 import { async_run_with_hooks } from '../utils';
+import { load_dom_image } from '../texture/image-parsers/image-bitmap';
+import { decode_gamma } from '../texture/image-parsers/decode_gamma';
+import { Skybox } from '../hittable/skybox';
 
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
@@ -78,11 +80,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
 
         const fog_boundary = new Sphere(point3(0, 0, 0), 5000, create_dielectric(1.5));
         objects.objects.push(new ConstantMedium(fog_boundary, .0001, create_isotropic_phase_function(solid_color(1, 1, 1))));
-        const earth_image_bitmap = await createImageBitmap(
-            await fetch(earthUrl).then(res => res.blob())
-        );
-
-        const emat = create_lambertian(new ImageTexture(earth_image_bitmap));
+        const emat = create_lambertian(new ImageTexture(decode_gamma(2.2, await load_dom_image(earthUrl))));
         objects.objects.push(new Sphere(point3(400,200,400), 100, emat));
         const pertext = new NoiseTexture(0.2);
         objects.objects.push(new Sphere(point3(220,280,300), 80, create_lambertian(pertext)));
@@ -127,7 +125,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
                     time1: 1
                 });
             },
-            background: color(0, 0, 0)
+            background: Skybox.create_black()
         };
     });
 };

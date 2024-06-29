@@ -19,6 +19,7 @@ import { create_metal } from '../materials/metal';
 import { create_dielectric } from '../materials/dielectric';
 import { MegaMaterial } from '../materials/megamaterial';
 import { run_with_hooks } from '../utils';
+import { Skybox } from '../hittable/skybox';
 
 function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittable {
     const rng = get_predefined_random(scene_creation_random_numbers);
@@ -94,5 +95,5 @@ export const book1_final_scene = (scene_creation_random_numbers: number[]): Scen
     create_camera,
     light: null,
     root_hittable: create_lots_of_spheres(scene_creation_random_numbers),
-    background: color(0.7, 0.8, 1.0)
+    background: Skybox.create_solid(0.7, 0.8, 1.0)
 });

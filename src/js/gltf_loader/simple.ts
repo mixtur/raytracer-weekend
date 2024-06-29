@@ -76,7 +76,6 @@ export const load_gltf = async (url: string): Promise<Hittable> => {
             const normals = [];
             const has_normals = 'NORMAL' in p.attributes;
             if (has_normals) {
-                console.log('normals');
                 const normals_components = accessors[p.attributes.NORMAL];
                 for (let i = 0; i < normals_components.length; i += 3) {
                     normals.push(
@@ -87,8 +86,6 @@ export const load_gltf = async (url: string): Promise<Hittable> => {
                         )
                     );
                 }
-            } else {
-                console.log('no normals');
             }
 
             const mode = p.mode ?? GLPrimitiveMode.TRIANGLES;

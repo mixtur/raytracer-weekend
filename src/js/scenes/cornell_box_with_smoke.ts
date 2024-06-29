@@ -2,7 +2,7 @@ import { Scene } from './scene';
 import { Camera } from '../camera';
 import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
-import { color, point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec3.gen';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
@@ -11,6 +11,7 @@ import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_lambertian } from '../materials/lambertian';
 import { create_isotropic_phase_function } from '../materials/isotropic_phase_function';
 import { BVHNode } from '../hittable/bvh';
+import { Skybox } from '../hittable/skybox';
 
 const red = create_lambertian(solid_color(.65, .05, .05));
 const white = create_lambertian(solid_color(.73, .73, .73));
@@ -71,5 +72,5 @@ export const cornell_box_with_smoke: Scene = {
             time1: 1
         });
     },
-    background: color(0, 0, 0)
+    background: Skybox.create_black()
 };

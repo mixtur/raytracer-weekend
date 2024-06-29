@@ -1,6 +1,6 @@
 import { Scene } from './scene';
 import { Camera } from '../camera';
-import { color, point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec3.gen';
 import { HittableList } from '../hittable/hittable_list';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Sphere } from '../hittable/sphere';
@@ -8,6 +8,7 @@ import { Quad } from '../hittable/quad';
 import { solid_color } from '../texture/solid_color';
 import { create_lambertian } from '../materials/lambertian';
 import { create_diffuse_light } from '../materials/diffuse_light';
+import { Skybox } from '../hittable/skybox';
 
 const perlin_texture = new NoiseTexture(4);
 
@@ -40,5 +41,5 @@ export const simple_light: Scene = {
             time1: 1
         })
     },
-    background: color(0, 0, 0)
+    background: Skybox.create_black()
 }

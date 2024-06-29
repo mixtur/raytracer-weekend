@@ -18,7 +18,7 @@ for (let i = 0; i < 100; i++) {
 const light_pdf = new HittablePDF();
 const mix_pdf = new MixturePDF();
 
-export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
+export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights: Hittable | null, depth: number): Color => {
     const scattered = ray_stack[depth];
     const hit = hit_stack[depth];
     const bounce = bounce_stack[depth];
@@ -26,7 +26,9 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
         return color(0, 0, 0);
     }
     if (!world.hit(r, 0.0001, Infinity, hit)) {
-        return background;
+        if (!background.hit(r, 0.0001, Infinity, hit)) {
+            return color(0, 0, 0);
+        }
     }
     const emitted = hit.material.emit(hit.material, r, hit);
     if (!hit.material.scatter(hit.material, r, hit, bounce)) {
@@ -56,13 +58,13 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
     return fma_vec3(bounce_color, mul_vec3_s(bounce.attenuation, pdf_factor), emitted);
 }
 
-export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
+export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittable, lights: Hittable | null, depth: number): Color => {
     const scattered = ray_stack[0];
     const total_emission = color(0, 0, 0);
     const total_attenuation = color(1, 1, 1);
     for (let i = 0; i < depth; i++) {
-        if (!world.hit(r, 0.0001, Infinity, hit)) {
-            fma_vec3_r(total_emission, total_attenuation, background, total_emission);
+        if (!world.hit(r, 0.0001, Infinity, hit) && !background.hit(r, 0.0001, Infinity, hit)) {
+            fma_vec3_r(total_emission, total_attenuation, color(0, 0, 0), total_emission);
             break;
         }
         const emission = hit.material.emit(hit.material, r, hit);

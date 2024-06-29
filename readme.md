@@ -4,11 +4,11 @@ It is written in TypeScript.
 
 The following additional features are implemented
 - grid instead of BVH when applicable
-- cheaper box intersection tests
 - zero allocations while rendering
 - multithreaded rendering
 - quaternions for changing PDFs orientations
 - some gltf support
+- basic IBL
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -17,11 +17,13 @@ The following additional features are implemented
 ```
 
 TODO:
-- matrix-based camera
+- scene serialization for workers
+- HDR backgrounds importance sampling
 - better tone mapping
-- HDR backgrounds
+- texture filtering
 - micro-facets
 - non-transparent dielectrics
+- matrix-based camera
 - glTF
   - albedo map
   - normal map

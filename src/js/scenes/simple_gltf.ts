@@ -1,16 +1,17 @@
 import { load_gltf } from '../gltf_loader/simple';
 import { Scene } from './scene';
-import { color, vec3 } from '../math/vec3.gen';
+import { vec3 } from '../math/vec3.gen';
 import { Camera } from '../camera';
+import { load_rgbe } from '../texture/image-parsers/rgbe_image_parser';
+import { Skybox } from '../hittable/skybox';
 
 export const load_simple_gltf = async (): Promise<Scene> => {
-    const hittable = await load_gltf('/gltf/simple/model.gltf');
+    const scene = await load_gltf('/gltf/simple/model.gltf');
+    const env = await load_rgbe(20, '/hdr/street.hdr');
 
     return {
         light: null,
-        background: color(1, 1, 1),
         create_camera(aspect_ratio: number): Camera {
-            // this.setCameraPosition({ position: { x: -3.5, y: 11, z: 3.55 }, target: { x: 1, y: 0.5, z: -1 } });
             return new Camera({
                 look_from: vec3(-5, 10, 5),
                 look_at: vec3(1, 1, -1),
@@ -23,6 +24,7 @@ export const load_simple_gltf = async (): Promise<Scene> => {
                 time1: 1
             })
         },
-        root_hittable: hittable
+        root_hittable: scene,
+        background: Skybox.create(env)
     }
 }

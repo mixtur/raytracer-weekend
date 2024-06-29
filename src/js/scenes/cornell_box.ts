@@ -3,7 +3,7 @@ import { Camera } from '../camera';
 import { HittableList } from '../hittable/hittable_list';
 import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
-import { ArenaVec3Allocator, color, point3, use_vec3_allocator, vec3 } from '../math/vec3.gen';
+import { ArenaVec3Allocator, point3, use_vec3_allocator, vec3 } from '../math/vec3.gen';
 import { Box } from '../hittable/box';
 import { RotateY } from '../hittable/rotate_y';
 import { Translate } from '../hittable/translate';
@@ -13,6 +13,7 @@ import { create_metal } from '../materials/metal';
 import { create_dielectric } from '../materials/dielectric';
 import { Sphere } from '../hittable/sphere';
 import { run_with_hooks } from '../utils';
+import { Skybox } from '../hittable/skybox';
 
 const hittables = run_with_hooks(() => {
     use_vec3_allocator(new ArenaVec3Allocator(128));
@@ -82,5 +83,5 @@ export const cornell_box: Scene = {
             time1: 1
         });
     },
-    background: color(0, 0, 0)
+    background: Skybox.create_black()
 };
