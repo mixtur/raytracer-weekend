@@ -6,7 +6,6 @@ import { SpherePDF } from '../math/pdf';
 
 export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     bounce.scatter_pdf = mat.scattering_pdf;
-    bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
     bounce.skip_pdf = false;
     return true;
 };

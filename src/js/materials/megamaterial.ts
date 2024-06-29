@@ -6,6 +6,7 @@ import { color, Color, vec3 } from '../math/vec3.gen';
 import { PDF, SpherePDF } from '../math/pdf';
 
 export interface MegaMaterial {
+    attenuate: AttenuationFunction;
     scatter: ScatterFunction;
     scattering_pdf: PDF;
     emit: EmitFunction;
@@ -27,6 +28,7 @@ export interface BounceRecord {
 export type EmitFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord) => Color;
 export type ScatterFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord) => boolean;
 export type ScatteringPDF = (r_in: Ray, hit: HitRecord, scattered: Ray) => number;
+export type AttenuationFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray) => void;
 
 export const create_bounce_record = (): BounceRecord => {
     return {
@@ -41,9 +43,13 @@ export const create_bounce_record = (): BounceRecord => {
 export const default_scatter: ScatterFunction = () => false;
 export const default_scattering_pdf: ScatteringPDF = () => 0;
 export const default_emit: EmitFunction = (mat, r_in, hit) => mat.emissive.value(hit.u, hit.v, hit.p);
+export const default_attenuate: AttenuationFunction = (mat, r_in, hit, bounce, scattered) => {
+    bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
+};
 
 export const create_mega_material = (config: Partial<MegaMaterial>): MegaMaterial => {
     return {
+        attenuate: config.attenuate ?? default_attenuate,
         scatter: config.scatter ?? default_scatter,
         scattering_pdf: config.scattering_pdf ?? new SpherePDF(),
         emit: config.emit ?? default_emit,

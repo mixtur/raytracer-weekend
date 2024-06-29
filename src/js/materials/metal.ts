@@ -19,6 +19,5 @@ export const metal_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     if (dot_vec3(reflected, hit.normal) <= 0) { return false; }
     ray_set(bounce.skip_pdf_ray, hit.p, reflected, r_in.time);
     bounce.skip_pdf = true;
-    bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
     return true;
 }

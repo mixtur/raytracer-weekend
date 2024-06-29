@@ -1,10 +1,12 @@
 import { ray_set } from '../math/ray';
-import { dot_vec3, reflect_vec3, refract_vec3, set_vec3, unit_vec3 } from '../math/vec3.gen';
+import { dot_vec3, reflect_vec3, refract_vec3, unit_vec3 } from '../math/vec3.gen';
 import { create_mega_material, MegaMaterial, ScatterFunction } from './megamaterial';
+import { solid_color } from '../texture/solid_color';
 
 export const create_dielectric = (ior: number): MegaMaterial => create_mega_material({
     scatter: dielectric_scatter,
-    ior
+    ior,
+    albedo: solid_color(1, 1, 1)
 });
 
 const _reflectance = (cos: number, ref_idx: number): number => {
@@ -28,6 +30,5 @@ export const dielectric_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
 
     ray_set(bounce.skip_pdf_ray, hit.p, direction, r_in.time)
     bounce.skip_pdf = true;
-    set_vec3(bounce.attenuation, 1, 1, 1);
     return true;
 }
