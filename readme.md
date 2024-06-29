@@ -8,7 +8,7 @@ The following additional features are implemented
 - multithreaded rendering
 - quaternions for changing PDFs orientations
 - some gltf support
-- basic IBL
+- IBL with importance sampling
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -18,7 +18,6 @@ The following additional features are implemented
 
 TODO:
 - scene serialization for workers
-- HDR backgrounds importance sampling
 - better tone mapping
 - texture filtering
 - micro-facets

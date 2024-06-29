@@ -1,36 +1,40 @@
 import { HitRecord, Hittable } from './hittable';
-import { Ray, ray_at2, ray_at3 } from '../math/ray';
+import { Ray, ray_at3 } from '../math/ray';
 import { MegaMaterial } from '../materials/megamaterial';
-import { color, Color, negate_vec3, negate_vec3_r, unit_vec3 } from '../math/vec3.gen';
+import { negate_vec3_r, unit_vec3, Vec3 } from '../math/vec3.gen';
 import { AABB } from './aabb';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';
 import { HDRPixelsData } from '../texture/image-parsers/types';
 import { ImageTexture } from '../texture/image_texture';
+import { PDF, SpherePDF } from '../math/pdf';
+import { create_image_based_importance_sampler } from '../texture/image-based-importance-sampler';
 
 export class Skybox extends Hittable {
     static create_white(): Skybox {
-        return new Skybox(create_diffuse_light(solid_color(1, 1, 1)))
+        return new Skybox(create_diffuse_light(solid_color(1, 1, 1)), new SpherePDF())
     }
 
     static create_black(): Skybox {
-        return new Skybox(create_diffuse_light(solid_color(0, 0, 0)))
+        return new Skybox(create_diffuse_light(solid_color(0, 0, 0)), new SpherePDF())
     }
 
     static create_solid(r: number, g: number, b: number): Skybox {
-        return new Skybox(create_diffuse_light(solid_color(r, g, b)))
+        return new Skybox(create_diffuse_light(solid_color(r, g, b)), new SpherePDF())
     }
 
     static create(image: HDRPixelsData): Skybox {
-        return new Skybox(create_diffuse_light(new ImageTexture(image)));
+        return new Skybox(create_diffuse_light(new ImageTexture(image)), create_image_based_importance_sampler(image));
     }
 
     material: MegaMaterial;
+    pdf: PDF;
 
     // assuming diffuse_light
-    constructor(material: MegaMaterial) {
+    constructor(material: MegaMaterial, pdf: PDF) {
         super();
         this.material = material;
+        this.pdf = pdf;
     }
 
     hit(r: Ray, _t_min: number, t_max: number, hit: HitRecord): boolean {
@@ -57,5 +61,13 @@ export class Skybox extends Hittable {
     get_bounding_box(time0: number, time1: number, aabb: AABB) {
         aabb.min.fill(-Infinity);
         aabb.max.fill(Infinity);
+    }
+
+    random(_origin: Vec3): Vec3 {
+        return this.pdf.generate();
+    }
+
+    pdf_value(_origin: Vec3, direction: Vec3): number {
+        return this.pdf.value(direction);
     }
 }

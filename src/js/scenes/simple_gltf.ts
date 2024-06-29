@@ -8,9 +8,10 @@ import { Skybox } from '../hittable/skybox';
 export const load_simple_gltf = async (): Promise<Scene> => {
     const scene = await load_gltf('/gltf/simple/model.gltf');
     const env = await load_rgbe(20, '/hdr/street.hdr');
+    const skybox = Skybox.create(env);
 
     return {
-        light: null,
+        light: skybox,
         create_camera(aspect_ratio: number): Camera {
             return new Camera({
                 look_from: vec3(-5, 10, 5),
@@ -25,6 +26,6 @@ export const load_simple_gltf = async (): Promise<Scene> => {
             })
         },
         root_hittable: scene,
-        background: Skybox.create(env)
+        background: skybox
     }
 }
