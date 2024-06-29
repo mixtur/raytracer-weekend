@@ -8,16 +8,18 @@ const hit = create_empty_hit_record();
 const bounce = create_bounce_record();
 const hit_stack: HitRecord[] = [];
 const bounce_stack: BounceRecord[] = [];
+const ray_stack: Ray[] = [];
 for (let i = 0; i < 100; i++) {
     hit_stack.push(create_empty_hit_record());
     bounce_stack.push(create_bounce_record());
+    ray_stack.push(ray(vec3(0, 0, 0), vec3(0, 0, 0), 0));
 }
-const scattered = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
 
 const light_pdf = new HittablePDF();
 const mix_pdf = new MixturePDF();
 
 export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
+    const scattered = ray_stack[depth];
     const hit = hit_stack[depth];
     const bounce = bounce_stack[depth];
     if (depth <= 0) {
@@ -55,6 +57,7 @@ export const ray_color = (r: Ray, background: Color, world: Hittable, lights: Hi
 }
 
 export const ray_color_iterative = (r: Ray, background: Color, world: Hittable, lights: Hittable | null, depth: number): Color => {
+    const scattered = ray_stack[0];
     const total_emission = color(0, 0, 0);
     const total_attenuation = color(1, 1, 1);
     for (let i = 0; i < depth; i++) {
