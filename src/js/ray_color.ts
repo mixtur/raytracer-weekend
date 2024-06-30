@@ -35,7 +35,7 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
         return emitted;
     }
 
-    let pdf = bounce.scatter_pdf;
+    let pdf = hit.material.scattering_pdf;
     let pdf_factor = 1;
     if (bounce.skip_pdf) {
         ray_set(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
@@ -49,9 +49,10 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
         }
 
         ray_set(scattered, hit.p, pdf.generate(), r.time);
-        bounce.sampling_pdf = pdf.value(scattered.direction);
 
-        pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / bounce.sampling_pdf;
+        if (pdf !== hit.material.scattering_pdf) {
+            pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / pdf.value(scattered.direction);
+        }
     }
 
     hit.material.attenuate(hit.material, r, hit, bounce, scattered);
@@ -79,7 +80,7 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
         if (bounce.skip_pdf) {
             ray_set(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
         } else {
-            let pdf = bounce.scatter_pdf;
+            let pdf = hit.material.scattering_pdf;
             if (lights !== null) {
                 light_pdf.hittable = lights;
                 light_pdf.origin = hit.p;
@@ -89,9 +90,8 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
             }
 
             ray_set(scattered, hit.p, pdf.generate(), r.time);
-            bounce.sampling_pdf = pdf.value(scattered.direction);
 
-            pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / bounce.sampling_pdf;
+            pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / pdf.value(scattered.direction);
         }
 
         hit.material.attenuate(hit.material, r, hit, bounce, scattered);
