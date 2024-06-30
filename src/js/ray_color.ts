@@ -1,5 +1,5 @@
 import { ray, Ray, ray_set } from './math/ray';
-import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, vec3, } from './math/vec3.gen';
+import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r, vec3, } from './math/vec3.gen';
 import { create_empty_hit_record, HitRecord, Hittable } from './hittable/hittable';
 import { BounceRecord, create_bounce_record } from './materials/megamaterial';
 import { HittablePDF, MixturePDF } from './math/pdf';
@@ -56,9 +56,10 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
     }
 
     hit.material.attenuate(hit.material, r, hit, bounce, scattered);
+    mul_vec3_s_r(bounce.attenuation, bounce.attenuation, pdf_factor);
 
     const bounce_color = ray_color(scattered, background, world, lights, depth - 1);
-    return fma_vec3(bounce_color, mul_vec3_s(bounce.attenuation, pdf_factor), emitted);
+    return fma_vec3(bounce_color, bounce.attenuation, emitted);
 }
 
 export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittable, lights: Hittable | null, depth: number): Color => {

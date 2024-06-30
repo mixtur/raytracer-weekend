@@ -3,14 +3,14 @@ import { Texture } from '../../texture/texture';
 import { CosinePDF } from '../../math/pdf';
 import { lambertian_scatter } from '../lambertian';
 import {
-    add_vec3,
+    add_vec3, add_vec3_r,
     dot_vec3,
     mix_vec3,
     mix_vec3_r, mul_vec3,
     mul_vec3_s, negate_vec3, set_vec3,
-    sub_vec3,
+    sub_vec3, sub_vec3_r,
     unit_vec3,
-    vec3
+    vec3, vec3_dirty
 } from '../../math/vec3.gen';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
@@ -23,6 +23,13 @@ const burley_diffuse_partial = (f_d90: number, cos_theta_sep: number) => {
     return 1 + (f_d90 - 1) * ((1 - cos_theta_sep) ** 5);
 };
 
+const f0_vec = vec3_dirty();
+const one_vec = vec3(1, 1, 1);
+const specular_weight = vec3_dirty();
+const diffuse_weight = vec3_dirty();
+
+// todo: low roughness values don't produce shiny surfaces
+// todo: metals look weird
 // todo: create less junk vectors;
 // todo: precompute more
 const burley_brdf: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
@@ -48,19 +55,19 @@ const burley_brdf: AttenuationFunction = (material, r_in, hit, bounce, scattered
     // aka Cook-Torrance F, aka Fresnel Factor, aka Schlick's approximation
     const ior = hit.front_face ? (1 / material.ior) : material.ior;
     const f0 = ((1 - ior) / (1 + ior)) ** 2;//1 - assuming we're rendering in the air
-    const f0_vec = vec3(f0, f0, f0);//typically f0 == 0.0
+    set_vec3(f0_vec, f0, f0, f0);//typically f0 == 0.0
     mix_vec3_r(f0_vec, f0_vec, albedo, material.metalness);
 
     // we want to compute this f0 + (1 - f0) * (1 - l_dot_h) ** 5
     // except that f0 and 1 are vectors, so
-    const specular_weight = add_vec3(
+    add_vec3_r(specular_weight,
         f0_vec,
         mul_vec3_s(
-            sub_vec3(vec3(1, 1, 1), f0_vec),
+            sub_vec3(one_vec, f0_vec),
             (1 - l_dot_h) ** 5
         )
     );
-    const diffuse_weight = sub_vec3(vec3(1, 1, 1), specular_weight);
+    sub_vec3_r(diffuse_weight, one_vec, specular_weight);
 
     const alpha_squared = alpha ** 2;
 

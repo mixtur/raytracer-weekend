@@ -22,6 +22,7 @@ export const gen_fn = (name, signature, body, use_result_arg = false) => {
     return `export const ${name}${use_result_arg ? '_r' : ''} = (${signature.args.map(arg => arg.name + ': ' + arg.type).join(', ')}): ${signature.return_type} => {\n${body}\n}`;
 };
 
+//todo: make _r variants return the result
 export const gen_signature = (use_result_arg, base_signature) => {
     if (use_result_arg) {
         return {
