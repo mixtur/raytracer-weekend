@@ -7,7 +7,7 @@ import {
     dot_vec3,
     mix_vec3,
     mix_vec3_r, mul_vec3,
-    mul_vec3_s, negate_vec3, set_vec3,
+    mul_vec3_s, mul_vec3_s_r, negate_vec3, set_vec3,
     sub_vec3, sub_vec3_r,
     unit_vec3,
     vec3, vec3_dirty
@@ -28,8 +28,6 @@ const one_vec = vec3(1, 1, 1);
 const specular_weight = vec3_dirty();
 const diffuse_weight = vec3_dirty();
 
-// todo: low roughness values don't produce shiny surfaces
-// todo: metals look weird
 // todo: create less junk vectors;
 // todo: precompute more
 const burley_brdf: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
@@ -73,7 +71,7 @@ const burley_brdf: AttenuationFunction = (material, r_in, hit, bounce, scattered
 
     // D factor
     const d_normalization = alpha_squared / Math.PI;
-    const d = d_normalization / (1 + (alpha_squared - 1) * l_dot_h ** 2);
+    const d = d_normalization / ((1 + (alpha_squared - 1) * (l_dot_h ** 2)) ** 2);
 
     //G factor
     //
