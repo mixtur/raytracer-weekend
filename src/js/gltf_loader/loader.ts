@@ -20,6 +20,7 @@ import { quat } from '../math/quat.gen';
 import { HittableList } from '../hittable/hittable_list';
 import { Transform } from '../hittable/transform';
 import { run_with_hooks } from '../utils';
+import { create_burley_pbr } from '../materials/pbr/burley-pbr';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -58,7 +59,9 @@ export const load_gltf = async (url: string): Promise<Hittable> => {
 
         const materials = (gltf.materials ?? []).map(m => {
             const color = m.pbrMetallicRoughness?.baseColorFactor ?? [1, 1, 1, 1];
-            return create_lambertian(solid_color(color[0], color[1], color[2]));
+            const roughness = m.pbrMetallicRoughness?.roughnessFactor ?? 1;
+            const metalness = m.pbrMetallicRoughness?.metallicFactor ?? 1;
+            return create_burley_pbr(solid_color(color[0], color[1], color[2]), roughness, metalness);
         });
 
         const parse_indexed_primitive = (p: GLTF2.Primitive) => {

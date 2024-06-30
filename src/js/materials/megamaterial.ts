@@ -4,6 +4,7 @@ import { ray, Ray } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
 import { color, Color, vec3 } from '../math/vec3.gen';
 import { PDF, SpherePDF } from '../math/pdf';
+import { clamp, remap } from '../utils';
 
 export interface MegaMaterial {
     attenuate: AttenuationFunction;
@@ -14,6 +15,9 @@ export interface MegaMaterial {
     emissive: Texture;
     albedo: Texture;
     fuzz: number;// metal
+
+    roughness: number;
+    metalness: number;
 }
 
 export interface BounceRecord {
@@ -47,9 +51,11 @@ export const create_mega_material = (config: Partial<MegaMaterial>): MegaMateria
         scatter: config.scatter ?? default_scatter,
         scattering_pdf: config.scattering_pdf ?? new SpherePDF(),
         emit: config.emit ?? default_emit,
-        ior: config.ior ?? 0,
+        ior: config.ior ?? 1.5,
         emissive: config.emissive ?? solid_color(0, 0, 0),
         albedo: config.albedo ?? solid_color(0, 0, 0),
-        fuzz: config.fuzz ?? 0
+        fuzz: config.fuzz ?? 0,
+        roughness: remap(clamp(config.roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999),
+        metalness: remap(clamp(config.metalness ?? 1, 0, 1), 0, 1, 0.001, 0.999),
     };
 }

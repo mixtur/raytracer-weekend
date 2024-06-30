@@ -6,7 +6,7 @@ import {
 } from './megamaterial';
 import { CosinePDF } from '../math/pdf';
 
-const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
+export const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
     const scattering_pdf = material.scattering_pdf as CosinePDF;
     scattering_pdf.setDirection(hit.normal);
     bounce.skip_pdf = false;

@@ -1,4 +1,4 @@
-import { load_gltf } from '../gltf_loader/simple';
+import { load_gltf } from '../gltf_loader/loader';
 import { Scene } from './scene';
 import { vec3 } from '../math/vec3.gen';
 import { Camera } from '../camera';

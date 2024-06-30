@@ -10,7 +10,7 @@ import { create_earth_scene } from './scenes/earth';
 import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { run_with_hooks } from './utils';
 import { cornell_box_matrix } from './scenes/cornell_box_matrix';
-import { load_gltf } from './gltf_loader/simple';
+import { load_gltf } from './gltf_loader/loader';
 import { load_simple_gltf } from './scenes/simple_gltf';
 
 export interface RenderWorkerMessageData {

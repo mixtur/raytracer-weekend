@@ -8,7 +8,11 @@ export const clamp = (x: number, min: number, max: number): number => {
     if (x < min) return min;
     if (x > max) return max;
     return x;
-}
+};
+
+export const remap = (x: number, src_lo: number, src_hi: number, dst_lo: number, dst_hi: number): number => {
+    return dst_lo + (dst_hi - dst_lo) * (x - src_lo) / (src_hi - src_lo);
+};
 
 export const format_time = (ms: number): string => {
     const ms_int = Math.floor(ms);

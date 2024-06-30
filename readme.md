@@ -9,6 +9,7 @@ The following additional features are implemented
 - quaternions for changing PDFs orientations
 - some gltf support
 - IBL with importance sampling
+- some PBR
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -20,10 +21,10 @@ TODO:
 - scene serialization for workers
 - better tone mapping
 - texture filtering
-- micro-facets
+- explicit micro-facets (not sure if it is even possible)
 - non-transparent dielectrics
 - matrix-based camera
 - glTF
-  - albedo map
+  - albedo map (and UV attributes)
   - normal map
   - metalness-roughness map
