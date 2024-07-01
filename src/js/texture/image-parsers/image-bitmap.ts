@@ -1,7 +1,7 @@
-import { HDRPixelsData } from './types';
+import { PixelsData } from './types';
 
 
-export const load_dom_image = async (url: string): Promise<HDRPixelsData> => {
+export const load_dom_image = async (url: string): Promise<PixelsData> => {
     const response = await fetch(url);
     const image_bitmap = await createImageBitmap(await response.blob());
     const tmp_canvas = new OffscreenCanvas(image_bitmap.width, image_bitmap.height);
@@ -13,15 +13,16 @@ export const load_dom_image = async (url: string): Promise<HDRPixelsData> => {
     const image_data = ctx.getImageData(0, 0, tmp_canvas.width, tmp_canvas.height);
 
     const elements_count = image_data.width * image_data.height * 4;
-    const pixels = new Float64Array(elements_count);
+    const pixels = new Uint8Array(elements_count);
 
     for (let i = 0; i < elements_count; i++) {
-        pixels[i] = image_data.data[i] / 255;
+        pixels[i] = image_data.data[i];
     }
 
     return {
         width: image_data.width,
         height: image_data.height,
-        pixels
+        pixels,
+        normalization: 1 / 255
     };
 }

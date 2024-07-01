@@ -5,8 +5,8 @@ import { negate_vec3_r, unit_vec3, Vec3 } from '../math/vec3.gen';
 import { AABB } from './aabb';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';
-import { HDRPixelsData } from '../texture/image-parsers/types';
-import { ImageTexture } from '../texture/image_texture';
+import { PixelsData } from '../texture/image-parsers/types';
+import { HdrTexture } from '../texture/hdr_image_texture';
 import { PDF, SpherePDF } from '../math/pdf';
 import { create_image_based_importance_sampler } from '../texture/image-based-importance-sampler';
 
@@ -23,8 +23,8 @@ export class Skybox extends Hittable {
         return new Skybox(create_diffuse_light(solid_color(r, g, b)), new SpherePDF())
     }
 
-    static create(image: HDRPixelsData): Skybox {
-        return new Skybox(create_diffuse_light(new ImageTexture(image)), create_image_based_importance_sampler(image));
+    static create_hdr(image: PixelsData): Skybox {
+        return new Skybox(create_diffuse_light(new HdrTexture(image)), create_image_based_importance_sampler(image));
     }
 
     material: MegaMaterial;

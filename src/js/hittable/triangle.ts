@@ -41,14 +41,27 @@ export class InterpolatedNormal implements NormalStrategy {
     get_normal(wb: number, wc: number): Vec3 {
         const wa = 1 - (wb + wc);
         const {na, nb, nc} = this;
-        return unit_vec3(vec3(
+        const result = vec3(
             na[0] * wa + nb[0] * wb + nc[0] * wc,
             na[1] * wa + nb[1] * wb + nc[1] * wc,
             na[2] * wa + nb[2] * wb + nc[2] * wc
-        ));
+        );
+        unit_vec3_r(result, result);
+        return result;
     }
 }
 
+export type TriangleUV = [Vec3, Vec3, Vec3];
+
+export const get_tex_coords_r = (result: Vec3, wb: number, wc: number, tex_coords: TriangleUV): Vec3 => {
+    const wa = 1 - (wb + wc);
+
+    result[0] = tex_coords[0][0] * wa + tex_coords[1][0] * wb + tex_coords[2][0] * wc;
+    result[1] = tex_coords[0][1] * wa + tex_coords[1][1] * wb + tex_coords[2][1] * wc;
+    return result;
+}
+
+//todo: make triangles indexed (mesh-hittable?)
 export class Triangle extends Hittable {
     q: Point3;
     u: Vec3;
@@ -60,8 +73,10 @@ export class Triangle extends Hittable {
     d: number;
     area: number;
     normal_strategy: NormalStrategy;
+    //todo: Vec2
+    tex_coords: TriangleUV[];
 
-    constructor(a: Point3, b: Point3, c: Point3, normal_strategy: NormalStrategy, mat: MegaMaterial) {
+    constructor(a: Point3, b: Point3, c: Point3, normal_strategy: NormalStrategy, uvs: TriangleUV[], mat: MegaMaterial) {
         super();
 
         const q = a;
@@ -69,6 +84,7 @@ export class Triangle extends Hittable {
         const v = sub_vec3(c, a);
 
         this.normal_strategy = normal_strategy;
+        this.tex_coords = uvs;
 
         this.q = q;
         this.u = u;
@@ -123,6 +139,7 @@ export class Triangle extends Hittable {
         hit.normal.set(normal);
         hit.p.set(intersection);
         hit.material = this.mat;
+        hit.tex_channels = this.tex_coords;
         set_face_normal(hit, r, normal);
 
         return true;

@@ -1,5 +1,6 @@
-export interface HDRPixelsData {
+export interface PixelsData {
     width: number;
     height: number;
-    pixels: Float64Array;
+    pixels: Uint8Array | Float32Array;
+    normalization: number;
 }

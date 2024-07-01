@@ -25,6 +25,6 @@ TODO:
 - non-transparent dielectrics
 - matrix-based camera
 - glTF
-  - albedo map (and UV attributes)
-  - normal map
   - metalness-roughness map
+  - emissive map
+  - normal map

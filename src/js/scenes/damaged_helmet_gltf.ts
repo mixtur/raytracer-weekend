@@ -5,17 +5,18 @@ import { Camera } from '../camera';
 import { load_rgbe } from '../texture/image-parsers/rgbe_image_parser';
 import { Skybox } from '../hittable/skybox';
 
-export const load_simple_gltf = async (): Promise<Scene> => {
-    const scene = await load_gltf('/gltf/simple/model.gltf', 102400, 1024);
-    const env = await load_rgbe(20, '/hdr/street.hdr');
+export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
+    const scene = await load_gltf('/gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', 1024000, 1024);
+    const env = await load_rgbe(2, '/hdr/Cannon_Exterior.hdr');
     const skybox = Skybox.create_hdr(env);
 
     return {
-        light: skybox,
+        // light: skybox,
+        light: null,
         create_camera(aspect_ratio: number): Camera {
             return new Camera({
-                look_from: vec3(-5, 10, 5),
-                look_at: vec3(1, 1, -1),
+                look_from: vec3(-3, -1, 3),
+                look_at: vec3(0, 0, 0),
                 aspect_ratio,
                 v_up: vec3(0, 1, 0),
                 focus_dist: 10,

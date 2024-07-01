@@ -11,6 +11,7 @@ export interface HitRecord {
     material: MegaMaterial;
     u: number;
     v: number;
+    tex_channels: [Vec3, Vec3, Vec3][]
 }
 
 const dummy_material: MegaMaterial = create_mega_material({
@@ -26,12 +27,9 @@ export const create_empty_hit_record = (): HitRecord => {
         front_face: false,
         material: dummy_material,
         v: NaN,
-        u: NaN
+        u: NaN,
+        tex_channels: []
     };
-};
-
-export const hit_record = (p: Point3, normal: Vec3, t: number, front_face: boolean, material: MegaMaterial, u: number, v: number): HitRecord => {
-    return { p, normal, t, front_face, material, u, v };
 };
 
 export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3): void => {

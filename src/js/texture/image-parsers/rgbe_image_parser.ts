@@ -1,6 +1,6 @@
 import { mat3, mul_mat3_vec3_r } from '../../math/mat3.gen';
 import { mul_vec3_s_r, set_vec3, Vec3, vec3_dirty } from '../../math/vec3.gen';
-import { HDRPixelsData } from './types';
+import { PixelsData } from './types';
 
 export interface RGBEImporterOptions {
     bytes: Uint8Array;
@@ -111,7 +111,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
             }
         };
 
-    function _parse(luminance: number, buffer: Uint8Array): HDRPixelsData {
+    function _parse(luminance: number, buffer: Uint8Array): PixelsData {
         const { width, height, end } = _read_header(buffer);
 
         const buffer_f32 = new Float32Array(width * height * 4);
@@ -125,9 +125,10 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
         _scale_luminance(width * height, buffer_f32);
 
         return {
-            pixels: new Float64Array(buffer_f32),
+            pixels: buffer_f32,
             width,
-            height
+            height,
+            normalization: 1
         };
     }
 
@@ -291,7 +292,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
     return _parse(luminance, bytes);
 };
 
-export const load_rgbe = async (luminance: number, url: string): Promise<HDRPixelsData> => {
+export const load_rgbe = async (luminance: number, url: string): Promise<PixelsData> => {
     const response = await fetch(url);
     return parse_rgbe({
         bytes: new Uint8Array(await response.arrayBuffer()),

@@ -17,7 +17,7 @@ import { MovingSphere } from '../hittable/moving_sphere';
 import { Sphere } from '../hittable/sphere';
 import { ConstantMedium } from '../hittable/constant_medium';
 import earthUrl from './earthmap.jpg';
-import { ImageTexture } from '../texture/image_texture';
+import { HdrTexture } from '../texture/hdr_image_texture';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Translate } from '../hittable/translate';
 import { RotateY } from '../hittable/rotate_y';
@@ -31,8 +31,8 @@ import { create_lambertian } from '../materials/lambertian';
 import { Quad } from '../hittable/quad';
 import { async_run_with_hooks } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
-import { decode_gamma } from '../texture/image-parsers/decode_gamma';
 import { Skybox } from '../hittable/skybox';
+import { SrgbImageTexture } from '../texture/srgb_image_texture';
 
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
@@ -80,7 +80,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
 
         const fog_boundary = new Sphere(point3(0, 0, 0), 5000, create_dielectric(1.5));
         objects.objects.push(new ConstantMedium(fog_boundary, .0001, create_isotropic_phase_function(solid_color(1, 1, 1))));
-        const emat = create_lambertian(new ImageTexture(decode_gamma(2.2, await load_dom_image(earthUrl))));
+        const emat = create_lambertian(new SrgbImageTexture(await load_dom_image(earthUrl)));
         objects.objects.push(new Sphere(point3(400,200,400), 100, emat));
         const pertext = new NoiseTexture(0.2);
         objects.objects.push(new Sphere(point3(220,280,300), 80, create_lambertian(pertext)));

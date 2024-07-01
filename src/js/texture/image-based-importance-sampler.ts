@@ -1,4 +1,4 @@
-import { HDRPixelsData } from './image-parsers/types';
+import { PixelsData } from './image-parsers/types';
 import { PDF } from '../math/pdf';
 import { convertXYZ2xyY, RGB2XYZ } from './image-parsers/rgbe_image_parser';
 import { mul_mat3_vec3_r } from '../math/mat3.gen';
@@ -11,7 +11,7 @@ const XYZcolor = vec3_dirty();
 const xyYColor = vec3_dirty();
 const tmp_color = vec3_dirty();
 
-export const create_image_based_importance_sampler = (pixels_data: HDRPixelsData): PDF => {
+export const create_image_based_importance_sampler = (pixels_data: PixelsData): PDF => {
     const {pixels, width, height} = pixels_data;
     let acc = 0;
     const pdf = [];

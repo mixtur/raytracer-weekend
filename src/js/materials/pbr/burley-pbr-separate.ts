@@ -1,4 +1,10 @@
-import { AttenuationFunction, create_mega_material, MegaMaterial, ScatterFunction } from '../megamaterial';
+import {
+    AttenuationFunction,
+    BounceRecord,
+    create_mega_material,
+    MegaMaterial,
+    ScatterFunction
+} from '../megamaterial';
 import { Texture } from '../../texture/texture';
 import { CosinePDF, MixturePDF, SpecularIsotropicMicroFacetPDF } from '../../math/pdf';
 import {
@@ -12,6 +18,9 @@ import {
     vec3, vec3_dirty
 } from '../../math/vec3.gen';
 import { clamp, remap } from '../../utils';
+import { Ray } from '../../math/ray';
+import { HitRecord } from '../../hittable/hittable';
+import { get_tex_coords_r } from '../../hittable/triangle';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -28,7 +37,7 @@ const one_vec = vec3(1, 1, 1);
 const specular_weight = vec3_dirty();
 const diffuse_weight = vec3_dirty();
 
-const burley_brdf_diffuse: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
+const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3) => {
     const n = unit_vec3(hit.normal);
     const v = negate_vec3(unit_vec3(r_in.direction));
     const l = unit_vec3(scattered.direction);
@@ -43,7 +52,6 @@ const burley_brdf_diffuse: AttenuationFunction = (material, r_in, hit, bounce, s
 
     // const h_dot_n = dot_vec3(h, n);
     const l_dot_h = dot_vec3(l, h);// the same as dot_vec3(v, h);
-    const albedo = material.albedo.value(hit.u, hit.v, hit.p);
 
 
     // aka Cook-Torrance F, aka Fresnel Factor, aka Schlick's approximation
@@ -78,7 +86,7 @@ const burley_brdf_diffuse: AttenuationFunction = (material, r_in, hit, bounce, s
     bounce.attenuation.set(attenuation_value);
 }
 
-const burley_brdf_specular: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
+const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3) => {
     const n = unit_vec3(hit.normal);
     const v = negate_vec3(unit_vec3(r_in.direction));
     const l = unit_vec3(scattered.direction);
@@ -94,7 +102,6 @@ const burley_brdf_specular: AttenuationFunction = (material, r_in, hit, bounce, 
     // const h_dot_n = dot_vec3(h, n);
     const l_dot_h = dot_vec3(l, h);// the same as dot_vec3(v, h);
     const v_dot_h = l_dot_h;
-    const albedo = material.albedo.value(hit.u, hit.v, hit.p);
 
     // aka Cook-Torrance F, aka Fresnel Factor, aka Schlick's approximation
     const ior = hit.front_face ? (1 / material.ior) : material.ior;
@@ -169,14 +176,27 @@ class SpecularGFXPDF extends SpecularIsotropicMicroFacetPDF {
     }
 }
 
+const uv = vec3_dirty();
 const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
     const mixture_pdf = material.scattering_pdf as MixturePDF;
+    const { u, v } = hit;
+    if (hit.tex_channels.length > 0) {
+        //todo: un-hardcode tex channel
+        get_tex_coords_r(uv, u, v, hit.tex_channels[0]);
+        uv[0] -= Math.floor(uv[0]);
+        uv[1] -= Math.floor(uv[1]);
+    } else {
+        uv[0] = u;
+        uv[1] = v;
+    }
+
+    const albedo = material.albedo.value(uv[0], uv[1], hit.p);
     if (mixture_pdf.use_pdf1) {
         // cosine pdf, therefore
-        burley_brdf_diffuse(material, r_in, hit, bounce, scattered);
+        burley_brdf_diffuse(material, r_in, hit, bounce, scattered, albedo);
     } else {
         // specular pdf, therefore
-        burley_brdf_specular(material, r_in, hit, bounce, scattered);
+        burley_brdf_specular(material, r_in, hit, bounce, scattered, albedo);
     }
     mul_vec3_s_r(bounce.attenuation, bounce.attenuation, 2);
 };
