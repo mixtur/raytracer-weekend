@@ -35,7 +35,7 @@ export async function single_threaded_render({
     const cam = scene.create_camera(aspect_ratio);
 
     await async_run_with_hooks(async () => {
-        const vec3_allocator = new ArenaVec3Allocator(4096);
+        const vec3_allocator = new ArenaVec3Allocator(8192);
         const quat_allocator = new ArenaQuatAllocator(640);
 
         use_vec3_allocator(vec3_allocator);

@@ -84,7 +84,7 @@ const gen_newz_to_quat = (use_result_arg) => {
     const body = [
         `const new_z = tmp_vec;`,
         `unit_vec3_r(new_z, _new_z);`,
-        `// we use these two lines as a special case of vec3_cross_3(im, z_vec3, new_z);`,
+        `// we use these two lines as a special case of cross_vec3_r(im, z_vec3, new_z);`,
         `im[0] = - new_z[1];`,
         `im[1] = new_z[0];`,
         ...(use_result_arg
@@ -92,14 +92,14 @@ const gen_newz_to_quat = (use_result_arg) => {
                     `result[0] = im[0];`,
                     `result[1] = im[1];`,
                     `result[2] = im[2];`,
-                    `result[3] = new_z[2] + 1; // new_z[2] is a special case of vec3_dot(z_vec3, new_z)`,
+                    `result[3] = new_z[2] + 1; // new_z[2] is a special case of dot_vec3(z_vec3, new_z)`,
             ]
             : [
                 `const result = quat(`,
                 `    im[0],`,
                 `    im[1],`,
                 `    im[2],`,
-                `    new_z[2] + 1 // new_z[2] is a special case of vec3_dot(z_vec3, new_z)`,
+                `    new_z[2] + 1 // new_z[2] is a special case of dot_vec3(z_vec3, new_z)`,
                 `);`
             ]),
         ``,
@@ -123,15 +123,15 @@ const gen_axis_angle_to_quat = (use_result_arg) => {
     const name = 'axis_angle_to_quat';
     const signature = gen_signature(use_result_arg, sig('Quat', 'axis: Vec3, angle: number'));
     const preamble = [
-        `const halfAngle = angle * 0.5;`,
-        `const sin = Math.sin(halfAngle);`,
+        `const half_angle = angle * 0.5;`,
+        `const sin = Math.sin(half_angle);`,
     ].map(x => ind + x).join('\n');
 
     const components = [
         `sin * axis[0]`,
         `sin * axis[1]`,
         `sin * axis[2]`,
-        `Math.cos(halfAngle)`,
+        `Math.cos(half_angle)`,
     ];
 
     const body = [
@@ -179,6 +179,23 @@ const gen_mul_quat_vec = (use_result_arg) => {
     return gen_fn(name, signature, body, use_result_arg);
 };
 
+const gen_invert_quat = (use_result_arg) => {
+    const name = 'invert_quat';
+    const signature = gen_signature(use_result_arg, sig('Quat', 'q: Quat'));
+
+    const body = [
+        ind + 'const inv_neg_sq_abs = - 1 / quat_sq_len(q);',
+        gen_output(use_result_arg, 'quat', [
+            'q[0] * inv_neg_sq_abs',
+            'q[1] * inv_neg_sq_abs',
+            'q[2] * inv_neg_sq_abs',
+            '-q[3] * inv_neg_sq_abs',
+        ]),
+    ].join('\n\n');
+
+    return gen_fn(name, signature, body, use_result_arg);
+};
+
 export const gen_quat_module = () => {
     const module_code = [
         preamble,
@@ -186,7 +203,8 @@ export const gen_quat_module = () => {
             gen_unit,
             gen_newz_to_quat,
             gen_mul_quat_vec,
-            gen_axis_angle_to_quat
+            gen_axis_angle_to_quat,
+            gen_invert_quat
         ].flatMap(f => [f(false), f(true)])
     ].join('\n\n') + '\n';
 

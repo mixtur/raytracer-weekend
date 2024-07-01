@@ -12,6 +12,7 @@ import {
     unit_vec3,
     vec3, vec3_dirty
 } from '../../math/vec3.gen';
+import { clamp, remap } from '../../utils';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -113,12 +114,14 @@ const burley_brdf: AttenuationFunction = (material, r_in, hit, bounce, scattered
 // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
 export const create_burley_pbr = (albedo: Texture, roughness: number, metalness: number): MegaMaterial => {
+    const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
+    const _metalness = remap(clamp(metalness ?? 1, 0, 1), 0, 1, 0.001, 0.999);
     return create_mega_material({
         attenuate: burley_brdf,
         scatter: lambertian_scatter,
         albedo,
-        roughness: roughness ** 2,
         scattering_pdf: new CosinePDF(),
-        metalness
-    })
+        roughness: _roughness,
+        metalness: _metalness
+    });
 }

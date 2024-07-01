@@ -27,9 +27,9 @@ export interface BounceRecord {
     skip_pdf_ray: Ray;
 }
 
-export type EmitFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord) => Color;
-export type ScatterFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord) => boolean;
-export type AttenuationFunction = (mat: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray) => void;
+export type EmitFunction = (material: MegaMaterial, r_in: Ray, hit: HitRecord) => Color;
+export type ScatterFunction = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord) => boolean;
+export type AttenuationFunction = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray) => void;
 
 export const create_bounce_record = (): BounceRecord => {
     return {
@@ -55,7 +55,7 @@ export const create_mega_material = (config: Partial<MegaMaterial>): MegaMateria
         emissive: config.emissive ?? solid_color(0, 0, 0),
         albedo: config.albedo ?? solid_color(0, 0, 0),
         fuzz: config.fuzz ?? 0,
-        roughness: remap(clamp(config.roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999),
-        metalness: remap(clamp(config.metalness ?? 1, 0, 1), 0, 1, 0.001, 0.999),
+        roughness: config.roughness ?? 1,
+        metalness: config.metalness ?? 1,
     };
 }

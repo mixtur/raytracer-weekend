@@ -9,7 +9,7 @@ The following additional features are implemented
 - quaternions for changing PDFs orientations
 - some gltf support
 - IBL with importance sampling
-- some PBR
+- PBR using [this](https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf) paper
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -18,10 +18,10 @@ The following additional features are implemented
 ```
 
 TODO:
+- **bug** - when burley_pbr_separate is rendered with image based importance sampling, colors get bent a little 
 - scene serialization for workers
 - better tone mapping
 - texture filtering
-- explicit micro-facets (not sure if it is even possible)
 - non-transparent dielectrics
 - matrix-based camera
 - glTF

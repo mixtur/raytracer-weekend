@@ -290,32 +290,48 @@ const gen_rand_vec3_cosine_unit = (use_result_arg) => {
     return gen_fn(name, signature, body, use_result_arg);
 };
 
+const gen_reflect_incident_vec3 = (use_result_arg) => {
+    const name = `reflect_incident_vec3`;
+    const signature = gen_signature(use_result_arg, sig('Vec3', 'incident_v: Vec3, normal: Vec3'));
+    const body = use_result_arg
+        ? [
+            ind + 'mul_vec3_s_r(result, normal, 2 * dot_vec3(incident_v, normal));',
+            ind + 'sub_vec3_r(result, incident_v, result);'
+        ].join('\n')
+        : [
+            ind + 'const result = mul_vec3_s(normal, 2 * dot_vec3(incident_v, normal));',
+            ind + 'sub_vec3_r(result, incident_v, result);',
+            ind + 'return result;',
+        ].join('\n');
+    return gen_fn(name, signature, body, use_result_arg);
+}
+
 const gen_reflect_vec3 = (use_result_arg) => {
     const name = `reflect_vec3`;
     const signature = gen_signature(use_result_arg, sig('Vec3', 'v: Vec3, normal: Vec3'));
     const body = use_result_arg
         ? [
             ind + 'mul_vec3_s_r(result, normal, 2 * dot_vec3(v, normal));',
-            ind + 'sub_vec3_r(result, v, result);'
+            ind + 'sub_vec3_r(result, result, v);'
         ].join('\n')
         : [
             ind + 'const result = mul_vec3_s(normal, 2 * dot_vec3(v, normal));',
-            ind + 'sub_vec3_r(result, v, result);',
+            ind + 'sub_vec3_r(result, result, v);',
             ind + 'return result;',
         ].join('\n');
     return gen_fn(name, signature, body, use_result_arg);
 }
 
-const gen_refract_vec3 = (use_result_arg) => {
-    const name = `refract_vec3`;
-    const signature = gen_signature(use_result_arg, sig('Vec3', 'v: Vec3, normal: Vec3, ior: number'));
+const gen_refract_incident_vec3 = (use_result_arg) => {
+    const name = `refract_incident_vec3`;
+    const signature = gen_signature(use_result_arg, sig('Vec3', 'incident_v: Vec3, normal: Vec3, ior: number'));
     const body = use_result_arg
         ? [
-            ind + 'const cos_theta = -dot_vec3(normal, v);',
+            ind + 'const cos_theta = -dot_vec3(normal, incident_v);',
             ind + 'const v_proj = result;',
             ind + 'mul_vec3_s_r(v_proj, normal, cos_theta);',
             ind + 'const out_x_dir = v_proj;',
-            ind + 'add_vec3_r(out_x_dir, v, v_proj);',
+            ind + 'add_vec3_r(out_x_dir, incident_v, v_proj);',
             ind + 'const out_x = out_x_dir;',
             ind + 'mul_vec3_s_r(out_x, out_x_dir, ior);',
             //todo: make a tmp variable for out_y
@@ -323,10 +339,10 @@ const gen_refract_vec3 = (use_result_arg) => {
             ind + 'add_vec3_r(out_x, out_x, out_y);',
         ].join('\n')
         : [
-            ind + 'const cos_theta = -dot_vec3(normal, v);',
+            ind + 'const cos_theta = -dot_vec3(normal, incident_v);',
             ind + 'const v_proj = mul_vec3_s(normal, cos_theta);',
             ind + 'const out_x_dir = v_proj;',
-            ind + 'add_vec3_r(out_x_dir, v, v_proj);',
+            ind + 'add_vec3_r(out_x_dir, incident_v, v_proj);',
             ind + 'const out_x = out_x_dir;',
             ind + 'mul_vec3_s_r(out_x, out_x_dir, ior);',
             //todo: make a tmp variable for out_y
@@ -377,8 +393,9 @@ export const gen_vec_module = () => {
             gen_rand_vec3_unit,
             gen_rand_vec3_on_unit_hemisphere,
             gen_rand_vec3_cosine_unit,
+            gen_reflect_incident_vec3,
             gen_reflect_vec3,
-            gen_refract_vec3,
+            gen_refract_incident_vec3,
             gen_rand_vec3_in_unit_disk,
 
             gen_vec_vec_bin_op('add', '+'),

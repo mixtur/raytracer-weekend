@@ -56,7 +56,7 @@ async function render({
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
 
     run_with_hooks(() => {
-        const vec3_allocator = new ArenaVec3Allocator(4096);
+        const vec3_allocator = new ArenaVec3Allocator(8192);
         const quat_allocator = new ArenaQuatAllocator(640);
         const output_line_allocator = new ArenaVec3Allocator(image_width);
 
