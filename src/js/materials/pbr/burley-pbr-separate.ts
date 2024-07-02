@@ -37,7 +37,7 @@ const one_vec = vec3(1, 1, 1);
 const specular_weight = vec3_dirty();
 const diffuse_weight = vec3_dirty();
 
-const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3) => {
+const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3, metallic: number, roughness: number) => {
     const n = unit_vec3(hit.normal);
     const v = negate_vec3(unit_vec3(r_in.direction));
     const l = unit_vec3(scattered.direction);
@@ -58,7 +58,7 @@ const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, 
     const ior = hit.front_face ? (1 / material.ior) : material.ior;
     const f0 = ((1 - ior) / (1 + ior)) ** 2;//1 - assuming we're rendering in the air
     set_vec3(f0_vec, f0, f0, f0);//typically f0 == 0.0
-    mix_vec3_r(f0_vec, f0_vec, albedo, material.metalness);
+    mix_vec3_r(f0_vec, f0_vec, albedo, metallic);
 
     // we want to compute this f0 + (1 - f0) * (1 - l_dot_h) ** 5
     // except that f0 and 1 are vectors, so
@@ -76,7 +76,7 @@ const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, 
     // const diffuse = albedo;
     //
     // disney's diffuse
-    const fd_90 = 0.5 + 2 * material.roughness * l_dot_h ** 2;
+    const fd_90 = 0.5 + 2 * roughness * l_dot_h ** 2;
     const diffuse_factor = burley_diffuse_partial(fd_90, l_dot_n)
         * burley_diffuse_partial(fd_90, v_dot_n);
     const diffuse = mul_vec3_s(albedo, diffuse_factor);
@@ -86,7 +86,7 @@ const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, 
     bounce.attenuation.set(attenuation_value);
 }
 
-const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3) => {
+const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3, metallic: number, roughness: number) => {
     const n = unit_vec3(hit.normal);
     const v = negate_vec3(unit_vec3(r_in.direction));
     const l = unit_vec3(scattered.direction);
@@ -107,7 +107,7 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
     const ior = hit.front_face ? (1 / material.ior) : material.ior;
     const f0 = ((1 - ior) / (1 + ior)) ** 2;//1 - assuming we're rendering in the air
     set_vec3(f0_vec, f0, f0, f0);//typically f0 == 0.0
-    mix_vec3_r(f0_vec, f0_vec, albedo, material.metalness);
+    mix_vec3_r(f0_vec, f0_vec, albedo, metallic);
 
     // we want to compute this f0 + (1 - f0) * (1 - l_dot_h) ** 5
     // except that f0 and 1 are vectors, so
@@ -130,7 +130,7 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
     // );
     //
     // disney's G
-    const alpha_g = (0.5 + (material.roughness ** 0.5) / 2) ** 2;
+    const alpha_g = (0.5 + (roughness ** 0.5) / 2) ** 2;
     const alpha_g_squared = alpha_g ** 2;
     const tan_theta_l_squared = 1 / l_dot_n ** 2 - 1;
     const tan_theta_v_squared = 1 / v_dot_n ** 2 - 1;
@@ -145,9 +145,9 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
 }
 
 class SpecularGFXPDF extends SpecularIsotropicMicroFacetPDF {
-    alpha_squared: number;
-    constructor(alpha: number) {
-        super();
+    alpha_squared!: number;
+
+    setAlpha(alpha: number) {
         this.alpha_squared = alpha ** 2;
     }
 
@@ -177,8 +177,7 @@ class SpecularGFXPDF extends SpecularIsotropicMicroFacetPDF {
 }
 
 const uv = vec3_dirty();
-const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
-    const mixture_pdf = material.scattering_pdf as MixturePDF;
+const update_uv = (hit: HitRecord) => {
     const { u, v } = hit;
     if (hit.tex_channels.length > 0) {
         //todo: un-hardcode tex channel
@@ -189,14 +188,30 @@ const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, sc
         uv[0] = u;
         uv[1] = v;
     }
+}
 
+const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
+    const mixture_pdf = material.scattering_pdf as MixturePDF;
     const albedo = material.albedo.value(uv[0], uv[1], hit.p);
+    let metallic = 1, roughness = 1;
+    if (material.metallic === material.roughness) {
+        const metallic_roughness = material.metallic.value(uv[0], uv[1], hit.p);
+        roughness = metallic_roughness[1];
+        metallic = metallic_roughness[2];
+    } else {
+        roughness = material.roughness.value(uv[0], uv[1], hit.p)[1];
+        metallic = material.metallic.value(uv[0], uv[1], hit.p)[2];
+    }
+
+    const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
+    const _metallic = remap(clamp(metallic ?? 1, 0, 1), 0, 1, 0.001, 0.999);
+
     if (mixture_pdf.use_pdf1) {
         // cosine pdf, therefore
-        burley_brdf_diffuse(material, r_in, hit, bounce, scattered, albedo);
+        burley_brdf_diffuse(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
     } else {
         // specular pdf, therefore
-        burley_brdf_specular(material, r_in, hit, bounce, scattered, albedo);
+        burley_brdf_specular(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
     }
     mul_vec3_s_r(bounce.attenuation, bounce.attenuation, 2);
 };
@@ -208,7 +223,15 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
     const unit_normal = unit_vec3(hit.normal);
     const unit_view = negate_vec3(unit_vec3(r_in.direction));
     diffuse_pdf.setDirection(unit_normal);
+
+    //todo: roughness is sampled twice now. Once here and another time in attenuation
+    //      we'd better avoid it.
+    update_uv(hit);
+    const roughness = material.roughness.value(uv[0], uv[1], hit.p)[1];
+    const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
+    specular_pdf.setAlpha(_roughness);
     specular_pdf.setup(unit_normal, unit_view);
+
     bounce.skip_pdf = false;
     return true;
 };
@@ -216,19 +239,16 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 // implemented by blindly using these parers:
 // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-export const create_burley_pbr_separate = (albedo: Texture, roughness: number, metalness: number): MegaMaterial => {
-    const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
-    const _metalness = remap(clamp(metalness ?? 1, 0, 1), 0, 1, 0.001, 0.999);
-
+export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture): MegaMaterial => {
     const scattering_pdf = new MixturePDF();
     scattering_pdf.pdf1 = new CosinePDF();
-    scattering_pdf.pdf2 = new SpecularGFXPDF(_roughness);
+    scattering_pdf.pdf2 = new SpecularGFXPDF();
     return create_mega_material({
         attenuate: burley_attenuation,
         scatter: burley_scatter,
         albedo,
         scattering_pdf,
-        roughness: _roughness,
-        metalness: _metalness
+        roughness: roughness,
+        metallic: metalness
     });
 }

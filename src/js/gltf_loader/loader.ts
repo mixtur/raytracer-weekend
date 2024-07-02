@@ -21,9 +21,9 @@ import { HittableList } from '../hittable/hittable_list';
 import { Transform } from '../hittable/transform';
 import { run_with_hooks } from '../utils';
 import { create_burley_pbr_separate } from '../materials/pbr/burley-pbr-separate';
-import { HdrTexture } from '../texture/hdr_image_texture';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { SrgbImageTexture } from '../texture/srgb_image_texture';
+import { LinearImageTexture } from '../texture/linear_image_texture';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -66,7 +66,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             }
         });
 
-        const textures = (gltf.textures ?? []).map(t => new SrgbImageTexture(images[t.source!]));
+        const textures = (gltf.textures ?? []).map(t => images[t.source!]);
 
         const default_material = create_lambertian(solid_color(1, 1, 1));
 
@@ -74,14 +74,19 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             // todo: tex_coord
             // todo: combine factor and texture
             const color = m.pbrMetallicRoughness?.baseColorFactor ?? [1, 1, 1, 1];
-            const color_texture = m.pbrMetallicRoughness?.baseColorTexture?.index;
+            const color_texture_index = m.pbrMetallicRoughness?.baseColorTexture?.index;
             const roughness = m.pbrMetallicRoughness?.roughnessFactor ?? 1;
             const metalness = m.pbrMetallicRoughness?.metallicFactor ?? 1;
+            const metallic_roughness_texture_index = m.pbrMetallicRoughness?.metallicRoughnessTexture?.index;
+            const metallic_roughness = metallic_roughness_texture_index === undefined
+                ? solid_color(0, roughness, metalness)
+                : new LinearImageTexture(textures[metallic_roughness_texture_index]);
 
-            const albedo = color_texture === undefined
+            const albedo = color_texture_index === undefined
                 ? solid_color(color[0], color[1], color[2])
-                : textures[color_texture];
-            return create_burley_pbr_separate(albedo, roughness, metalness);
+                : new SrgbImageTexture(textures[color_texture_index]);
+
+            return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness);
         });
 
         const parse_indexed_primitive = (p: GLTF2.Primitive) => {

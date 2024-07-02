@@ -18,6 +18,7 @@ The following additional features are implemented
 ```
 
 TODO:
+- **bug** - for some triangle-camera co-orientations output is extremely noisy. Not sure why yet.
 - **bug** - when burley_pbr_separate is rendered with image based importance sampling, colors get bent a little 
 - scene serialization for workers
 - better tone mapping
@@ -25,6 +26,5 @@ TODO:
 - non-transparent dielectrics
 - matrix-based camera
 - glTF
-  - metalness-roughness map
   - emissive map
   - normal map

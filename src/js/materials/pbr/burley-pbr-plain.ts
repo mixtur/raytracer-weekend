@@ -55,7 +55,7 @@ const burley_brdf: AttenuationFunction = (material, r_in, hit, bounce, scattered
     const ior = hit.front_face ? (1 / material.ior) : material.ior;
     const f0 = ((1 - ior) / (1 + ior)) ** 2;//1 - assuming we're rendering in the air
     set_vec3(f0_vec, f0, f0, f0);//typically f0 == 0.0
-    mix_vec3_r(f0_vec, f0_vec, albedo, material.metalness);
+    mix_vec3_r(f0_vec, f0_vec, albedo, material.metallic);
 
     // we want to compute this f0 + (1 - f0) * (1 - l_dot_h) ** 5
     // except that f0 and 1 are vectors, so
@@ -122,6 +122,6 @@ export const create_burley_pbr = (albedo: Texture, roughness: number, metalness:
         albedo,
         scattering_pdf: new CosinePDF(),
         roughness: _roughness,
-        metalness: _metalness
+        metallic: _metalness
     });
 }
