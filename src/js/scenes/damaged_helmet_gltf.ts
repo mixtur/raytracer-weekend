@@ -15,13 +15,13 @@ export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
         light: null,
         create_camera(aspect_ratio: number): Camera {
             return new Camera({
-                look_from: vec3(0, 1, 3),
+                look_from: vec3(3, -1, 3),
                 look_at: vec3(0, 0, 0),
                 aspect_ratio,
                 v_up: vec3(0, 1, 0),
-                focus_dist: 10,
-                aperture: 0,
-                y_fov: 40,
+                focus_dist: 3.8,
+                aperture: 0.2,
+                y_fov: 30,
                 time0: 0,
                 time1: 1
             })

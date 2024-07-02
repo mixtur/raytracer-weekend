@@ -43,9 +43,9 @@ export class Transform implements Hittable {
         if (!this.object.hit(new_ray, t_min, t_max, hit)) {
             return false;
         }
+        set_face_normal(hit, new_ray, hit.normal);
         mul_mat3x4_vec3_r(hit.p, this.matrix, hit.p);
         mul_mat3_vec3_r(hit.normal, this.normal, hit.normal);
-        set_face_normal(hit, new_ray, hit.normal);
 
         return true;
     }

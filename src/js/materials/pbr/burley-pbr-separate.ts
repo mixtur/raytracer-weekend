@@ -139,6 +139,8 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
 
     // note: there is no Cook-Torrance D. It is implicit from sampling distribution
     // note: we divide by 2, not 4, because we need to account for sampling light direction by sampling micro-facets
+    // const attenuation_value = mul_vec3_s(specular_weight, g / (2 * v_dot_n));
+
     const attenuation_value = mul_vec3_s(specular_weight, g / (2 * v_dot_n));
 
     bounce.attenuation.set(attenuation_value);

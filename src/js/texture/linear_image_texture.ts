@@ -12,7 +12,7 @@ export class LinearImageTexture implements Texture {
     value(u: number, v: number, p: Point3): Color {
         const {pixels, width, height, normalization} = this._pixels_data;
         const i = Math.floor(clamp(u, 0, 1) * width);
-        const j = Math.floor((1 - clamp(v, 0, 1)) * height);
+        const j = Math.floor(clamp(v, 0, 1) * height);
 
         const offset = (j * width + i) * 4;
         const r = pixels[offset] * normalization;

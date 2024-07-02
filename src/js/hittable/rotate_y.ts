@@ -56,6 +56,7 @@ export class RotateY extends Hittable {
 
         if (!this.obj.hit(r_rotated, t_min, t_max, hit)) return false;
 
+        set_face_normal(hit, r_rotated, hit.normal);
         set_vec3(hit.p,
              cos_theta * hit.p[0] + sin_theta * hit.p[2],
             hit.p[1],
@@ -67,8 +68,6 @@ export class RotateY extends Hittable {
             hit.normal[1],
             -sin_theta * hit.normal[0] + cos_theta * hit.normal[2]
         );
-
-        set_face_normal(hit, r_rotated, hit.normal);
 
         return true;
     }

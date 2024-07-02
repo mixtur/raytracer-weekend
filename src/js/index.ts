@@ -4,10 +4,10 @@ import { multi_threaded_render } from './multi_threaded_render';
 import { generate_random_permutation_u16, generate_straight_order_u16 } from './utils';
 import { DomProgressReporter, ConsoleProgressReporter } from './progress-reporters';
 
-const aspect_ratio = 4/3;
-const image_width = 800;
+const aspect_ratio = 1;
+const image_width = 1280;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 100;
+const samples_per_pixel = 1000;
 const max_depth = 50;
 
 const writer = create_canvas_color_writer(image_width, image_height, document.getElementById('render') as HTMLDivElement);
