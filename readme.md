@@ -24,6 +24,7 @@ TODO:
 - texture filtering
 - non-transparent dielectrics
 - matrix-based camera
+- hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
 - glTF
   - emissive map
   - normal map
