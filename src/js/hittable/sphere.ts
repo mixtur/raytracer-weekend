@@ -1,4 +1,4 @@
-import { ray, Ray, ray_at3, ray_set } from '../math/ray';
+import { ray, Ray, ray_at_r, ray_set } from '../math/ray';
 import {
     div_vec3_s_r,
     dot_vec3,
@@ -57,7 +57,7 @@ export class Sphere extends Hittable {
             }
         }
         const p = hit.p;
-        ray_at3(p, r, t);
+        ray_at_r(p, r, t);
         sub_vec3_r(r_vector, p, center)
         div_vec3_s_r(hit.normal, r_vector, radius)
         hit.t = t;

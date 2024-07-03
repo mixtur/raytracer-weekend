@@ -1,6 +1,6 @@
 import { create_empty_hit_record, HitRecord, Hittable } from './hittable';
 import { AABB } from './aabb';
-import { Ray, ray_at3 } from '../math/ray';
+import { Ray, ray_at_r } from '../math/ray';
 import { len_vec3, set_vec3 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 
@@ -37,7 +37,7 @@ export class ConstantMedium extends Hittable {
         if (hit_distance > distance_inside_boundary) return false;
 
         const t = hit1.t + hit_distance / ray_length;
-        ray_at3(hit.p, r, t);
+        ray_at_r(hit.p, r, t);
         set_vec3(hit.normal, 1, 0, 0);
         hit.t = t;
         hit.material = this.phase_function;

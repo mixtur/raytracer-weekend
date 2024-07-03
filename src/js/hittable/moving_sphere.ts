@@ -1,4 +1,4 @@
-import { Ray, ray_at3 } from '../math/ray';
+import { Ray, ray_at_r } from '../math/ray';
 import { div_vec3_s_r, dot_vec3, mix_vec3_r, Point3, sub_vec3_r, vec3, Vec3 } from '../math/vec3.gen';
 import { HitRecord, Hittable, set_face_normal } from "./hittable";
 import { AABB } from './aabb';
@@ -54,7 +54,7 @@ export class MovingSphere extends Hittable {
             }
         }
         const p = hit.p;
-        ray_at3(p, r, t);
+        ray_at_r(p, r, t);
         sub_vec3_r(r_vector, p, center)
         div_vec3_s_r(hit.normal, r_vector, radius);
         hit.t = t;

@@ -1,6 +1,6 @@
 import { HitRecord, Hittable, set_face_normal } from './hittable';
 import { len_vec3, Point3, sq_len_vec3, sub_vec3, Vec3, vec3 } from '../math/vec3.gen';
-import { Ray, ray_at3 } from '../math/ray';
+import { Ray, ray_at_r } from '../math/ray';
 import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
 import { random_min_max } from '../math/random';
@@ -49,7 +49,7 @@ export class Box extends Hittable {
         if (t_exit < t_enter) return false;
         const p = hit.p;
         if (t_min <= t_enter && t_enter <= t_max) {
-            ray_at3(p, r, t_enter)
+            ray_at_r(p, r, t_enter)
             hit.normal.set(t_enter === tx0 ? vec3(dx > 0 ? -1 : 1, 0, 0) :
                            t_enter === ty0 ? vec3(0, dy > 0 ? -1 : 1, 0) :
                                              vec3(0, 0, dz > 0 ? -1 : 1));
@@ -62,7 +62,7 @@ export class Box extends Hittable {
                     t_enter === ty0 ? (p[2] - min_z) / (max_z - min_z) :
                                       (p[0] - min_x) / (max_x - min_x);
         } else if (t_min <= t_exit && t_exit <= t_max) {
-            ray_at3(p, r, t_exit);
+            ray_at_r(p, r, t_exit);
             hit.normal.set(
                 t_exit === tx1 ? vec3(dx > 0 ? 1 : -1, 0, 0) :
                 t_exit === ty1 ? vec3(0, dy > 0 ? 1 : -1, 0) :

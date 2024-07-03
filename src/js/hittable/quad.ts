@@ -7,7 +7,7 @@ import {
 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB } from './aabb';
-import { ray, Ray, ray_at2, ray_set } from '../math/ray';
+import { ray, Ray, ray_at, ray_set } from '../math/ray';
 
 const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
@@ -66,7 +66,7 @@ export class Quad extends Hittable {
             return false;
         }
 
-        const intersection = ray_at2(r, t);
+        const intersection = ray_at(r, t);
         const planar_hitpt_vector = sub_vec3(intersection, this.q);
         cross_vec3_r(tmp_cross, planar_hitpt_vector, this.v)
         const a = dot_vec3(this.w, tmp_cross);

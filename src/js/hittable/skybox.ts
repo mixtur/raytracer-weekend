@@ -1,5 +1,5 @@
 import { HitRecord, Hittable } from './hittable';
-import { Ray, ray_at3 } from '../math/ray';
+import { Ray, ray_at_r } from '../math/ray';
 import { MegaMaterial } from '../materials/megamaterial';
 import { negate_vec3_r, unit_vec3, Vec3 } from '../math/vec3.gen';
 import { AABB } from './aabb';
@@ -52,7 +52,7 @@ export class Skybox extends Hittable {
         hit.t = t_max;
         hit.material = this.material;
         negate_vec3_r(hit.normal, unit_dir);
-        ray_at3(hit.p, r, t_max);
+        ray_at_r(hit.p, r, t_max);
         hit.front_face = true;
 
         return true;
