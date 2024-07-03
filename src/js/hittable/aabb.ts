@@ -12,18 +12,19 @@ export class AABB {
     }
 
     hit(r: Ray, t_min: number, t_max: number): boolean {
-        for (let a = 0; a < 3; a++) {
-            const inv_d = 1 / r.direction[a];
-            let t0 = (this.min[a] - r.origin[a]) * inv_d;
-            let t1 = (this.max[a] - r.origin[a]) * inv_d;
-            if (inv_d < 0) { const t = t0; t0 = t1; t1 = t; }
-            t_min = Math.max(t0, t_min);
-            t_max = Math.min(t1, t_max);
-            if (t_max <= t_min) {
-                return false;
-            }
-        }
-        return true;
+        let t0_0 = (this.min[0] - r.origin[0]) * r.inv_dir[0];
+        let t1_0 = (this.min[1] - r.origin[1]) * r.inv_dir[1];
+        let t2_0 = (this.min[2] - r.origin[2]) * r.inv_dir[2];
+
+        let t0_1 = (this.max[0] - r.origin[0]) * r.inv_dir[0];
+        let t1_1 = (this.max[1] - r.origin[1]) * r.inv_dir[1];
+        let t2_1 = (this.max[2] - r.origin[2]) * r.inv_dir[2];
+
+        if (r.inv_dir[0] < 0) { const t = t0_0; t0_0 = t0_1; t0_1 = t; }
+        if (r.inv_dir[1] < 0) { const t = t1_0; t1_0 = t1_1; t1_1 = t; }
+        if (r.inv_dir[2] < 0) { const t = t2_0; t2_0 = t2_1; t2_1 = t; }
+
+        return Math.max(t0_0, t1_0, t2_0, t_min) < Math.min(t0_1, t1_1, t2_1, t_max);
     }
 
     consumeAABB(b: AABB): void {

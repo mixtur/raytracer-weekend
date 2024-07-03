@@ -70,6 +70,7 @@ const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, 
         )
     );
     sub_vec3_r(diffuse_weight, one_vec, specular_weight);
+    mul_vec3_s_r(diffuse_weight, diffuse_weight, 1 - metallic);
 
     //note: don't divide by PI, because CosinePDF. (implicitly multiplied by l_dot_n / PI)
     // lambert's diffuse:

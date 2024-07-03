@@ -96,9 +96,8 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
 
     const _scale_luminance = (pixels_number: number, buffer_f32: Float32Array): void => {
             for (let i = 0; i < pixels_number; ++i) {
-                const rgba32f = buffer_f32.subarray(i * 4, i * 4 + 4);
-
-                set_vec3(XYZColor, rgba32f[0], rgba32f[1], rgba32f[2]);
+                const base_index = i * 4;
+                set_vec3(XYZColor, buffer_f32[base_index], buffer_f32[base_index + 1], buffer_f32[base_index + 2]);
 
                 convertXYZ2xyY(XYZColor, xyYColor);
 
@@ -107,7 +106,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
                 convertxyY2XYZ(xyYColor, XYZColor);
 
                 mul_mat3_vec3_r(XYZColor, XYZ2RGB, XYZColor);
-                rgba32f.set(XYZColor);
+                buffer_f32.set(XYZColor, base_index);
             }
         };
 

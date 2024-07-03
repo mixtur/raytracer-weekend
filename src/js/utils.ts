@@ -28,13 +28,11 @@ export const format_time = (ms: number): string => {
 const teardowns: Array<() => void> = [];
 export const run_with_hooks = <T>(f: () => T): T => {
     teardowns.length = 0;
-    try {
-        return f();
-    } finally {
-        for (let i = 0; i < teardowns.length; i++){
-            teardowns[i]();
-        }
+    const result = f();
+    for (let i = 0; i < teardowns.length; i++){
+        teardowns[i]();
     }
+    return result;
 };
 
 

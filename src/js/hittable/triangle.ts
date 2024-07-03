@@ -3,15 +3,15 @@ import {
     add_vec3, add_vec3_r,
     cross_vec3, cross_vec3_r, div_vec3_s, dot_vec3, fma_vec3_s_vec3, fma_vec3_s_vec3_r, len_vec3,
     Point3, sq_len_vec3, sub_vec3, sub_vec3_r, unit_vec3, unit_vec3_r, vec3,
-    Vec3
+    Vec3, vec3_dirty
 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB } from './aabb';
-import { ray, Ray, ray_at2, ray_set } from '../math/ray';
+import { ray_dirty, Ray, ray_at2, ray_set, ray_at3 } from '../math/ray';
 
 const tmp_hit = create_empty_hit_record();
-const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
-const tmp_cross = vec3(0, 0, 0);
+const tmp_ray = ray_dirty();
+const tmp_cross = vec3_dirty();
 
 export interface NormalStrategy {
     get_normal(wb: number, wc: number): Vec3;
@@ -60,6 +60,9 @@ export const get_tex_coords_r = (result: Vec3, wb: number, wc: number, tex_coord
     result[1] = tex_coords[0][1] * wa + tex_coords[1][1] * wb + tex_coords[2][1] * wc;
     return result;
 }
+
+const planar_hitpt_vector = vec3_dirty();
+const intersection = vec3_dirty();
 
 //todo: make triangles indexed (mesh-hittable?)
 export class Triangle extends Hittable {
@@ -121,8 +124,8 @@ export class Triangle extends Hittable {
             return false;
         }
 
-        const intersection = ray_at2(r, t);
-        const planar_hitpt_vector = sub_vec3(intersection, this.q);
+        ray_at3(intersection, r, t);
+        sub_vec3_r(planar_hitpt_vector, intersection, this.q);
         cross_vec3_r(tmp_cross, planar_hitpt_vector, this.v)
         const a = dot_vec3(this.w, tmp_cross);
         cross_vec3_r(tmp_cross, this.u, planar_hitpt_vector)

@@ -1,4 +1,4 @@
-import { ray, Ray, ray_set } from './math/ray';
+import { ray_dirty, Ray, ray_set } from './math/ray';
 import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r, vec3, } from './math/vec3.gen';
 import { create_empty_hit_record, HitRecord, Hittable } from './hittable/hittable';
 import { BounceRecord, create_bounce_record } from './materials/megamaterial';
@@ -12,7 +12,7 @@ const ray_stack: Ray[] = [];
 for (let i = 0; i < 100; i++) {
     hit_stack.push(create_empty_hit_record());
     bounce_stack.push(create_bounce_record());
-    ray_stack.push(ray(vec3(0, 0, 0), vec3(0, 0, 0), 0));
+    ray_stack.push(ray_dirty());
 }
 
 const light_pdf = new HittablePDF();

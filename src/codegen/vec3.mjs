@@ -25,7 +25,7 @@ export class ArenaVec3Allocator {
     }
     alloc(a: number, b: number, c: number): Vec3 {
         if (this.nextToAlloc >= this.vectors.length) {
-            throw new Error('arena is full cannot alloc');
+            throw new Error(\`Arena is full cannot alloc. Limit = \${this.vectors.length}\`);
         }
         const result = this.vectors[this.nextToAlloc++];
         result[0] = a;

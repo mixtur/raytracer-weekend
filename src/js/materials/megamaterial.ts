@@ -1,6 +1,6 @@
 import { Texture } from '../texture/texture';
 import { solid_color } from '../texture/solid_color';
-import { ray, Ray } from '../math/ray';
+import { Ray, ray_dirty } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
 import { color, Color, vec3 } from '../math/vec3.gen';
 import { PDF, SpherePDF } from '../math/pdf';
@@ -34,7 +34,7 @@ export const create_bounce_record = (): BounceRecord => {
     return {
         attenuation: color(0, 0, 0),
         skip_pdf: false,
-        skip_pdf_ray: ray(vec3(0, 0, 0), vec3(0, 0, 0), 0)
+        skip_pdf_ray: ray_dirty()
     }
 };
 
