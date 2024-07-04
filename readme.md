@@ -31,3 +31,6 @@ TODO:
 - glTF
   - combine factors with textures
   - alpha channel
+  - texture transforms
+  - transmission
+  - volume, ior
