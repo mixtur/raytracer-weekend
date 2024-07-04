@@ -87,6 +87,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             const metalness = m.pbrMetallicRoughness?.metallicFactor ?? 1;
             const metallic_roughness_texture_index = m.pbrMetallicRoughness?.metallicRoughnessTexture?.index;
             const normal_map_index = m.normalTexture?.index;
+            const emissive_map_index = m.emissiveTexture?.index;
 
             const metallic_roughness = metallic_roughness_texture_index === undefined
                 ? solid_color(0, roughness, metalness)
@@ -100,7 +101,11 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 ? null
                 : new LinearImageTexture(textures[normal_map_index]);
 
-            return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness, normal_map);
+            const emissive_map = emissive_map_index === undefined
+                ? null
+                : new SrgbImageTexture(textures[emissive_map_index]);
+
+            return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness, normal_map, emissive_map);
         });
 
         const parse_indexed_primitive = (p: GLTF2.Primitive) => {

@@ -1,7 +1,7 @@
 import {
     AttenuationFunction,
     BounceRecord,
-    create_mega_material,
+    create_mega_material, default_emit, EmitFunction,
     MegaMaterial,
     ScatterFunction
 } from '../megamaterial';
@@ -21,6 +21,8 @@ import { clamp, remap } from '../../utils';
 import { Ray } from '../../math/ray';
 import { HitRecord } from '../../hittable/hittable';
 import { interpolate_vec2_r } from '../../hittable/triangle';
+import { SrgbImageTexture } from '../../texture/srgb_image_texture';
+import { solid_color } from '../../texture/solid_color';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -231,7 +233,6 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 
     //todo: roughness is sampled twice now. Once here and another time in attenuation
     //      we'd better avoid it.
-    update_uv(hit);
     const roughness = material.roughness.value(uv[0], uv[1], hit.p)[1];
     const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
     specular_pdf.setAlpha(_roughness);
@@ -241,10 +242,19 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
     return true;
 };
 
+const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
+    if (material.emissive instanceof SrgbImageTexture) {
+        update_uv(hit);
+        return material.emissive.value(uv[0], uv[1], uv);
+    }
+
+    return material.emissive.value(hit.u, hit.v, hit.p);
+};
+
 // implemented by blindly using these parers:
 // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture, normal_map: Texture | null): MegaMaterial => {
+export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture, normal_map: Texture | null, emissive: Texture | null): MegaMaterial => {
     const scattering_pdf = new MixturePDF();
     scattering_pdf.pdf1 = new CosinePDF();
     scattering_pdf.pdf2 = new SpecularGFXPDF();
@@ -253,6 +263,8 @@ export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, 
         scatter: burley_scatter,
         albedo,
         scattering_pdf,
+        emit: uv_aware_emit,
+        emissive: emissive ?? solid_color(0, 0, 0),
         roughness: roughness,
         metallic: metalness,
         normal_map

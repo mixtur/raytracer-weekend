@@ -29,4 +29,5 @@ TODO:
 - utilize free screen space better
 - highlight lines currently being rendered in the progress bar
 - glTF
-  - emissive map
+  - combine factors with textures
+  - alpha channel
