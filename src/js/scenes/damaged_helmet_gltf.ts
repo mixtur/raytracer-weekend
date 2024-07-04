@@ -20,7 +20,7 @@ export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
                 aspect_ratio,
                 v_up: vec3(0, 1, 0),
                 focus_dist: 3.8,
-                aperture: 0.2,
+                aperture: 0.05,
                 y_fov: 30,
                 time0: 0,
                 time1: 1

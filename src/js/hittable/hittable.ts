@@ -1,7 +1,8 @@
 import { Ray } from "../math/ray";
-import { dot_vec3, point3, Point3, vec3, Vec3 } from '../math/vec3.gen';
+import { dot_vec3, point3, Point3, vec3, Vec3, vec3_dirty } from '../math/vec3.gen';
 import { AABB } from './aabb';
 import { create_mega_material, MegaMaterial } from '../materials/megamaterial';
+import { TriangleVec2 } from './triangle';
 
 export interface HitRecord {
     p: Point3;
@@ -11,7 +12,7 @@ export interface HitRecord {
     material: MegaMaterial;
     u: number;
     v: number;
-    tex_channels: [Vec3, Vec3, Vec3][]
+    tex_channels: TriangleVec2[];
 }
 
 const dummy_material: MegaMaterial = create_mega_material({

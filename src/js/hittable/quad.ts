@@ -7,10 +7,10 @@ import {
 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB } from './aabb';
-import { ray, Ray, ray_at, ray_set } from '../math/ray';
+import { Ray, ray_at, ray_dirty, ray_set } from '../math/ray';
 
 const tmp_hit = create_empty_hit_record();
-const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
+const tmp_ray = ray_dirty();
 const tmp_cross = vec3(0, 0, 0);
 
 export class Quad extends Hittable {

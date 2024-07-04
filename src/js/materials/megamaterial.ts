@@ -17,6 +17,7 @@ export interface MegaMaterial {
 
     roughness: Texture;
     metallic: Texture;
+    normal_map: Texture | null;
 }
 
 export interface BounceRecord {
@@ -58,5 +59,6 @@ export const create_mega_material = (config: Partial<MegaMaterial>): MegaMateria
         fuzz: config.fuzz ?? 0,
         roughness: config.roughness ?? default_metallic_roughness,
         metallic: config.metallic ?? default_metallic_roughness,
+        normal_map: config.normal_map ?? null
     };
 }

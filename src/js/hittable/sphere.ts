@@ -1,4 +1,4 @@
-import { ray, Ray, ray_at_r, ray_set } from '../math/ray';
+import { Ray, ray_at_r, ray_dirty, ray_set } from '../math/ray';
 import {
     div_vec3_s_r,
     dot_vec3,
@@ -14,7 +14,7 @@ import { mul_quat_vec3, newz_to_quat } from '../math/quat.gen';
 
 
 const tmp_hit = create_empty_hit_record();
-const tmp_ray = ray(vec3(0, 0, 0), vec3(0, 0, 0), 0);
+const tmp_ray = ray_dirty();
 
 export function get_sphere_uv(p: Point3, uv: UV): void {
     // p: a given point on the sphere of radius one, centered at the origin.

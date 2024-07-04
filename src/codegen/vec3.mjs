@@ -100,6 +100,17 @@ const gen_vec_scalar_bin_op = (op_name, op_code) => use_result_arg => {
     return gen_fn(name, signature, body, use_result_arg);
 };
 
+const gen_fma_vec3_s_s = (use_result_arg) => {
+    const name = `fma_vec3_s_s`;
+    const signature = gen_signature(use_result_arg, sig('Vec3', 'a: Vec3, b: number, c: number'));
+    const body = gen_output(use_result_arg, 'vec3', [
+        `a[0] * b + c`,
+        `a[1] * b + c`,
+        `a[2] * b + c`,
+    ]);
+    return gen_fn(name, signature, body, use_result_arg);
+};
+
 const gen_fma_vec3_s_vec3 = (use_result_arg) => {
     const name = `fma_vec3_s_vec3`;
     const signature = gen_signature(use_result_arg, sig('Vec3', 'a: Vec3, b: number, c: Vec3'));
@@ -380,6 +391,7 @@ export const gen_vec_module = () => {
         preamble,
         gen_fn('dot_vec3', sig('number', 'a: Vec3, b: Vec3'), ind + extract_fn_body(dot_vec3)),
         ...[
+            gen_fma_vec3_s_s,
             gen_fma_vec3_s_vec3,
             gen_fma_vec3,
             gen_cross,

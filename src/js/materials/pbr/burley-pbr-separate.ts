@@ -20,7 +20,7 @@ import {
 import { clamp, remap } from '../../utils';
 import { Ray } from '../../math/ray';
 import { HitRecord } from '../../hittable/hittable';
-import { get_tex_coords_r } from '../../hittable/triangle';
+import { interpolate_vec2_r } from '../../hittable/triangle';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -180,11 +180,13 @@ class SpecularGFXPDF extends SpecularIsotropicMicroFacetPDF {
 }
 
 const uv = vec3_dirty();
+const barycentric_weights = vec3_dirty();
 const update_uv = (hit: HitRecord) => {
     const { u, v } = hit;
     if (hit.tex_channels.length > 0) {
         //todo: un-hardcode tex channel
-        get_tex_coords_r(uv, u, v, hit.tex_channels[0]);
+        set_vec3(barycentric_weights, 1 - u - v, u, v);
+        interpolate_vec2_r(uv, barycentric_weights, hit.tex_channels[0]);
         uv[0] -= Math.floor(uv[0]);
         uv[1] -= Math.floor(uv[1]);
     } else {
@@ -242,7 +244,7 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 // implemented by blindly using these parers:
 // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
-export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture): MegaMaterial => {
+export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture, normal_map: Texture | null): MegaMaterial => {
     const scattering_pdf = new MixturePDF();
     scattering_pdf.pdf1 = new CosinePDF();
     scattering_pdf.pdf2 = new SpecularGFXPDF();
@@ -252,6 +254,7 @@ export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, 
         albedo,
         scattering_pdf,
         roughness: roughness,
-        metallic: metalness
+        metallic: metalness,
+        normal_map
     });
 }

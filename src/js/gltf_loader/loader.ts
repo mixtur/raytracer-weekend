@@ -3,7 +3,14 @@ import { GLTF2 } from './gltf_spec';
 import { GLDataType, GLPrimitiveMode } from './gl_types';
 import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
-import { ConstantNormal, InterpolatedNormal, Triangle, TriangleUV } from '../hittable/triangle';
+import {
+    ConstantNormal,
+    InterpolatedNormal,
+    NormalMap,
+    Triangle,
+    TriangleVec2,
+    TriangleVec3
+} from '../hittable/triangle';
 import { BVHNode } from '../hittable/bvh';
 import {
     ArenaMat3x4Allocator,
@@ -24,6 +31,7 @@ import { create_burley_pbr_separate } from '../materials/pbr/burley-pbr-separate
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { SrgbImageTexture } from '../texture/srgb_image_texture';
 import { LinearImageTexture } from '../texture/linear_image_texture';
+import { Texture } from '../texture/texture';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -78,6 +86,8 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             const roughness = m.pbrMetallicRoughness?.roughnessFactor ?? 1;
             const metalness = m.pbrMetallicRoughness?.metallicFactor ?? 1;
             const metallic_roughness_texture_index = m.pbrMetallicRoughness?.metallicRoughnessTexture?.index;
+            const normal_map_index = m.normalTexture?.index;
+
             const metallic_roughness = metallic_roughness_texture_index === undefined
                 ? solid_color(0, roughness, metalness)
                 : new LinearImageTexture(textures[metallic_roughness_texture_index]);
@@ -86,7 +96,11 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 ? solid_color(color[0], color[1], color[2])
                 : new SrgbImageTexture(textures[color_texture_index]);
 
-            return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness);
+            const normal_map = normal_map_index === undefined
+                ? null
+                : new LinearImageTexture(textures[normal_map_index]);
+
+            return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness, normal_map);
         });
 
         const parse_indexed_primitive = (p: GLTF2.Primitive) => {
@@ -113,6 +127,23 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                             normals_components[i + 2],
                         )
                     );
+                }
+            }
+
+            const tangents = [];
+            const tangents_ws = [];
+            const has_tangents = 'TANGENT' in p.attributes;
+            if (has_tangents) {
+                const tangents_components = accessors[p.attributes.TANGENT];
+                for (let i = 0; i < tangents_components.length; i += 4) {
+                    tangents.push(
+                        vec3(
+                            tangents_components[i],
+                            tangents_components[i + 1],
+                            tangents_components[i + 2],
+                        )
+                    );
+                    tangents_ws.push(tangents_components[i + 3]);
                 }
             }
 
@@ -145,21 +176,39 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             }
             const triangles = [];
             const material = p.material === undefined ? default_material : materials[p.material];
+            const get_normal_strategy = (positions: TriangleVec3, vertex_normals: TriangleVec3 | null, vertex_tangents: TriangleVec3 | null, tangents_ws: Vec3 | null, uvs: TriangleVec2 | null, normal_map: Texture | null) => {
+                if (!vertex_normals) {
+                    return new ConstantNormal(positions);
+                }
+                if (!vertex_tangents || !tangents_ws || !uvs || !normal_map) {
+                    return new InterpolatedNormal(vertex_normals);
+                }
+                return new NormalMap(vertex_normals, vertex_tangents, tangents_ws, uvs, normal_map);
+            }
+
+            if (material.normal_map !== null) {
+                const report = [];
+                if (!has_normals) report.push('NORMAL');
+                if (!has_tangents) report.push('TANGENT');
+
+                if (report.length !== 0) {
+                    console.warn(`Cannot use normal map without these attributes: ${JSON.stringify(report)}`);
+                }
+            }
+
             for (let i = 0; i < indices.length; i += 3) {
-                const a = positions[indices[i]];
-                const b = positions[indices[i + 1]];
-                const c = positions[indices[i + 2]];
+                const vertex_positions: TriangleVec3 = [positions[indices[i]], positions[indices[i + 1]], positions[indices[i + 2]]];
 
-                const normal_strategy = has_normals
-                    ? new InterpolatedNormal(normals[indices[i]], normals[indices[i + 1]], normals[indices[i + 2]])
-                    : new ConstantNormal(a, b, c);
+                const vertex_normals: TriangleVec3 | null = has_normals ? [normals[indices[i]], normals[indices[i + 1]], normals[indices[i + 2]]] : null;
+                const vertex_tangents: TriangleVec3 | null = has_tangents ? [tangents[indices[i]], tangents[indices[i + 1]], tangents[indices[i + 2]]] : null;
+                const vertex_tangents_ws: Vec3 | null = has_tangents ? vec3(tangents_ws[indices[i]], tangents_ws[indices[i + 1]], tangents_ws[indices[i + 2]]) : null;
 
-                const uv_channels: TriangleUV[] = uv_layers.map(layer => [
+                const uv_channels: TriangleVec2[] = uv_layers.map(layer => [
                     layer[indices[i]], layer[indices[i + 1]], layer[indices[i + 2]]
                 ]);
 
-
-                triangles.push(new Triangle(a, b, c, normal_strategy, uv_channels, material));
+                const normal_strategy = get_normal_strategy(vertex_positions, vertex_normals, vertex_tangents, vertex_tangents_ws, uv_channels[0] ?? null, material.normal_map);
+                triangles.push(new Triangle(vertex_positions, normal_strategy, uv_channels, material));
             }
 
             return new BVHNode(triangles, 0, 0);

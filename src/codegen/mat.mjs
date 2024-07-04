@@ -84,6 +84,39 @@ export const s = 's';
 
 const el = (template_el, sym) => (template_el === s) ? sym : template_el;
 
+const lin = {
+    rows: 3,
+    cols: 3,
+    template: [
+        [s, s, s, 0],
+        [s, s, s, 0],
+        [s, s, s, 0],
+        [0, 0, 0, 1],
+    ]
+};
+
+const aff = {
+    rows: 3,
+    cols: 4,
+    template: [
+        [s, s, s, s],
+        [s, s, s, s],
+        [s, s, s, s],
+        [0, 0, 0, 1],
+    ]
+};
+
+const hom = {
+    rows: 4,
+    cols: 4,
+    template: [
+        [s, s, s, s],
+        [s, s, s, s],
+        [s, s, s, s],
+        [s, s, s, s],
+    ]
+};
+
 export const gen_mul_mat_vec = (matrix_layout) => (use_result_arg) => {
     const {rows, cols, template} = matrix_layout;
     const mat_type_name = gen_type_name(matrix_layout);
@@ -206,38 +239,22 @@ export const gen_mat_conversion = (from_layout, to_layout) => (use_result_arg) =
     return gen_fn(name, signature, gen_output(use_result_arg, to_name, components), use_result_arg);
 };
 
-const lin = {
-    rows: 3,
-    cols: 3,
-    template: [
-        [s, s, s, 0],
-        [s, s, s, 0],
-        [s, s, s, 0],
-        [0, 0, 0, 1],
-    ]
-};
-
-const aff = {
-    rows: 3,
-    cols: 4,
-    template: [
-        [s, s, s, s],
-        [s, s, s, s],
-        [s, s, s, s],
-        [0, 0, 0, 1],
-    ]
-};
-
-const hom = {
-    rows: 4,
-    cols: 4,
-    template: [
-        [s, s, s, s],
-        [s, s, s, s],
-        [s, s, s, s],
-        [s, s, s, s],
-    ]
-};
+export const gen_columns_to_mat = (template) => (use_result_arg) => {
+    const mat_type_name = gen_type_name(template);
+    const mat_name = mat_type_name.toLowerCase();
+    const name = `columns_to_${mat_name}`;
+    const signature = gen_signature(use_result_arg, {
+        return_type: mat_type_name,
+        args: new Array(template.cols).fill('').map((_, i) => ({ name: `col${i}`, type: 'Vec3' })),
+    });
+    const components = [];
+    for (let col = 0; col < template.cols; col++) {
+        for (let row = 0; row < template.rows; row++) {
+            components.push(el(template.template[row][col], `col${col}[${row}]`));
+        }
+    }
+    return gen_fn(name, signature, gen_output(use_result_arg, mat_name, components), use_result_arg);
+}
 
 export const gen_inv_mat3 = (use_result_arg) => {
     const code = [
@@ -579,6 +596,9 @@ export const gen_mat_module = () => {
         gen_mat_preamble(hom),
 
         ...[
+            gen_columns_to_mat(lin),
+            gen_columns_to_mat(aff),
+
             gen_mat_conversion(lin, aff),
             gen_mat_conversion(lin, hom),
 
