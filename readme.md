@@ -19,11 +19,11 @@ The following additional features are implemented
 
 TODO:
 - **bug** - when burley_pbr_separate is rendered with image based importance sampling, colors get bent a little 
-- scene serialization for workers
-- better tone mapping
 - texture filtering
-- non-transparent dielectrics
+- better tone mapping
 - matrix-based camera
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
+- pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
+- scene serialization for workers
 - glTF
   - emissive map
