@@ -3,16 +3,15 @@ import { Sphere } from '../hittable/sphere';
 import { point3, vec3 } from '../math/vec3.gen';
 import earthUrl from './earthmap.jpg';
 import { Camera } from '../camera';
-import { HdrTexture } from '../texture/hdr_image_texture';
 import { create_lambertian } from '../materials/lambertian';
 import { Skybox } from '../hittable/skybox';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
-import { SrgbImageTexture } from '../texture/srgb_image_texture';
+import { ImageTexture } from '../texture/image_texture';
 
 export const create_earth_scene = async (): Promise<Scene> => {
     const earth_image = await load_dom_image(earthUrl);
     return {
-        root_hittable: new Sphere(point3(0, 0, 0), 2, create_lambertian(new SrgbImageTexture(earth_image))),
+        root_hittable: new Sphere(point3(0, 0, 0), 2, create_lambertian(new ImageTexture(earth_image, {flip_y: true, decode_srgb: true}))),
         light: null,
         create_camera: (aspect_ratio: number): Camera => {
             const look_from = point3(13, 2, 3);

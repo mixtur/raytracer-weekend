@@ -21,7 +21,7 @@ import { clamp, remap } from '../../utils';
 import { Ray } from '../../math/ray';
 import { HitRecord } from '../../hittable/hittable';
 import { interpolate_vec2_r } from '../../hittable/triangle';
-import { SrgbImageTexture } from '../../texture/srgb_image_texture';
+import { ImageTexture } from '../../texture/image_texture';
 import { solid_color } from '../../texture/solid_color';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
@@ -189,8 +189,6 @@ const update_uv = (hit: HitRecord) => {
         //todo: un-hardcode tex channel
         set_vec3(barycentric_weights, 1 - u - v, u, v);
         interpolate_vec2_r(uv, barycentric_weights, hit.tex_channels[0]);
-        uv[0] -= Math.floor(uv[0]);
-        uv[1] -= Math.floor(uv[1]);
     } else {
         uv[0] = u;
         uv[1] = v;
@@ -228,6 +226,7 @@ class BurleyPDF implements PDF {
 
 const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
     const mixture_pdf = material.scattering_pdf as BurleyPDF;
+    update_uv(hit);
     const albedo = material.albedo.value(uv[0], uv[1], hit.p);
     let metallic = 1, roughness = 1;
     if (material.metallic === material.roughness) {
@@ -273,9 +272,9 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 };
 
 const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
-    if (material.emissive instanceof SrgbImageTexture) {
+    if (material.emissive instanceof ImageTexture) {
         update_uv(hit);
-        return material.emissive.value(uv[0], uv[1], uv);
+        return material.emissive.value(uv[0], uv[1]);
     }
 
     return material.emissive.value(hit.u, hit.v, hit.p);

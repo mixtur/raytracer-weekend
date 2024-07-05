@@ -18,7 +18,7 @@ The following additional features are implemented
 ```
 
 TODO:
-- texture filtering
+- **bug** normals with normal map on DamagedHelmet don't exactly match results in the reference viewer. 
 - better tone mapping
 - matrix-based camera
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
@@ -33,4 +33,3 @@ TODO:
   - texture transforms
   - transmission
   - volume, ior
-  - respect wrapping

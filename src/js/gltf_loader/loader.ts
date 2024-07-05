@@ -1,6 +1,6 @@
 import { Hittable } from '../hittable/hittable';
 import { GLTF2 } from './gltf_spec';
-import { GLDataType, GLPrimitiveMode } from './gl_types';
+import { GLDataType, GLPrimitiveMode, GLTextureFilter } from './gl_types';
 import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
 import {
@@ -29,9 +29,8 @@ import { Transform } from '../hittable/transform';
 import { run_with_hooks } from '../utils';
 import { create_burley_pbr_separate } from '../materials/pbr/burley-pbr-separate';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
-import { SrgbImageTexture } from '../texture/srgb_image_texture';
-import { LinearImageTexture } from '../texture/linear_image_texture';
 import { Texture } from '../texture/texture';
+import { ImageTexture } from '../texture/image_texture';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -74,7 +73,10 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             }
         });
 
-        const textures = (gltf.textures ?? []).map(t => images[t.source!]);
+        const textures = (gltf.textures ?? []).map(t => ({
+            image: images[t.source!],
+            sampler: gltf.samplers?.[t.sampler!] ?? {}
+        }));
 
         const default_material = create_lambertian(solid_color(1, 1, 1));
 
@@ -91,19 +93,37 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
 
             const metallic_roughness = metallic_roughness_texture_index === undefined
                 ? solid_color(0, roughness, metalness)
-                : new LinearImageTexture(textures[metallic_roughness_texture_index]);
+                : new ImageTexture(textures[metallic_roughness_texture_index].image, {
+                    wrap_s: textures[metallic_roughness_texture_index].sampler.wrapS,
+                    wrap_t: textures[metallic_roughness_texture_index].sampler.wrapT,
+                    filter: textures[metallic_roughness_texture_index].sampler.magFilter !== GLTextureFilter.NEAREST
+                });
 
             const albedo = color_texture_index === undefined
                 ? solid_color(color[0], color[1], color[2])
-                : new SrgbImageTexture(textures[color_texture_index]);
+                : new ImageTexture(textures[color_texture_index].image, {
+                    wrap_s: textures[color_texture_index].sampler.wrapS,
+                    wrap_t: textures[color_texture_index].sampler.wrapT,
+                    filter: textures[color_texture_index].sampler.magFilter !== GLTextureFilter.NEAREST,
+                    decode_srgb: true
+                });
 
             const normal_map = normal_map_index === undefined
                 ? null
-                : new LinearImageTexture(textures[normal_map_index]);
+                : new ImageTexture(textures[normal_map_index].image, {
+                    wrap_s: textures[normal_map_index].sampler.wrapS,
+                    wrap_t: textures[normal_map_index].sampler.wrapT,
+                    filter: textures[normal_map_index].sampler.magFilter !== GLTextureFilter.NEAREST,
+                });
 
             const emissive_map = emissive_map_index === undefined
                 ? null
-                : new SrgbImageTexture(textures[emissive_map_index]);
+                : new ImageTexture(textures[emissive_map_index].image, {
+                    wrap_s: textures[emissive_map_index].sampler.wrapS,
+                    wrap_t: textures[emissive_map_index].sampler.wrapT,
+                    filter: textures[emissive_map_index].sampler.magFilter !== GLTextureFilter.NEAREST,
+                    decode_srgb: true
+                });
 
             return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness, normal_map, emissive_map);
         });

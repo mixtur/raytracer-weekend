@@ -6,9 +6,10 @@ import { AABB } from './aabb';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';
 import { PixelsData } from '../texture/image-parsers/types';
-import { HdrTexture } from '../texture/hdr_image_texture';
 import { PDF, SpherePDF } from '../math/pdf';
 import { create_image_based_importance_sampler } from '../texture/image-based-importance-sampler';
+import { ImageTexture } from '../texture/image_texture';
+import { GLWrappingMode } from '../gltf_loader/gl_types';
 
 export class Skybox extends Hittable {
     static create_white(): Skybox {
@@ -24,7 +25,12 @@ export class Skybox extends Hittable {
     }
 
     static create_hdr(image: PixelsData): Skybox {
-        return new Skybox(create_diffuse_light(new HdrTexture(image)), create_image_based_importance_sampler(image));
+        return new Skybox(create_diffuse_light(new ImageTexture(image, {
+            filter: true,
+            wrap_s: GLWrappingMode.REPEAT,
+            wrap_t: GLWrappingMode.MIRRORED_REPEAT,
+            flip_y: true
+        })), create_image_based_importance_sampler(image));
     }
 
     material: MegaMaterial;
