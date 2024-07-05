@@ -57,8 +57,6 @@ export class InterpolatedNormal implements NormalStrategy {
     }
 }
 
-const mod1 = (x: number) => x - Math.floor(x);
-
 const tangent_space_transform = mat3_dirty();
 export class NormalMap implements NormalStrategy {
     uvs: TriangleVec2;
@@ -96,7 +94,7 @@ export class NormalMap implements NormalStrategy {
 
         columns_to_mat3_r(tangent_space_transform, vertex_tangent, bitangent, vertex_normal);
 
-        const result = this.normal_map.value(mod1(uvs[0]), mod1(uvs[1]), uvs);
+        const result = this.normal_map.value(uvs[0], uvs[1], uvs);
 
         fma_vec3_s_s_r(result, result, 2, -1);
         mul_mat3_vec3_r(result, tangent_space_transform, result);
