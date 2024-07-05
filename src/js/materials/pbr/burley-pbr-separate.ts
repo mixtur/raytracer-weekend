@@ -138,13 +138,14 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
     const tan_theta_l_squared = 1 / l_dot_n ** 2 - 1;
     const tan_theta_v_squared = 1 / v_dot_n ** 2 - 1;
     const g = walter_g_partial(l_dot_h, l_dot_n, alpha_g_squared, tan_theta_l_squared)
-        * walter_g_partial(v_dot_h, v_dot_n, alpha_g_squared, tan_theta_v_squared);
+            * walter_g_partial(v_dot_h, v_dot_n, alpha_g_squared, tan_theta_v_squared);
 
     // note: there is no Cook-Torrance D. It is implicit from sampling distribution
     // note: we divide by 2, not 4, because we need to account for sampling light direction by sampling micro-facets
-    // const attenuation_value = mul_vec3_s(specular_weight, g / (2 * v_dot_n));
-
     const attenuation_value = mul_vec3_s(specular_weight, g / (2 * v_dot_n));
+
+    //todo: According to people on the internet, THIS should be the correct formula. But it looks wrong when rendered.
+    //const attenuation_value = mul_vec3_s(specular_weight, g * l_dot_h / v_dot_n);
 
     bounce.attenuation.set(attenuation_value);
 }

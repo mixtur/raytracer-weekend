@@ -97,15 +97,17 @@ export class MixturePDF implements PDF {
 //note: anisotropic micro-facet distribution would require tangent, not just normal,
 //      and quaternion would be computed differently (not sure how yet)
 export abstract class SpecularIsotropicMicroFacetPDF implements PDF {
-    quat: Quat = quat_dirty();
-    inv_quat: Quat = quat_dirty();
-    unit_view: Vec3 = vec3_dirty();
+    quat = quat_dirty();
+    inv_quat = quat_dirty();
+    unit_view = vec3_dirty();
+    unit_normal = vec3_dirty();
 
     protected abstract _generate_h(): Vec3;
     protected abstract _value_h(unit_h: Vec3): number;
 
     setup(unit_normal: Vec3, unit_view: Vec3): void {
         newz_to_quat_r(this.quat, unit_normal);
+        this.unit_normal.set(unit_normal);
         invert_quat_r(this.inv_quat, this.quat);
         this.unit_view.set(unit_view);
     }
@@ -121,15 +123,21 @@ export abstract class SpecularIsotropicMicroFacetPDF implements PDF {
             this.unit_view,
             unit_l
         );
+        if (dot_vec3(this.unit_normal, h) < 0) {
+            return 0;
+        }
+
         unit_vec3_r(h, h);
         // at this point h is correct, except it is in world space
         // rotate h back to local space
         mul_quat_vec3_r(h, this.inv_quat, h);
-        if (h[2] < 0) return 0;
         // now we can compute local-space h value.
         // divide by 2, transformation from h to unit_l is linear (in spherical coordinates), and it's determinant is 2
         //todo: according to people on the Internet, this is wrong. Determinant of Jacobian for reflection operator is apparently not just constant 2.
-        //      Need to understand why. (Or maybe this is fine for my case)
+        //      It should be 4 * v_dot_h  (which is the same as 4 * h[2])
+        //      Need to understand why. (Or maybe 2 is fine for my case)
+        //      When tried to actually apply it, it made surfaces at grazing angles look gray-ish.
+        //      Maybe we need to remove disney's hack to masking/shadowing term to fix it.
         return this._value_h(h) / 2;
     }
 }
