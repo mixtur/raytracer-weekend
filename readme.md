@@ -18,7 +18,6 @@ The following additional features are implemented
 ```
 
 TODO:
-- **bug** - when burley_pbr_separate is rendered with image based importance sampling, colors get bent a little 
 - texture filtering
 - better tone mapping
 - matrix-based camera
@@ -34,3 +33,4 @@ TODO:
   - texture transforms
   - transmission
   - volume, ior
+  - respect wrapping

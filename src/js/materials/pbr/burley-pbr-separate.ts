@@ -1,14 +1,14 @@
 import {
     AttenuationFunction,
     BounceRecord,
-    create_mega_material, default_emit, EmitFunction,
+    create_mega_material, EmitFunction,
     MegaMaterial,
     ScatterFunction
 } from '../megamaterial';
 import { Texture } from '../../texture/texture';
-import { CosinePDF, MixturePDF, SpecularIsotropicMicroFacetPDF } from '../../math/pdf';
+import { CosinePDF, PDF, SpecularIsotropicMicroFacetPDF } from '../../math/pdf';
 import {
-    add_vec3, add_vec3_r,
+    add_vec3_r,
     dot_vec3,
     mix_vec3,
     mix_vec3_r, mul_vec3,
@@ -149,7 +149,7 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
     bounce.attenuation.set(attenuation_value);
 }
 
-class SpecularGFXPDF extends SpecularIsotropicMicroFacetPDF {
+class SpecularGGXPDF extends SpecularIsotropicMicroFacetPDF {
     alpha_squared!: number;
 
     setAlpha(alpha: number) {
@@ -197,8 +197,37 @@ const update_uv = (hit: HitRecord) => {
     }
 }
 
+//note: We cannot use plain MixturePDF here because importance sampling (that prefers lights) will produce wrong results.
+//      Attenuation functions in materials account for use of their pdfs, so that true formula is pre-divided by pdf.
+//      When light based importance sampling is working, this pre-division becomes wrong.
+//      To fix that ray_color multiplies attenuation by material's pdf and divides by light's pdf.
+//      But the problem is that PBR actually uses 2 PDFs. One for diffuse and another for specular.
+//      If we used MixturePDF to combine the two, the fix would multiply by mixture of specular and diffuse pdfs which
+//      is wrong. To make it right again we do this:
+class BurleyPDF implements PDF {
+    pdf1 = new CosinePDF();
+    pdf2 = new SpecularGGXPDF();
+    use_pdf1 = false;
+
+    flip(): void {
+        this.use_pdf1 = Math.random() < 0.5;
+    }
+
+    value(direction: Vec3): number {
+        return this.use_pdf1
+            ? this.pdf1.value(direction)
+            : this.pdf2.value(direction);
+    }
+
+    generate(): Vec3 {
+        return this.use_pdf1
+            ? this.pdf1.generate()
+            : this.pdf2.generate();
+    }
+}
+
 const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
-    const mixture_pdf = material.scattering_pdf as MixturePDF;
+    const mixture_pdf = material.scattering_pdf as BurleyPDF;
     const albedo = material.albedo.value(uv[0], uv[1], hit.p);
     let metallic = 1, roughness = 1;
     if (material.metallic === material.roughness) {
@@ -224,9 +253,10 @@ const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, sc
 };
 
 const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
-    const mixture_pdf = material.scattering_pdf as MixturePDF;
-    const diffuse_pdf = mixture_pdf.pdf1 as CosinePDF;
-    const specular_pdf = mixture_pdf.pdf2 as SpecularGFXPDF;
+    const mixture_pdf = material.scattering_pdf as BurleyPDF;
+    mixture_pdf.flip();
+    const diffuse_pdf = mixture_pdf.pdf1;
+    const specular_pdf = mixture_pdf.pdf2;
     const unit_normal = unit_vec3(hit.normal);
     const unit_view = negate_vec3(unit_vec3(r_in.direction));
     diffuse_pdf.setDirection(unit_normal);
@@ -255,14 +285,11 @@ const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
 // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
 export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture, normal_map: Texture | null, emissive: Texture | null): MegaMaterial => {
-    const scattering_pdf = new MixturePDF();
-    scattering_pdf.pdf1 = new CosinePDF();
-    scattering_pdf.pdf2 = new SpecularGFXPDF();
     return create_mega_material({
         attenuate: burley_attenuation,
         scatter: burley_scatter,
         albedo,
-        scattering_pdf,
+        scattering_pdf: new BurleyPDF(),
         emit: uv_aware_emit,
         emissive: emissive ?? solid_color(0, 0, 0),
         roughness: roughness,

@@ -50,7 +50,7 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
 
         ray_set(scattered, hit.p, pdf.generate(), r.time);
 
-        if (pdf !== hit.material.scattering_pdf) {
+        if (pdf === mix_pdf) {
             pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / pdf.value(scattered.direction);
         }
     }
