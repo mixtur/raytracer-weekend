@@ -9,7 +9,7 @@ import { Texture } from '../../texture/texture';
 import { CosinePDF, PDF, SpecularIsotropicMicroFacetPDF } from '../../math/pdf';
 import {
     add_vec3_r,
-    dot_vec3,
+    dot_vec3, fma_vec3_s_s,
     mix_vec3,
     mix_vec3_r, mul_vec3,
     mul_vec3_s, mul_vec3_s_r, negate_vec3, set_vec3,
@@ -249,6 +249,7 @@ const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, sc
         burley_brdf_specular(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
     }
     mul_vec3_s_r(bounce.attenuation, bounce.attenuation, 2);
+    // bounce.attenuation.set(fma_vec3_s_s(hit.normal, 0.5, 0.5));
 };
 
 const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {

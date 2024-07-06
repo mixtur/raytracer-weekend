@@ -18,7 +18,7 @@ The following additional features are implemented
 ```
 
 TODO:
-- **bug** when normals are facing along incoming ray, they get flipped. This is fine for flat normals, but with normal maps and vertex normals, it becomes a problem. 
+- **bug** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case. 
 - better tone mapping
 - matrix-based camera
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.

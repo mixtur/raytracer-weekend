@@ -18,8 +18,6 @@ import { Sphere } from '../hittable/sphere';
 import { ConstantMedium } from '../hittable/constant_medium';
 import earthUrl from './earthmap.jpg';
 import { NoiseTexture } from '../texture/noise_texture';
-import { Translate } from '../hittable/translate';
-import { RotateY } from '../hittable/rotate_y';
 import { BVHNode } from '../hittable/bvh';
 import { Camera } from '../camera';
 import { create_diffuse_light } from '../materials/diffuse_light';
@@ -28,10 +26,13 @@ import { create_metal } from '../materials/metal';
 import { create_isotropic_phase_function } from '../materials/isotropic_phase_function';
 import { create_lambertian } from '../materials/lambertian';
 import { Quad } from '../hittable/quad';
-import { async_run_with_hooks } from '../utils';
+import { async_run_with_hooks, degrees_to_radians } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Skybox } from '../hittable/skybox';
 import { ImageTexture } from '../texture/image_texture';
+import { Transform } from '../hittable/transform';
+import { trs_to_mat3x4 } from '../math/mat3.gen';
+import { axis_angle_to_quat } from '../math/quat.gen';
 
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
@@ -91,14 +92,14 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
             spheres.push(new Sphere(rand_vec3_min_max(0, 165), 10, white));
         }
 
-        objects.objects.push(new Translate(
-                new RotateY(
-                    new BVHNode(spheres, 0.0, 1.0),
-                    15
-                ),
-                vec3(-100,270,395)
-            )
-        );
+        objects.objects.push(new Transform(
+            trs_to_mat3x4(
+                vec3(-100,270,395),
+                axis_angle_to_quat(vec3(0, 1, 0), degrees_to_radians(15)),
+                vec3(1, 1, 1)
+            ),
+            new BVHNode(spheres, 0.0, 1.0)
+        ));
 
         return {
             root_hittable: objects,

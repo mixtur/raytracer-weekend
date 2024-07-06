@@ -214,7 +214,7 @@ export class Triangle extends Hittable {
         hit.p.set(intersection);
         hit.material = this.mat;
         hit.tex_channels = this.tex_coords;
-        set_face_normal(hit, r, normal);
+        set_face_normal(hit, r, this.normal, normal);
 
         return true;
     }

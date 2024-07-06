@@ -79,7 +79,7 @@ export class Box extends Hittable {
             return false;
         }
 
-        set_face_normal(hit, r, hit.normal);
+        set_face_normal(hit, r, hit.normal, hit.normal);
 
         return true;
     }

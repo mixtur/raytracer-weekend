@@ -81,7 +81,7 @@ export class Quad extends Hittable {
         hit.normal.set(this.normal);
         hit.p.set(intersection);
         hit.material = this.mat;
-        set_face_normal(hit, r, this.normal);
+        set_face_normal(hit, r, this.normal, hit.normal);
 
         return true;
     }

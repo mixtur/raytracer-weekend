@@ -60,7 +60,7 @@ export class MovingSphere extends Hittable {
         hit.t = t;
         hit.material = this.material;
         get_sphere_uv(hit.normal, hit);
-        set_face_normal(hit, r, hit.normal);
+        set_face_normal(hit, r, hit.normal, hit.normal);
 
         return true;
     }

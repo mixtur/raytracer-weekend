@@ -33,18 +33,16 @@ export const create_empty_hit_record = (): HitRecord => {
     };
 };
 
-export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3): void => {
+export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3, rendering_normal: Vec3): void => {
     hit.front_face = dot_vec3(r.direction, outward_normal) < 0;
-    const n = hit.normal;
-    const l = Math.hypot(n[0], n[1], n[2]);
     if (hit.front_face) {
-        hit.normal[0] = outward_normal[0] / l;
-        hit.normal[1] = outward_normal[1] / l;
-        hit.normal[2] = outward_normal[2] / l;
+        hit.normal[0] = rendering_normal[0];
+        hit.normal[1] = rendering_normal[1];
+        hit.normal[2] = rendering_normal[2];
     } else {
-        hit.normal[0] = -outward_normal[0] / l;
-        hit.normal[1] = -outward_normal[1] / l;
-        hit.normal[2] = -outward_normal[2] / l;
+        hit.normal[0] = -rendering_normal[0];
+        hit.normal[1] = -rendering_normal[1];
+        hit.normal[2] = -rendering_normal[2];
     }
 };
 
