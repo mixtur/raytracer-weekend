@@ -25,7 +25,6 @@ TODO:
 - pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
 - scene serialization for workers
 - schedule thread load more evenly. Think something like Masonry layout, but for threads and ray counts
-- utilize free screen space better
 - highlight lines currently being rendered in the progress bar
 - glTF
   - combine factors with textures

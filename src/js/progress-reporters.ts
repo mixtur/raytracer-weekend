@@ -31,14 +31,87 @@ export class ConsoleProgressReporter implements ProgressReporter {
     }
 }
 
-export class DomProgressReporter implements ProgressReporter {
-    per_line_progress: Uint8Array;
+export class MultipleReporters implements ProgressReporter {
+    reporters: ProgressReporter[];
+    constructor(reporters: ProgressReporter[]) {
+        this.reporters = reporters;
+    }
+    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number) {
+        for (const reporter of this.reporters) {
+            reporter.report(thread_id, line_id, rays_casted_increment, total_rays_to_cast, time_passed);
+        }
+    }
+    report_thread_done(thread_id: number) {
+        for (const reporter of this.reporters) {
+            reporter.report_thread_done(thread_id);
+        }
+    }
+    report_done(total_rays: number, total_time_ms: number) {
+        for (const reporter of this.reporters) {
+            reporter.report_done(total_rays, total_time_ms);
+        }
+    }
+}
+
+export class ProgressBar implements ProgressReporter {
+    // per_line_progress: Uint8Array;
     per_thread_progress: Uint32Array;
     thread_count: number;
 
-    per_line_ctx: CanvasRenderingContext2D;
+    // per_line_ctx: CanvasRenderingContext2D;
     per_thread_ctx: CanvasRenderingContext2D;
 
+    constructor(image_height: number, thread_count: number, container: HTMLElement) {
+        const progress_reporter_div = document.createElement('div');
+        container.appendChild(progress_reporter_div);
+
+        progress_reporter_div.insertAdjacentHTML('afterbegin',
+            [
+                '<div class="progress-reporter__label-per-thread">Progress per thread</div>',
+                `<canvas class="progress-reporter__canvas_per_thread"></canvas>`,
+                // '<div class="progress-reporter__label-per-line">Progress per line</div>',
+                // '<canvas class="progress-reporter__canvas_per_line"></canvas>'
+            ].join('')
+        );
+
+        progress_reporter_div.className = 'progress-bar';
+
+        function create_ctx(selector: string): CanvasRenderingContext2D {
+            const canvas = progress_reporter_div.querySelector(selector) as HTMLCanvasElement;
+            canvas.width = image_height;
+            canvas.height = thread_count;
+            canvas.style.width = '100%';
+            canvas.style.height = `${thread_count}px`;
+            const ctx = canvas.getContext('2d');
+            if (ctx === null) { throw new Error('Progress reporter cannot acquire canvas 2d context'); }
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#fff';
+            return ctx;
+        }
+
+        this.per_thread_ctx = create_ctx('canvas.progress-reporter__canvas_per_thread');
+        // this.per_line_ctx = create_ctx('canvas.progress-reporter__canvas_per_line');
+
+        // this.per_line_progress = new Uint8Array(image_height);
+        this.per_thread_progress = new Uint32Array(thread_count);
+        this.thread_count = thread_count;
+    }
+
+    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
+        // this.per_line_progress[line_id]++;
+        // this.per_line_ctx.fillRect(line_id, this.thread_count - this.per_line_progress[line_id], 1, 1);
+
+        this.per_thread_ctx.fillRect(this.per_thread_progress[thread_id], thread_id, 1, 1);
+        this.per_thread_progress[thread_id]++;
+    }
+
+    report_thread_done(thread_id: number): void {}
+
+    report_done(total_rays: number, total_time_ms: number) {}
+}
+
+export class ProgressText implements ProgressReporter {
     rays_report_el: HTMLDivElement;
     speed_report_el: HTMLDivElement;
     time_report_el: HTMLDivElement;
@@ -62,16 +135,12 @@ export class DomProgressReporter implements ProgressReporter {
         return `State: ${name}`;
     }
 
-    constructor(image_height: number, thread_count: number, container: HTMLElement) {
+    constructor(container: HTMLElement) {
         const progress_reporter_div = document.createElement('div');
         container.appendChild(progress_reporter_div);
 
         progress_reporter_div.insertAdjacentHTML('afterbegin',
             [
-                '<div class="progress-reporter__label-per-thread">Progress per thread</div>',
-                `<canvas class="progress-reporter__canvas_per_thread"></canvas>`,
-                '<div class="progress-reporter__label-per-line">Progress per line</div>',
-                `<canvas class="progress-reporter__canvas_per_line"></canvas>`,
                 `<div class="progress-reporter__stat progress-reporter__stat--rays">${this.format_report_rays(0)}</div>`,
                 `<div class="progress-reporter__stat progress-reporter__stat--speed">${this.format_report_speed(0)}</div>`,
                 `<div class="progress-reporter__stat progress-reporter__stat--time">${this.format_report_time(0, 0)}</div>`,
@@ -81,38 +150,14 @@ export class DomProgressReporter implements ProgressReporter {
 
         progress_reporter_div.className = 'progress-reporter';
 
-        function create_ctx(selector: string): CanvasRenderingContext2D {
-            const canvas = progress_reporter_div.querySelector(selector) as HTMLCanvasElement;
-            canvas.width = image_height;
-            canvas.height = thread_count;
-            const ctx = canvas.getContext('2d');
-            if (ctx === null) { throw new Error('Progress reporter cannot acquire canvas 2d context'); }
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#fff';
-            return ctx;
-        }
-
-        this.per_thread_ctx = create_ctx('canvas.progress-reporter__canvas_per_thread');
-        this.per_line_ctx = create_ctx('canvas.progress-reporter__canvas_per_line');
         this.rays_report_el = progress_reporter_div.querySelector('.progress-reporter__stat--rays') as HTMLDivElement;
         this.speed_report_el = progress_reporter_div.querySelector('.progress-reporter__stat--speed') as HTMLDivElement;
         this.time_report_el = progress_reporter_div.querySelector('.progress-reporter__stat--time') as HTMLDivElement;
         this.state_report_el = progress_reporter_div.querySelector('.progress-reporter__stat--state') as HTMLDivElement;
-
-        this.per_line_progress = new Uint8Array(image_height);
-        this.per_thread_progress = new Uint32Array(thread_count);
-        this.thread_count = thread_count;
     }
 
     prev_update_time = 0;
     report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
-        this.per_line_progress[line_id]++;
-        this.per_line_ctx.fillRect(line_id, this.thread_count - this.per_line_progress[line_id], 1, 1);
-
-        this.per_thread_ctx.fillRect(this.per_thread_progress[thread_id], thread_id, 1, 1);
-        this.per_thread_progress[thread_id]++;
-
         this.rays_casted += rays_casted_increment;
 
         if (time_passed - this.prev_update_time > 300) {
