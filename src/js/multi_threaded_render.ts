@@ -1,10 +1,19 @@
 import { RenderParameters, RenderWorkerParametersMessage } from './types';
-import { ColorWriter } from './color-writers';
+import { ColorWriter } from './output/color-writers';
 import { RenderWorkerMessageData } from './render_worker';
 import { color } from './math/vec3.gen';
 import { ProgressReporter } from './progress-reporters';
+import { ToneMapper } from './output/tone-mappers';
 
-export async function multi_threaded_render(thread_number: number, render_parameters: RenderParameters, writer: ColorWriter, progress_reporter: ProgressReporter): Promise<void> {
+export interface MultiThreadedRenderConfig {
+    thread_count: number;
+    render_parameters: RenderParameters;
+    writer: ColorWriter;
+    tone_mapper: ToneMapper;
+    progress_reporter: ProgressReporter;
+}
+
+export async function multi_threaded_render({render_parameters, thread_count, writer, progress_reporter, tone_mapper}: MultiThreadedRenderConfig): Promise<void> {
     const {
         image_width,
         image_height,
@@ -14,7 +23,7 @@ export async function multi_threaded_render(thread_number: number, render_parame
         line_order
     } = render_parameters;
 
-    thread_number = Math.min(thread_number, total_samples_per_pixel);
+    thread_count = Math.min(thread_count, total_samples_per_pixel);
 
     //this is needed for all threads to work on the same scene, that is yet random. (didn't want to bother with seeded random)
     const scene_creation_random_numbers = [];
@@ -29,10 +38,10 @@ export async function multi_threaded_render(thread_number: number, render_parame
     let samples_sent = 0;
     const total_rays = image_width * image_height * total_samples_per_pixel;
     const t0 = performance.now();
-    for (let i = 0; i < thread_number; i++) {
+    for (let i = 0; i < thread_count; i++) {
         const worker = new Worker(new URL('./render_worker.js', import.meta.url), {type: 'module'});
         let event_count = 0;
-        const samples_to_send = Math.floor((i + 1) * total_samples_per_pixel / thread_number) - samples_sent;
+        const samples_to_send = Math.floor((i + 1) * total_samples_per_pixel / thread_count) - samples_sent;
         samples_sent += samples_to_send;
         // note: tried to use transferables explicitly, but it seems Chrome doesn't care. It even makes things slightly slower.
         worker.postMessage({
@@ -42,7 +51,7 @@ export async function multi_threaded_render(thread_number: number, render_parame
             samples_per_pixel: samples_to_send,
             max_depth,
             scene_creation_random_numbers,
-            first_line_index: Math.floor(i / thread_number * image_height),
+            first_line_index: Math.floor(i / thread_count * image_height),
             line_order
         } as RenderWorkerParametersMessage);
 
@@ -61,7 +70,7 @@ export async function multi_threaded_render(thread_number: number, render_parame
                     tmp_color[0] = output_buffer[y_offset + x * 3];
                     tmp_color[1] = output_buffer[y_offset + x * 3 + 1];
                     tmp_color[2] = output_buffer[y_offset + x * 3 + 2];
-                    write_color(x, y, tmp_color, rays_casted_per_line[y]);
+                    write_color(x, y, tmp_color, rays_casted_per_line[y], tone_mapper);
                 }
                 dump_line(y);
                 const dt = performance.now() - t0;

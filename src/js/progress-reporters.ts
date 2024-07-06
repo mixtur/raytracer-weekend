@@ -61,7 +61,7 @@ export class ProgressBar implements ProgressReporter {
     // per_line_ctx: CanvasRenderingContext2D;
     per_thread_ctx: CanvasRenderingContext2D;
 
-    constructor(image_height: number, thread_count: number, container: HTMLElement) {
+    constructor(container: HTMLElement, thread_count: number, image_height: number) {
         const progress_reporter_div = document.createElement('div');
         container.appendChild(progress_reporter_div);
 

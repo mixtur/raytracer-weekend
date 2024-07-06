@@ -1,4 +1,4 @@
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { Hittable } from '../hittable/hittable';
 import {
     add_vec3,
@@ -101,9 +101,8 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
             new BVHNode(spheres, 0.0, 1.0)
         ));
 
-        return {
+        return create_scene({
             root_hittable: objects,
-            // light: null,
             // light: light_hittable,
             light: new HittableList([
                 light_hittable,
@@ -126,6 +125,6 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
                 });
             },
             background: Skybox.create_black()
-        };
+        });
     });
 };

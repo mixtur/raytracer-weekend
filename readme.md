@@ -10,6 +10,7 @@ The following additional features are implemented
 - some gltf support
 - IBL with importance sampling
 - PBR using [this](https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf) paper
+- ACES tone mapping
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -19,7 +20,6 @@ The following additional features are implemented
 
 TODO:
 - **bug** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case. 
-- better tone mapping
 - matrix-based camera
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
 - pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.

@@ -1,4 +1,4 @@
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { point3, vec3 } from '../math/vec3.gen';
 import { Camera } from '../camera';
 import { Hittable } from '../hittable/hittable';
@@ -17,9 +17,8 @@ const create_two_spheres = (): Hittable => {
     ]);
 };
 
-export const two_spheres: Scene = {
+export const two_spheres: Scene = create_scene({
     root_hittable: create_two_spheres(),
-    light: null,
 
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(13,2,3);
@@ -38,4 +37,4 @@ export const two_spheres: Scene = {
         })
     },
     background: Skybox.create_solid(0.7, 0.8, 1.0)
-}
+});

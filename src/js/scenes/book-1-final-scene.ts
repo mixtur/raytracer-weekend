@@ -13,7 +13,7 @@ import { MovingSphere } from '../hittable/moving_sphere';
 import { ZXGrid } from '../hittable/zx-grid';
 import { BVHNode } from '../hittable/bvh';
 import { Camera } from '../camera';
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { create_lambertian } from '../materials/lambertian';
 import { create_metal } from '../materials/metal';
 import { create_dielectric } from '../materials/dielectric';
@@ -91,9 +91,8 @@ const create_camera = (aspect_ratio: number): Camera => new Camera({
 });
 
 
-export const book1_final_scene = (scene_creation_random_numbers: number[]): Scene => ({
+export const book1_final_scene = (scene_creation_random_numbers: number[]): Scene => create_scene({
     create_camera,
-    light: null,
     root_hittable: create_lots_of_spheres(scene_creation_random_numbers),
     background: Skybox.create_solid(0.7, 0.8, 1.0)
 });

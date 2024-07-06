@@ -42,7 +42,7 @@ const gltf_components_per_element = {
     MAT4: 16
 }
 
-export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_size: number): Promise<Hittable> => {
+export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_size: number, emissive_scale: number = 20): Promise<Hittable> => {
     const base_url = new URL(url, location.href);
     const gltf = await fetch(url).then(res => res.json()) as GLTF2.Root;
     const [buffers, images] = await Promise.all([
@@ -118,7 +118,10 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
 
             const emissive_map = emissive_map_index === undefined
                 ? null
-                : new ImageTexture(textures[emissive_map_index].image, {
+                : new ImageTexture({
+                    ...textures[emissive_map_index].image,
+                    normalization: textures[emissive_map_index].image.normalization * emissive_scale
+                }, {
                     wrap_s: textures[emissive_map_index].sampler.wrapS,
                     wrap_t: textures[emissive_map_index].sampler.wrapT,
                     filter: textures[emissive_map_index].sampler.magFilter !== GLTextureFilter.NEAREST,

@@ -1,4 +1,4 @@
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
 import { point3, vec3 } from '../math/vec3.gen';
 import { HittableList } from '../hittable/hittable_list';
@@ -14,7 +14,7 @@ const perlin_texture = new NoiseTexture(4);
 
 const light1 = new Quad(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), create_diffuse_light(solid_color(0.5, 4, 1)));
 const light2 = new Sphere(point3(0, 7, 0), 2, create_diffuse_light(solid_color(4, 1, 0.5)));
-export const simple_light: Scene = {
+export const simple_light: Scene = create_scene({
     root_hittable: new HittableList([
         new Sphere(point3(0, -1000, 0), 1000, create_lambertian(perlin_texture)),
         new Sphere(point3(0, 2, 0), 2, create_lambertian(perlin_texture)),
@@ -42,4 +42,4 @@ export const simple_light: Scene = {
         })
     },
     background: Skybox.create_black()
-}
+});

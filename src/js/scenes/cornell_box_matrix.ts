@@ -1,4 +1,4 @@
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
 import { HittableList } from '../hittable/hittable_list';
 import { solid_color } from '../texture/solid_color';
@@ -68,7 +68,7 @@ const hittables = run_with_hooks(() => {
     };
 });
 
-export const cornell_box_matrix: Scene = {
+export const cornell_box_matrix: Scene = create_scene({
     root_hittable: hittables.root,
     light: hittables.light,
     create_camera(aspect_ratio: number): Camera {
@@ -88,4 +88,4 @@ export const cornell_box_matrix: Scene = {
         });
     },
     background: Skybox.create_black()
-};
+});

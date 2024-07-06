@@ -2,20 +2,18 @@ import { HittableList } from '../hittable/hittable_list';
 import { NoiseTexture } from '../texture/noise_texture';
 import { Sphere } from '../hittable/sphere';
 import { point3, vec3 } from '../math/vec3.gen';
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
 import { create_lambertian } from '../materials/lambertian';
 import { Skybox } from '../hittable/skybox';
 
 const pertext = new NoiseTexture(4);
 
-export const two_perlin_spheres: Scene = {
+export const two_perlin_spheres: Scene = create_scene({
     root_hittable: new HittableList([
         new Sphere(point3(0, -1000, 0), 1000, create_lambertian(pertext)),
         new Sphere(point3(0, 2, 0), 2, create_lambertian(pertext))
     ]),
-
-    light: null,
 
     create_camera(aspect_ratio: number): Camera {
         const look_from = point3(13,2,3);
@@ -34,4 +32,4 @@ export const two_perlin_spheres: Scene = {
         });
     },
     background: Skybox.create_solid(0.7, 0.8, 1.0)
-}
+});

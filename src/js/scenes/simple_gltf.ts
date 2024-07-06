@@ -1,5 +1,5 @@
 import { load_gltf } from '../gltf_loader/loader';
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { vec3 } from '../math/vec3.gen';
 import { Camera } from '../camera';
 import { load_rgbe } from '../texture/image-parsers/rgbe_image_parser';
@@ -10,7 +10,7 @@ export const load_simple_gltf = async (): Promise<Scene> => {
     const env = await load_rgbe(20, '/hdr/street.hdr');
     const skybox = Skybox.create_hdr(env);
 
-    return {
+    return create_scene({
         light: skybox,
         create_camera(aspect_ratio: number): Camera {
             return new Camera({
@@ -27,5 +27,5 @@ export const load_simple_gltf = async (): Promise<Scene> => {
         },
         root_hittable: scene,
         background: skybox
-    }
+    });
 }

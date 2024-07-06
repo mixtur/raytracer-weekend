@@ -48,9 +48,9 @@ async function render({
     // const scene = simple_light;
     // const scene = cornell_box_matrix;
     // const scene = cornell_box_with_smoke;
-    const scene = await book2_final_scene(scene_creation_random_numbers);
+    // const scene = await book2_final_scene(scene_creation_random_numbers);
     // const scene = await load_simple_gltf();
-    // const scene = await load_damaged_helmet_gltf();
+    const scene = await load_damaged_helmet_gltf();
     const cam = scene.create_camera(aspect_ratio);
 
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);

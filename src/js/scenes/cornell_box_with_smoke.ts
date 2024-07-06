@@ -1,4 +1,4 @@
-import { Scene } from './scene';
+import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
 import { solid_color } from '../texture/solid_color';
 import { Quad } from '../hittable/quad';
@@ -22,7 +22,7 @@ const light = create_diffuse_light(solid_color(7, 7, 7));
 
 const light_hittable = new Quad(point3(113,554,127), vec3(330,0,0), vec3(0,0,305), light);
 
-export const cornell_box_with_smoke: Scene = {
+export const cornell_box_with_smoke: Scene = create_scene({
     root_hittable: new BVHNode([
         new Quad(point3(555,0,0), vec3(0,555,0), vec3(0,0,555), green),
         new Quad(point3(0,0,0), vec3(0,555,0), vec3(0,0,555), red),
@@ -77,4 +77,4 @@ export const cornell_box_with_smoke: Scene = {
         });
     },
     background: Skybox.create_black()
-};
+});
