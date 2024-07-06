@@ -15,11 +15,11 @@ const tone_mapper = compose_tone_mappers([
         aperture: 16,
         shutter_speed: 1/25,
         ISO: 100,
-        exp_comp: 1
+        exp_comp: 0
     }),
     // clip_to_unit_range,
     ACES,
-    // apply_gamma(1 / 2.2),
+    apply_gamma(1 / 2.2),
 ]);
 
 const writer = create_canvas_color_writer(document.getElementById('right-panel') as HTMLDivElement, image_width, image_height);
