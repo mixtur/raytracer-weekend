@@ -132,12 +132,7 @@ export abstract class SpecularIsotropicMicroFacetPDF implements PDF {
         // rotate h back to local space
         mul_quat_vec3_r(h, this.inv_quat, h);
         // now we can compute local-space h value.
-        // divide by 2, transformation from h to unit_l is linear (in spherical coordinates), and it's determinant is 2
-        //todo: according to people on the Internet, this is wrong. Determinant of Jacobian for reflection operator is apparently not just constant 2.
-        //      It should be 4 * v_dot_h  (which is the same as 4 * h[2])
-        //      Need to understand why. (Or maybe 2 is fine for my case)
-        //      When tried to actually apply it, it made surfaces at grazing angles look gray-ish.
-        //      Maybe we need to remove disney's hack to masking/shadowing term to fix it.
-        return this._value_h(h) / 2;
+        // (4 * h[2]) - is determinant of Jacobian of reflection operator
+        return this._value_h(h) / (4 * h[2]);
     }
 }
