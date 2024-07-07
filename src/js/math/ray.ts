@@ -43,18 +43,6 @@ export class RayArenaAllocator {
         }
         this.currentRay = this.storage[0];
     }
-    reuse(origin: Vec3, direction: Vec3, time: number): Ray {
-        const r = this.currentRay;
-        r.origin[0] = origin[0];
-        r.origin[1] = origin[1];
-        r.origin[2] = origin[2];
-        r.direction[0] = direction[0];
-        r.direction[1] = direction[1];
-        r.direction[2] = direction[2];
-        r.time = time;
-        _compute_inv_dir(r);
-        return r;
-    }
     alloc(origin: Vec3, direction: Vec3, time: number): Ray {
         const r = this.currentRay = this.storage[++this.currentRayIndex];
         r.origin[0] = origin[0];

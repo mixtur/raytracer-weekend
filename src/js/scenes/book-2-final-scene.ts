@@ -108,22 +108,16 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
                 light_hittable,
                 subsurface_scattering_sphere
             ]),
-            create_camera(aspect_ratio: number): Camera {
-                const look_from = point3(478, 278, -600);
-                const look_at = point3(278, 278, 0);
-
-                return new Camera({
-                    look_from,
-                    look_at,
-                    v_up: vec3(0, 1, 0),
-                    focus_dist: 10,
-                    aspect_ratio,
-                    aperture: 0,
-                    y_fov: 40,
-                    time0: 0,
-                    time1: 1
-                });
-            },
+            camera: new Camera({
+                look_from: point3(478, 278, -600),
+                look_at: point3(278, 278, 0),
+                v_up: vec3(0, 1, 0),
+                focus_dist: 10,
+                aperture: 0,
+                y_fov: 40,
+                time0: 0,
+                time1: 1
+            }),
             background: Skybox.create_black()
         });
     });

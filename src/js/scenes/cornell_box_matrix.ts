@@ -71,21 +71,15 @@ const hittables = run_with_hooks(() => {
 export const cornell_box_matrix: Scene = create_scene({
     root_hittable: hittables.root,
     light: hittables.light,
-    create_camera(aspect_ratio: number): Camera {
-        const look_from = point3(278, 278, -800);
-        const look_at = point3(278, 278, 0);
-
-        return new Camera({
-            look_from,
-            look_at,
-            v_up: vec3(0, 1, 0),
-            focus_dist: 10,
-            aspect_ratio,
-            aperture: 0,
-            y_fov: 40,
-            time0: 0,
-            time1: 1
-        });
-    },
+    camera: new Camera({
+        look_from: point3(278, 278, -800),
+        look_at: point3(278, 278, 0),
+        v_up: vec3(0, 1, 0),
+        focus_dist: 10,
+        aperture: 0,
+        y_fov: 40,
+        time0: 0,
+        time1: 1
+    }),
     background: Skybox.create_black()
 });

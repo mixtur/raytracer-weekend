@@ -25,21 +25,15 @@ export const simple_light: Scene = create_scene({
         light1,
         light2
     ]),
-    create_camera(aspect_ratio: number): Camera {
-        const look_from = point3(26, 3, 6);
-        const look_at = point3(0, 2, 0);
-
-        return new Camera({
-            look_from,
-            look_at,
-            v_up: vec3(0, 1, 0),
-            focus_dist: 10,
-            aspect_ratio,
-            aperture: 0,
-            y_fov: 20,
-            time0: 0,
-            time1: 1
-        })
-    },
+    camera: new Camera({
+        look_from: point3(26, 3, 6),
+        look_at: point3(0, 2, 0),
+        v_up: vec3(0, 1, 0),
+        focus_dist: 10,
+        aperture: 0,
+        y_fov: 20,
+        time0: 0,
+        time1: 1
+    }),
     background: Skybox.create_black()
 });

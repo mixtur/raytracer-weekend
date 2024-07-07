@@ -8,12 +8,13 @@ import {
     mul_mat3_vec3, mul_mat3_vec3_r,
     mul_mat3x4_vec3, mul_mat3x4_vec3_r, transpose_mat3
 } from '../math/mat3.gen';
-import { alloc_ray, Ray } from '../math/ray';
+import { Ray, ray_dirty, ray_set } from '../math/ray';
 import { AABB } from './aabb';
 import { point3_dirty, set_vec3, Vec3 } from '../math/vec3.gen';
 
 const tmp_aabb = AABB.createEmpty();
 const tmp_point = point3_dirty();
+const new_ray = ray_dirty();
 export class Transform implements Hittable {
     matrix: Mat3x4;
     linear: Mat3;
@@ -38,7 +39,7 @@ export class Transform implements Hittable {
     hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const new_origin = mul_mat3x4_vec3(this.inv_matrix, r.origin);
         const new_direction = mul_mat3_vec3(this.inv_linear, r.direction);
-        const new_ray = alloc_ray(new_origin, new_direction, r.time);
+        ray_set(new_ray, new_origin, new_direction, r.time);
 
         if (!this.object.hit(new_ray, t_min, t_max, hit)) {
             return false;

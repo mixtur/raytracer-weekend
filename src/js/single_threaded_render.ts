@@ -33,7 +33,8 @@ export async function single_threaded_render({
     const scene = cornell_box_with_smoke;
 //    const scene = await book2_final_scene(scene_creation_random_numbers);
 //    const scene = two_spheres;
-    const cam = scene.create_camera(aspect_ratio);
+    const cam = scene.camera;
+    cam.configure(aspect_ratio);
 
     await async_run_with_hooks(async () => {
         const vec3_allocator = new ArenaVec3Allocator(8192);
