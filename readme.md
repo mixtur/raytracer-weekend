@@ -2,15 +2,19 @@ This is my take on the great [Ray tracing in one weekend](https://raytracing.git
 
 It is written in TypeScript.
 
-The following additional features are implemented
-- grid instead of BVH when applicable
-- zero allocations while rendering
+
+## Features
+- grids
 - multithreaded rendering
-- quaternions for changing PDFs orientations
-- some gltf support
-- IBL with importance sampling
-- PBR using [this](https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf) paper
+- loading glTF models
+- IBL
+- PBR
 - ACES tone mapping
+
+## See it in action
+https://mixtur.github.io/raytracing-weekend/
+
+## Run locally
 
 ```bash
  # you'll need node.js and npm installed in your system
@@ -18,16 +22,14 @@ The following additional features are implemented
  npm start # serves the raytracer page on 0.0.0.0:8080
 ```
 
-TODO:
-- **bug** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case. 
-- matrix-based camera
-- hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
-- pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
-- scene serialization for workers
-- schedule thread load more evenly. Think something like Masonry layout, but for threads and ray counts
-- glTF
-  - combine factors with textures
-  - alpha channel
-  - texture transforms
-  - transmission
-  - volume, ior
+## Resources used
+
+1. This wouldn't be possible without the great [Ray tracing in one weekend](https://raytracing.github.io) series.
+1. PBR is implemented using these papers
+  - https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
+    except that geometry factor uses `alpha = roughness^2`, not `alpha = (0.5 + 0.5 * roughness)^2`
+  - https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf - the actual formula for geometry factor is taken from here
+  - https://jcgt.org/published/0007/04/01/paper.pdf - took Jacobian of the reflection operator from there
+1. Ported RGBE parser from our in-house 3d engine, as well as some math
+  - AFAIK the source code is not public now, but you can take a look at some demos here - https://webgears.app/engine
+1. glTF example models are taken from here - https://github.com/KhronosGroup/glTF-Sample-Assets
