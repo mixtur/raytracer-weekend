@@ -22,7 +22,7 @@ https://mixtur.github.io/raytracing-weekend/
  npm start # serves the raytracer page on 0.0.0.0:8080
 ```
 
-## Resources used
+## Acknowledgments
 
 1. This wouldn't be possible without the great [Ray tracing in one weekend](https://raytracing.github.io) series.
 1. PBR is implemented using these papers
@@ -32,4 +32,5 @@ https://mixtur.github.io/raytracing-weekend/
     - https://jcgt.org/published/0007/04/01/paper.pdf - took Jacobian of the reflection operator from there
 1. Ported RGBE parser from our in-house 3d engine, as well as some math
     - AFAIK the source code is not public now, but you can take a look at some demos here - https://webgears.app/engine
-1. glTF example models are taken from here - https://github.com/KhronosGroup/glTF-Sample-Assets
+1. glTF models are taken from here
+    - https://github.com/KhronosGroup/glTF-Sample-Assets
