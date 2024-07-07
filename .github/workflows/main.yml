@@ -32,7 +32,7 @@ jobs:
       - name: Install Node.js dependencies
         run: "npm ci --production"
       - name: Build
-        run: "node build/prod.mjs"
+        run: "npm run build"
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
