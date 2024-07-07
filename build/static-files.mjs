@@ -12,6 +12,7 @@ export const MIME_TYPES = {
   gif: "image/gif",
   ico: "image/x-icon",
   svg: "image/svg+xml",
+  gltf: "application/json"
 };
 
 export const prepareSingleFile = async (basePath, filePath) => {

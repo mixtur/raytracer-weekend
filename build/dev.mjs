@@ -1,36 +1,16 @@
 import * as fs from 'node:fs';
-import * as url from 'node:url';
 import * as path from 'node:path';
 import { createServer } from 'node:http';
 import { context } from 'esbuild';
 import { createPrepareFile, DEFAULT_MIME_TYPE, MIME_TYPES } from './static-files.mjs';
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
-const project_path = x => path.join(__dirname, '..', x);
-
-const DIR_PUBLIC = project_path('src/public');
-const DIR_DEVBUILD = project_path('dev-build');
+import { DIR_PUBLIC, DIR_DEV_BUILD, get_esbuild_config } from './_esbuild-config.mjs';
 
 async function start() {
-    const esbuildContext = await context({
-        entryPoints: {
-            index: project_path('src/js/index.ts'),
-            render_worker: project_path('src/js/render_worker.ts'),
-        },
-        bundle: true,
-        sourcemap: true,
-        outdir: DIR_DEVBUILD,
-        format: "esm",
-        splitting: true,
-        loader: {
-            '.jpg': 'file'
-        }
-    });
-
+    const esbuildContext = await context(get_esbuild_config(DIR_DEV_BUILD, false));
 
     const prepareFile = createPrepareFile(
-        [DIR_PUBLIC, DIR_DEVBUILD],
-        path.join(DIR_DEVBUILD, '404.html')
+        [DIR_PUBLIC, DIR_DEV_BUILD],
+        path.join(DIR_DEV_BUILD, '404.html')
     );
 
     const httpServer = createServer(async (req, res) => {
@@ -60,8 +40,8 @@ async function start() {
         });
     });
 
-    fs.rmSync(DIR_DEVBUILD, { recursive: true, force: true });
-    fs.mkdirSync(DIR_DEVBUILD, { recursive: true });
+    fs.rmSync(DIR_DEV_BUILD, { recursive: true, force: true });
+    fs.mkdirSync(DIR_DEV_BUILD, { recursive: true });
     console.log(`Started HTTP server on http://${HOST}:${PORT}`);
     await esbuildContext.watch();
     console.log(`Started esbuild`);
