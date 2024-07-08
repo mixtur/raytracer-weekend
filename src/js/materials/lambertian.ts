@@ -1,6 +1,7 @@
 import { Texture } from '../texture/texture';
 import {
-    create_mega_material,
+    create_material_type,
+    create_mega_material, material_types,
     MegaMaterial,
     ScatterFunction
 } from './megamaterial';
@@ -14,7 +15,11 @@ export const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce)
 };
 
 export const create_lambertian = (albedo: Texture): MegaMaterial => create_mega_material({
-    scatter: lambertian_scatter,
+    type: 'lambertian',
     scattering_pdf: new CosinePDF(),
     albedo
+});
+
+material_types.lambertian = create_material_type({
+    scatter: lambertian_scatter
 });

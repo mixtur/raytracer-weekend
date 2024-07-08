@@ -16,6 +16,7 @@ export interface HitRecord {
 }
 
 const dummy_material: MegaMaterial = create_mega_material({
+    type: 'dummy',
     fuzz: NaN,
     ior: NaN,
 });

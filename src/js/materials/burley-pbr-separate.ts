@@ -1,12 +1,12 @@
 import {
     AttenuationFunction,
     BounceRecord,
-    create_mega_material, EmitFunction,
+    create_mega_material, create_material_type, EmitFunction, material_types,
     MegaMaterial,
     ScatterFunction
-} from '../megamaterial';
-import { Texture, texture_get_value } from '../../texture/texture';
-import { CosinePDF, PDF, SpecularIsotropicMicroFacetPDF } from '../../math/pdf';
+} from './megamaterial';
+import { Texture, texture_get_value } from '../texture/texture';
+import { CosinePDF, PDF, SpecularIsotropicMicroFacetPDF } from '../math/pdf';
 import {
     add_vec3_r,
     dot_vec3,
@@ -16,13 +16,13 @@ import {
     sub_vec3, sub_vec3_r,
     unit_vec3, Vec3,
     vec3, vec3_dirty
-} from '../../math/vec3.gen';
-import { clamp, remap } from '../../utils';
-import { Ray } from '../../math/ray';
-import { HitRecord } from '../../hittable/hittable';
-import { interpolate_vec2_r } from '../../hittable/triangle';
-import { solid_color } from '../../texture/solid_color';
-import { is_image_texture } from '../../texture/image_texture';
+} from '../math/vec3.gen';
+import { clamp, remap } from '../utils';
+import { Ray } from '../math/ray';
+import { HitRecord } from '../hittable/hittable';
+import { interpolate_vec2_r } from '../hittable/triangle';
+import { solid_color } from '../texture/solid_color';
+import { is_image_texture } from '../texture/image_texture';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -281,16 +281,20 @@ const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
     return texture_get_value[material.emissive.type](material.emissive, hit.u, hit.v, hit.p);
 };
 
+material_types.burley_pbr = create_material_type({
+    attenuate: burley_attenuation,
+    scatter: burley_scatter,
+    emit: uv_aware_emit
+});
+
 // implemented by blindly using these parers:
 // https://media.disneyanimation.com/uploads/production/publication_asset/48/asset/s2012_pbs_disney_brdf_notes_v3.pdf
 // https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
 export const create_burley_pbr_separate = (albedo: Texture, roughness: Texture, metalness: Texture, normal_map: Texture | null, emissive: Texture | null): MegaMaterial => {
     return create_mega_material({
-        attenuate: burley_attenuation,
-        scatter: burley_scatter,
+        type: 'burley_pbr',
         albedo,
         scattering_pdf: new BurleyPDF(),
-        emit: uv_aware_emit,
         emissive: emissive ?? solid_color(0, 0, 0),
         roughness: roughness,
         metallic: metalness,

@@ -5,10 +5,16 @@ import {
     mul_vec3_s, rand_vec3_in_unit_sphere,
     reflect_incident_vec3, unit_vec3
 } from '../math/vec3.gen';
-import { create_mega_material, MegaMaterial, ScatterFunction } from './megamaterial';
+import {
+    create_material_type,
+    create_mega_material,
+    material_types,
+    MegaMaterial,
+    ScatterFunction
+} from './megamaterial';
 
 export const create_metal = (albedo: Texture, fuzz: number): MegaMaterial => create_mega_material({
-    scatter: metal_scatter,
+    type: 'metal',
     albedo,
     fuzz
 });
@@ -21,3 +27,7 @@ export const metal_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     bounce.skip_pdf = true;
     return true;
 }
+
+material_types.metal = create_material_type({
+    scatter: metal_scatter
+});

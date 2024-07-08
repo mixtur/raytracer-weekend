@@ -1,7 +1,7 @@
 import { ray_dirty, Ray, ray_set } from './math/ray';
 import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r } from './math/vec3.gen';
 import { Hittable, create_empty_hit_record, HitRecord, hittable_types } from './hittable/hittable';
-import { BounceRecord, create_bounce_record } from './materials/megamaterial';
+import { BounceRecord, create_bounce_record, material_types } from './materials/megamaterial';
 import { HittablePDF, MixturePDF } from './math/pdf';
 
 const hit = create_empty_hit_record();
@@ -30,8 +30,10 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
             return color(0, 0, 0);
         }
     }
-    const emitted = hit.material.emit(hit.material, r, hit);
-    if (!hit.material.scatter(hit.material, r, hit, bounce)) {
+
+    const material_type = material_types[hit.material.type];
+    const emitted = material_type.emit(hit.material, r, hit);
+    if (!material_type.scatter(hit.material, r, hit, bounce)) {
         return emitted;
     }
 
@@ -55,7 +57,7 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
         }
     }
 
-    hit.material.attenuate(hit.material, r, hit, bounce, scattered);
+    material_type.attenuate(hit.material, r, hit, bounce, scattered);
     mul_vec3_s_r(bounce.attenuation, bounce.attenuation, pdf_factor);
 
     const bounce_color = ray_color(scattered, background, world, lights, depth - 1);
@@ -71,9 +73,10 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
             fma_vec3_r(total_emission, total_attenuation, color(0, 0, 0), total_emission);
             break;
         }
-        const emission = hit.material.emit(hit.material, r, hit);
+        const material_type = material_types[hit.material.type];
+        const emission = material_type.emit(hit.material, r, hit);
         fma_vec3_r(total_emission, total_attenuation, emission, total_emission);
-        if (!hit.material.scatter(hit.material, r, hit, bounce)) {
+        if (!material_type.scatter(hit.material, r, hit, bounce)) {
             break;
         }
 
@@ -95,7 +98,7 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
             pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / pdf.value(scattered.direction);
         }
 
-        hit.material.attenuate(hit.material, r, hit, bounce, scattered);
+        material_type.attenuate(hit.material, r, hit, bounce, scattered);
 
         mul_vec3_r(total_attenuation, total_attenuation, mul_vec3_s(bounce.attenuation, pdf_factor));
         ray_set(r, scattered.origin, scattered.direction, scattered.time);

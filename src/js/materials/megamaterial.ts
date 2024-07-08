@@ -6,10 +6,9 @@ import { color, Color, vec3 } from '../math/vec3.gen';
 import { PDF, SpherePDF } from '../math/pdf';
 
 export interface MegaMaterial {
-    attenuate: AttenuationFunction;
-    scatter: ScatterFunction;
     scattering_pdf: PDF;
-    emit: EmitFunction;
+
+    type: string;
     ior: number; // dielectric
     emissive: Texture;
     albedo: Texture;
@@ -18,6 +17,12 @@ export interface MegaMaterial {
     roughness: Texture;
     metallic: Texture;
     normal_map: Texture | null;
+}
+
+export interface MaterialType {
+    attenuate: AttenuationFunction;
+    scatter: ScatterFunction;
+    emit: EmitFunction;
 }
 
 export interface BounceRecord {
@@ -45,14 +50,23 @@ export const default_attenuate: AttenuationFunction = (mat, r_in, hit, bounce, s
     bounce.attenuation.set(texture_get_value[mat.albedo.type](mat.albedo, hit.u, hit.v, hit.p));
 };
 
-export const create_mega_material = (config: Partial<MegaMaterial>): MegaMaterial => {
-    const default_metallic_roughness = solid_color(0, 1, 1);
-
+export const create_material_type = (config: Partial<MaterialType>): MaterialType => {
     return {
         attenuate: config.attenuate ?? default_attenuate,
         scatter: config.scatter ?? default_scatter,
+        emit: config.emit ?? default_emit
+    };
+}
+
+export const material_types: Record<string, MaterialType> = {};
+
+export const create_mega_material = (config: Partial<MegaMaterial>): MegaMaterial => {
+    if (config.type === undefined) { throw new Error(`Materials must have a type`); }
+
+    const default_metallic_roughness = solid_color(0, 1, 1);
+    return {
         scattering_pdf: config.scattering_pdf ?? new SpherePDF(),
-        emit: config.emit ?? default_emit,
+        type: config.type,
         ior: config.ior ?? 1.5,
         emissive: config.emissive ?? solid_color(0, 0, 0),
         albedo: config.albedo ?? solid_color(0, 0, 0),

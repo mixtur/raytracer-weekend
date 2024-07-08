@@ -20,7 +20,7 @@ import {
 import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec3.gen';
 import { quat } from '../math/quat.gen';
 import { run_with_hooks } from '../utils';
-import { create_burley_pbr_separate } from '../materials/pbr/burley-pbr-separate';
+import { create_burley_pbr_separate } from '../materials/burley-pbr-separate';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Texture } from '../texture/texture';
 import { Hittable } from '../hittable/hittable';
