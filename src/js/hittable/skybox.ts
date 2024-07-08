@@ -7,9 +7,9 @@ import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';
 import { PixelsData } from '../texture/image-parsers/types';
 import { PDF, SpherePDF } from '../math/pdf';
-import { create_image_based_importance_sampler } from '../texture/image-based-importance-sampler';
-import { ImageTexture } from '../texture/image_texture';
+import { create_image_based_importance_sampler } from '../math/image-based-importance-sampler';
 import { GLWrappingMode } from '../gltf_loader/gl_types';
+import { create_image_texture } from '../texture/image_texture';
 
 export interface ISkybox extends Hittable {
     type: 'skybox';
@@ -80,7 +80,7 @@ export class Skybox {
     }
 
     static create_hdr(image: PixelsData): ISkybox {
-        return create_skybox(create_diffuse_light(new ImageTexture(image, {
+        return create_skybox(create_diffuse_light(create_image_texture(image, {
             filter: true,
             wrap_s: GLWrappingMode.REPEAT,
             wrap_t: GLWrappingMode.MIRRORED_REPEAT,

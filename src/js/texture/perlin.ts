@@ -10,6 +10,62 @@ import { run_with_hooks } from '../utils';
 
 const POINT_COUNT = 256;
 
+export interface Perlin {
+    rand_vecs: Vec3[];
+    x_perm: Uint16Array;
+    y_perm: Uint16Array;
+    z_perm: Uint16Array;
+}
+
+export const create_perlin = () => {
+    const rand_vecs: Float64Array[] = [];
+    for (let i = 0; i < POINT_COUNT; i++) {
+        rand_vecs.push(rand_vec3_min_max(-1, 1));
+    }
+    const x_perm = perlin_generate_perm();
+    const y_perm = perlin_generate_perm();
+    const z_perm = perlin_generate_perm();
+
+    return {
+        rand_vecs,
+        x_perm,
+        y_perm,
+        z_perm
+    }
+};
+
+export function perlin_noise(perlin: Perlin, p: Point3): number {
+    const i = Math.floor(p[0]);
+    const j = Math.floor(p[1]);
+    const k = Math.floor(p[2]);
+
+    const u = p[0] - i;
+    const v = p[1] - j;
+    const w = p[2] - k;
+    for (let di = 0; di < 2; di++)
+        for (let dj = 0; dj < 2; dj++)
+            for (let dk = 0; dk < 2; dk++)
+                trilinear_buffer[di][dj][dk] = perlin.rand_vecs[
+                perlin.x_perm[(i + di) & 255] ^
+                perlin.y_perm[(j + dj) & 255] ^
+                perlin.z_perm[(k + dk) & 255]
+                    ];
+
+    return perlin_interp(trilinear_buffer, u, v, w);
+}
+
+export function perlin_turb(perlin: Perlin, p: Point3, depth: number): number {
+    let acc = 0;
+    let weight = 1;
+    const temp_p = vec3(p[0], p[1], p[2]);
+    for (let i = 0; i < depth; i++) {
+        acc += weight * perlin_noise(perlin, temp_p);
+        weight *= 0.5;
+        mul_vec3_s_r(temp_p, temp_p, 2);
+    }
+    return Math.abs(acc);
+}
+
 function perlin_generate_perm(): Uint16Array {
     const result = new Uint16Array(POINT_COUNT);
     for (let i = 0; i < POINT_COUNT; i++) {
@@ -64,51 +120,3 @@ const trilinear_buffer = run_with_hooks(() => {
         ]
     ];
 });
-
-export class Perlin {
-    rand_vecs: Vec3[];
-    x_perm: Uint16Array;
-    y_perm: Uint16Array;
-    z_perm: Uint16Array;
-    constructor() {
-        const rand_vecs: Float64Array[] = this.rand_vecs = [];
-        for (let i = 0; i < POINT_COUNT; i++) {
-            rand_vecs.push(rand_vec3_min_max(-1, 1));
-        }
-        this.x_perm = perlin_generate_perm();
-        this.y_perm = perlin_generate_perm();
-        this.z_perm = perlin_generate_perm();
-    }
-
-    noise(p: Point3): number {
-        const i = Math.floor(p[0]);
-        const j = Math.floor(p[1]);
-        const k = Math.floor(p[2]);
-
-        const u = p[0] - i;
-        const v = p[1] - j;
-        const w = p[2] - k;
-        for (let di = 0; di < 2; di++)
-            for (let dj = 0; dj < 2; dj++)
-                for (let dk = 0; dk < 2; dk++)
-                    trilinear_buffer[di][dj][dk] = this.rand_vecs[
-                        this.x_perm[(i + di) & 255] ^
-                        this.y_perm[(j + dj) & 255] ^
-                        this.z_perm[(k + dk) & 255]
-                    ];
-
-        return perlin_interp(trilinear_buffer, u, v, w);
-    }
-
-    turb(p: Point3, depth: number): number {
-        let acc = 0;
-        let weight = 1;
-        const temp_p = vec3(p[0], p[1], p[2]);
-        for (let i = 0; i < depth; i++) {
-            acc += weight * this.noise(temp_p);
-            weight *= 0.5;
-            mul_vec3_s_r(temp_p, temp_p, 2);
-        }
-        return Math.abs(acc);
-    }
-}

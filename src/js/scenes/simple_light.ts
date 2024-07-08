@@ -1,7 +1,7 @@
 import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
 import { point3, vec3 } from '../math/vec3.gen';
-import { NoiseTexture } from '../texture/noise_texture';
+import { create_noise_texture } from '../texture/noise_texture';
 import { solid_color } from '../texture/solid_color';
 import { create_lambertian } from '../materials/lambertian';
 import { create_diffuse_light } from '../materials/diffuse_light';
@@ -10,7 +10,7 @@ import { create_quad } from '../hittable/quad';
 import { create_sphere } from '../hittable/sphere';
 import { create_hittable_list } from '../hittable/hittable_list';
 
-const perlin_texture = new NoiseTexture(4);
+const perlin_texture = create_noise_texture(4);
 
 const light1 = create_quad(point3(3,1,-2), vec3(2,0,0), vec3(0,2,0), create_diffuse_light(solid_color(0.5, 4, 1)));
 const light2 = create_sphere(point3(0, 7, 0), 2, create_diffuse_light(solid_color(4, 1, 0.5)));

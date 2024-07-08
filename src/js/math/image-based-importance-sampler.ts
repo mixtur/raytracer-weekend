@@ -1,8 +1,8 @@
-import { PixelsData } from './image-parsers/types';
-import { PDF } from '../math/pdf';
-import { convertXYZ2xyY, RGB2XYZ } from './image-parsers/rgbe_image_parser';
-import { mul_mat3_vec3_r } from '../math/mat3.gen';
-import { set_vec3, unit_vec3, Vec3, vec3, vec3_dirty } from '../math/vec3.gen';
+import { PixelsData } from '../texture/image-parsers/types';
+import { PDF } from './pdf';
+import { convertXYZ2xyY, RGB2XYZ } from '../texture/image-parsers/rgbe_image_parser';
+import { mul_mat3_vec3_r } from './mat3.gen';
+import { set_vec3, unit_vec3, Vec3, vec3, vec3_dirty } from './vec3.gen';
 
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -1,11 +1,11 @@
 import {
     add_vec3, ArenaVec3Allocator,
-    color, len_vec3,
+    len_vec3,
     point3, rand_vec3, rand_vec3_min_max, sub_vec3, use_vec3_allocator,
     vec3
 } from '../math/vec3.gen';
-import { Checker3DTexture } from '../texture/checker_3d_texture';
-import { solid_color, SolidColor } from '../texture/solid_color';
+import { create_checker_3d_texture } from '../texture/checker_3d_texture';
+import { solid_color, create_solid_color } from '../texture/solid_color';
 import { get_predefined_random, random, random_min_max, use_random } from '../math/random';
 import { Camera } from '../camera';
 import { create_scene, Scene } from './scene';
@@ -27,7 +27,7 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
         use_random(rng);
         use_vec3_allocator(new ArenaVec3Allocator(1024 * 1024))
         const world_objects: Hittable[] = [];
-        const ground_material = create_lambertian(new Checker3DTexture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9)));
+        const ground_material = create_lambertian(create_checker_3d_texture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9)));
         world_objects.push(create_sphere(point3(0, -1000, 0), 1000, ground_material));
         const objects = [];
         for (let a = -11; a < 11; a++) {
@@ -37,9 +37,9 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
                 if (len_vec3(sub_vec3(center1, point3(4, 0.2, 0))) > 0.9) {
                     let sphere_mat: MegaMaterial;
                     if (choose_mat < 0.8) {
-                        sphere_mat = create_lambertian(new SolidColor(rand_vec3()));
+                        sphere_mat = create_lambertian(create_solid_color(rand_vec3()));
                     } else if (choose_mat < 0.95) {
-                        sphere_mat = create_metal(new SolidColor(rand_vec3_min_max(0.5, 1)), random_min_max(0, 0.5));
+                        sphere_mat = create_metal(create_solid_color(rand_vec3_min_max(0.5, 1)), random_min_max(0, 0.5));
                     } else {
                         sphere_mat = create_dielectric(1.5);
                     }
@@ -63,8 +63,8 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
         // world_objects.push(plainList);
 
         const mat1 = create_dielectric(1.5);
-        const mat2 = create_lambertian(new SolidColor(color(0.4, 0.2, 0.1)));
-        const mat3 = create_metal(new SolidColor(color(0.7, 0.6, 0.5)), 0.0);
+        const mat2 = create_lambertian(solid_color(0.4, 0.2, 0.1));
+        const mat3 = create_metal(solid_color(0.7, 0.6, 0.5), 0.0);
 
         world_objects.push(create_sphere(point3(0, 1, 0), 1.0, mat1));
         world_objects.push(create_sphere(point3(-4, 1, 0), 1.0, mat2));

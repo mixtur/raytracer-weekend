@@ -1,4 +1,4 @@
-import { Texture } from '../texture/texture';
+import { Texture, texture_get_value } from '../texture/texture';
 import { solid_color } from '../texture/solid_color';
 import { Ray, ray_dirty } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
@@ -40,9 +40,9 @@ export const create_bounce_record = (): BounceRecord => {
 };
 
 export const default_scatter: ScatterFunction = () => false;
-export const default_emit: EmitFunction = (mat, r_in, hit) => mat.emissive.value(hit.u, hit.v, hit.p);
+export const default_emit: EmitFunction = (mat, r_in, hit) => texture_get_value[mat.emissive.type](mat.emissive, hit.u, hit.v, hit.p);
 export const default_attenuate: AttenuationFunction = (mat, r_in, hit, bounce, scattered) => {
-    bounce.attenuation.set(mat.albedo.value(hit.u, hit.v, hit.p));
+    bounce.attenuation.set(texture_get_value[mat.albedo.type](mat.albedo, hit.u, hit.v, hit.p));
 };
 
 export const create_mega_material = (config: Partial<MegaMaterial>): MegaMaterial => {

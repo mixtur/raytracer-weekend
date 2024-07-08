@@ -5,11 +5,11 @@ import {
     MegaMaterial,
     ScatterFunction
 } from '../megamaterial';
-import { Texture } from '../../texture/texture';
+import { Texture, texture_get_value } from '../../texture/texture';
 import { CosinePDF, PDF, SpecularIsotropicMicroFacetPDF } from '../../math/pdf';
 import {
     add_vec3_r,
-    dot_vec3, fma_vec3_s_s,
+    dot_vec3,
     mix_vec3,
     mix_vec3_r, mul_vec3,
     mul_vec3_s, mul_vec3_s_r, negate_vec3, set_vec3,
@@ -21,8 +21,8 @@ import { clamp, remap } from '../../utils';
 import { Ray } from '../../math/ray';
 import { HitRecord } from '../../hittable/hittable';
 import { interpolate_vec2_r } from '../../hittable/triangle';
-import { ImageTexture } from '../../texture/image_texture';
 import { solid_color } from '../../texture/solid_color';
+import { is_image_texture } from '../../texture/image_texture';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -227,15 +227,15 @@ class BurleyPDF implements PDF {
 const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
     const mixture_pdf = material.scattering_pdf as BurleyPDF;
     update_uv(hit);
-    const albedo = material.albedo.value(uv[0], uv[1], hit.p);
+    const albedo = texture_get_value[material.albedo.type](material.albedo, uv[0], uv[1], hit.p);
     let metallic = 1, roughness = 1;
     if (material.metallic === material.roughness) {
-        const metallic_roughness = material.metallic.value(uv[0], uv[1], hit.p);
+        const metallic_roughness = texture_get_value[material.metallic.type](material.metallic, uv[0], uv[1], hit.p);
         roughness = metallic_roughness[1];
         metallic = metallic_roughness[2];
     } else {
-        roughness = material.roughness.value(uv[0], uv[1], hit.p)[1];
-        metallic = material.metallic.value(uv[0], uv[1], hit.p)[2];
+        roughness = texture_get_value[material.roughness.type](material.roughness, uv[0], uv[1], hit.p)[1];
+        metallic = texture_get_value[material.metallic.type](material.roughness, uv[0], uv[1], hit.p)[2];
     }
 
     const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
@@ -263,7 +263,7 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 
     //todo: roughness is sampled twice now. Once here and another time in attenuation
     //      we'd better avoid it.
-    const roughness = material.roughness.value(uv[0], uv[1], hit.p)[1];
+    const roughness = texture_get_value[material.roughness.type](material.roughness, uv[0], uv[1], hit.p)[1];
     const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
     specular_pdf.setAlpha(_roughness);
     specular_pdf.setup(unit_normal, unit_view);
@@ -273,12 +273,12 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 };
 
 const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
-    if (material.emissive instanceof ImageTexture) {
+    if (is_image_texture(material.emissive)) {
         update_uv(hit);
-        return material.emissive.value(uv[0], uv[1]);
+        return texture_get_value[material.emissive.type](material.emissive, uv[0], uv[1], uv);
     }
 
-    return material.emissive.value(hit.u, hit.v, hit.p);
+    return texture_get_value[material.emissive.type](material.emissive, hit.u, hit.v, hit.p);
 };
 
 // implemented by blindly using these parers:

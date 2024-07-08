@@ -1,4 +1,4 @@
-import { Texture } from '../texture/texture';
+import { Texture, texture_get_value } from '../texture/texture';
 import { create_mega_material, EmitFunction, MegaMaterial, ScatterFunction } from './megamaterial';
 import { color } from '../math/vec3.gen';
 
@@ -6,7 +6,7 @@ export const diffuse_light_scatter: ScatterFunction = () => false;
 export const black = color(0, 0, 0);
 export const diffuse_light_emit: EmitFunction = (mat, r_in, hit) => {
     if (hit.front_face) {
-        return mat.emissive.value(hit.u, hit.v, hit.p);
+        return texture_get_value[mat.emissive.type](mat.emissive, hit.u, hit.v, hit.p);
     }
     return black;
 }

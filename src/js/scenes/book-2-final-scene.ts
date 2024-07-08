@@ -10,7 +10,6 @@ import {
 import { solid_color } from '../texture/solid_color';
 import { get_predefined_random, random_min_max, use_random } from '../math/random';
 import earthUrl from './earthmap.jpg';
-import { NoiseTexture } from '../texture/noise_texture';
 import { Camera } from '../camera';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_dielectric } from '../materials/dielectric';
@@ -20,7 +19,6 @@ import { create_lambertian } from '../materials/lambertian';
 import { async_run_with_hooks, degrees_to_radians } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Skybox } from '../hittable/skybox';
-import { ImageTexture } from '../texture/image_texture';
 import { trs_to_mat3x4 } from '../math/mat3.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { create_hittable_list } from '../hittable/hittable_list';
@@ -33,6 +31,8 @@ import { create_constant_medium } from '../hittable/constant_medium';
 import { Hittable } from '../hittable/hittable';
 import { create_transform } from '../hittable/transform';
 import { create_bvh_node } from '../hittable/bvh';
+import { create_image_texture } from '../texture/image_texture';
+import { create_noise_texture } from '../texture/noise_texture';
 
 export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
@@ -80,9 +80,9 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
 
         const fog_boundary = create_sphere(point3(0, 0, 0), 5000, create_dielectric(1.5));
         objects.objects.push(create_constant_medium(fog_boundary, .0001, create_isotropic_phase_function(solid_color(1, 1, 1))));
-        const emat = create_lambertian(new ImageTexture(await load_dom_image(earthUrl), {flip_y: true, decode_srgb: true}));
+        const emat = create_lambertian(create_image_texture(await load_dom_image(earthUrl), {flip_y: true, decode_srgb: true}));
         objects.objects.push(create_sphere(point3(400,200,400), 100, emat));
-        const pertext = new NoiseTexture(0.2);
+        const pertext = create_noise_texture(0.2);
         objects.objects.push(create_sphere(point3(220,280,300), 80, create_lambertian(pertext)));
 
         const spheres: Hittable[] = [];

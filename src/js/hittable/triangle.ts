@@ -27,7 +27,7 @@ import {
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB, union_aabb_point_r, create_empty_aabb, expand_aabb_r } from '../math/aabb';
 import { ray_dirty, Ray, ray_set, ray_at_r } from '../math/ray';
-import { Texture } from '../texture/texture';
+import { Texture, texture_get_value } from '../texture/texture';
 import { columns_to_mat3_r, mat3_dirty, mul_mat3_vec3_r, transpose_mat3, transpose_mat3_r } from '../math/mat3.gen';
 
 const tmp_hit = create_empty_hit_record();
@@ -110,7 +110,7 @@ export const get_normal = (normal_strategy: INormalStrategy, barycentric_weights
 
         columns_to_mat3_r(tangent_space_transform, vertex_tangent, bitangent, vertex_normal);
 
-        const result = normal_strategy.normal_map.value(uvs[0], uvs[1], uvs);
+        const result = texture_get_value[normal_strategy.normal_map.type](normal_strategy.normal_map, uvs[0], uvs[1], uvs);
 
         fma_vec3_s_s_r(result, result, 2, -1);
         mul_mat3_vec3_r(result, tangent_space_transform, result);

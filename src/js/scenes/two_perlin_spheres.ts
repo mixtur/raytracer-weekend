@@ -1,4 +1,4 @@
-import { NoiseTexture } from '../texture/noise_texture';
+import { create_noise_texture } from '../texture/noise_texture';
 import { point3, vec3 } from '../math/vec3.gen';
 import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
@@ -7,7 +7,7 @@ import { Skybox } from '../hittable/skybox';
 import { create_hittable_list } from '../hittable/hittable_list';
 import { create_sphere } from '../hittable/sphere';
 
-const pertext = new NoiseTexture(4);
+const pertext = create_noise_texture(4);
 
 export const two_perlin_spheres: Scene = create_scene({
     root_hittable: create_hittable_list([

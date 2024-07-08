@@ -5,13 +5,13 @@ import { Camera } from '../camera';
 import { create_lambertian } from '../materials/lambertian';
 import { Skybox } from '../hittable/skybox';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
-import { ImageTexture } from '../texture/image_texture';
+import { create_image_texture } from '../texture/image_texture';
 import { create_sphere } from '../hittable/sphere';
 
 export const create_earth_scene = async (): Promise<Scene> => {
     const earth_image = await load_dom_image(earthUrl);
     return create_scene({
-        root_hittable: create_sphere(point3(0, 0, 0), 2, create_lambertian(new ImageTexture(earth_image, {flip_y: true, decode_srgb: true}))),
+        root_hittable: create_sphere(point3(0, 0, 0), 2, create_lambertian(create_image_texture(earth_image, {flip_y: true, decode_srgb: true}))),
         camera: new Camera({
             look_from: point3(13, 2, 3),
             look_at: point3(0, 0, 0),
