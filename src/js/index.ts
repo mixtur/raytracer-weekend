@@ -31,17 +31,6 @@ const tone_mapper = compose_tone_mappers([
     apply_gamma(1 / 2.2),
 ]);
 
-// const scene = lots_of_spheres;
-// const scene = two_spheres;
-// const scene = await create_earth_scene();
-// const scene = book1_final_scene();
-// const scene = simple_light;
-// const scene = cornell_box_matrix;
-// const scene = cornell_box_with_smoke;
-// const scene = await book2_final_scene();
-// const scene = await load_simple_gltf();
-const scene = await load_damaged_helmet_gltf();
-
 
 const writer = create_canvas_color_writer(document.getElementById('right-panel') as HTMLDivElement, image_width, image_height);
 // const writer = create_array_writer(image_width, image_height, default_tone_mapper, (array) => {
@@ -57,6 +46,18 @@ const progress_reporter = new MultipleReporters([
     new ProgressBar(document.getElementById('top-row') as HTMLDivElement, thread_count, image_height),
     new ProgressText(document.getElementById('left-panel') as HTMLDivElement)
 ]);
+
+// const scene = lots_of_spheres;
+// const scene = two_spheres;
+// const scene = await create_earth_scene();
+// const scene = book1_final_scene();
+// const scene = simple_light;
+// const scene = cornell_box_matrix;
+// const scene = cornell_box_with_smoke;
+// const scene = await book2_final_scene();
+// const scene = await load_simple_gltf();
+const scene = await load_damaged_helmet_gltf();
+
 multi_threaded_render({
     thread_count,
     tone_mapper,
