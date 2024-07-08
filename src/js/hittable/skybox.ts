@@ -6,7 +6,7 @@ import { AABB } from '../math/aabb';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';
 import { PixelsData } from '../texture/image-parsers/types';
-import { PDF, SpherePDF } from '../math/pdf';
+import { create_sphere_pdf, PDF, pdf_types } from '../math/pdf';
 import { create_image_based_importance_sampler } from '../math/image-based-importance-sampler';
 import { GLWrappingMode } from '../gltf_loader/gl_types';
 import { create_image_texture } from '../texture/image_texture';
@@ -50,33 +50,32 @@ hittable_types.skybox = create_hittable_type({
     },
 
     get_bounding_box(hittable, time0: number, time1: number, aabb: AABB) {
-        const skybox = hittable as ISkybox;
         aabb.min.fill(-Infinity);
         aabb.max.fill(Infinity);
     },
 
     random(hittable, _origin: Vec3): Vec3 {
-        const skybox = hittable as ISkybox;
-        return skybox.pdf.generate();
+        const {pdf} = hittable as ISkybox;
+        return pdf_types[pdf.type].generate(pdf);
     },
 
     pdf_value(hittable, _origin: Vec3, direction: Vec3): number {
-        const skybox = hittable as ISkybox;
-        return skybox.pdf.value(direction);
+        const {pdf} = hittable as ISkybox;
+        return pdf_types[pdf.type].value(pdf, direction);
     }
 })
 
 export class Skybox {
     static create_white(): ISkybox {
-        return create_skybox(create_diffuse_light(solid_color(1, 1, 1)), new SpherePDF())
+        return create_skybox(create_diffuse_light(solid_color(1, 1, 1)), create_sphere_pdf());
     }
 
     static create_black(): ISkybox {
-        return create_skybox(create_diffuse_light(solid_color(0, 0, 0)), new SpherePDF())
+        return create_skybox(create_diffuse_light(solid_color(0, 0, 0)), create_sphere_pdf());
     }
 
     static create_solid(r: number, g: number, b: number): ISkybox {
-        return create_skybox(create_diffuse_light(solid_color(r, g, b)), new SpherePDF())
+        return create_skybox(create_diffuse_light(solid_color(r, g, b)), create_sphere_pdf());
     }
 
     static create_hdr(image: PixelsData): ISkybox {

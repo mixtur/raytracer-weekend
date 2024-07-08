@@ -6,7 +6,7 @@ import {
     MegaMaterial,
     ScatterFunction
 } from './megamaterial';
-import { SpherePDF } from '../math/pdf';
+import { create_sphere_pdf } from '../math/pdf';
 
 export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit, bounce) => {
     bounce.skip_pdf = false;
@@ -15,7 +15,7 @@ export const isotropic_phase_function_scatter: ScatterFunction = (mat, r_in, hit
 
 export const create_isotropic_phase_function = (albedo: Texture): MegaMaterial => create_mega_material({
     type: 'isotropic_phase_function',
-    scattering_pdf: new SpherePDF(),
+    scattering_pdf: create_sphere_pdf(),
     albedo
 });
 

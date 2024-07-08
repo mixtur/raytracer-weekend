@@ -5,18 +5,18 @@ import {
     MegaMaterial,
     ScatterFunction
 } from './megamaterial';
-import { CosinePDF } from '../math/pdf';
+import { cosine_pdf_set_direction, create_cosine_pdf, ICosinePDF } from '../math/pdf';
 
 export const lambertian_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
-    const scattering_pdf = material.scattering_pdf as CosinePDF;
-    scattering_pdf.setDirection(hit.normal);
+    const scattering_pdf = material.scattering_pdf as ICosinePDF;
+    cosine_pdf_set_direction(scattering_pdf, hit.normal);
     bounce.skip_pdf = false;
     return true;
 };
 
 export const create_lambertian = (albedo: Texture): MegaMaterial => create_mega_material({
     type: 'lambertian',
-    scattering_pdf: new CosinePDF(),
+    scattering_pdf: create_cosine_pdf(),
     albedo
 });
 

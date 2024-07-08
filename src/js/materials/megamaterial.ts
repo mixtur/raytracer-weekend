@@ -3,7 +3,7 @@ import { solid_color } from '../texture/solid_color';
 import { Ray, ray_dirty } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';
 import { color, Color, vec3 } from '../math/vec3.gen';
-import { PDF, SpherePDF } from '../math/pdf';
+import { create_sphere_pdf, PDF } from '../math/pdf';
 
 export interface MegaMaterial {
     scattering_pdf: PDF;
@@ -65,7 +65,7 @@ export const create_mega_material = (config: Partial<MegaMaterial>): MegaMateria
 
     const default_metallic_roughness = solid_color(0, 1, 1);
     return {
-        scattering_pdf: config.scattering_pdf ?? new SpherePDF(),
+        scattering_pdf: config.scattering_pdf ?? create_sphere_pdf(),
         type: config.type,
         ior: config.ior ?? 1.5,
         emissive: config.emissive ?? solid_color(0, 0, 0),

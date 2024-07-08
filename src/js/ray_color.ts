@@ -2,7 +2,7 @@ import { ray_dirty, Ray, ray_set } from './math/ray';
 import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r } from './math/vec3.gen';
 import { Hittable, create_empty_hit_record, HitRecord, hittable_types } from './hittable/hittable';
 import { BounceRecord, create_bounce_record, material_types } from './materials/megamaterial';
-import { HittablePDF, MixturePDF } from './math/pdf';
+import { create_hittable_pdf, create_mixture_pdf, pdf_types } from './math/pdf';
 
 const hit = create_empty_hit_record();
 const bounce = create_bounce_record();
@@ -15,8 +15,8 @@ for (let i = 0; i < 100; i++) {
     ray_stack.push(ray_dirty());
 }
 
-const light_pdf = new HittablePDF();
-const mix_pdf = new MixturePDF();
+const light_pdf = create_hittable_pdf();
+const mix_pdf = create_mixture_pdf();
 
 export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights: Hittable | null, depth: number): Color => {
     const scattered = ray_stack[depth];
@@ -50,10 +50,11 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
             pdf = mix_pdf;
         }
 
-        ray_set(scattered, hit.p, pdf.generate(), r.time);
+        ray_set(scattered, hit.p, pdf_types[pdf.type].generate(pdf), r.time);
 
         if (pdf === mix_pdf) {
-            pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / pdf.value(scattered.direction);
+            const scattering_pdf = hit.material.scattering_pdf;
+            pdf_factor = pdf_types[scattering_pdf.type].value(scattering_pdf, scattered.direction) / pdf_types[pdf.type].value(pdf, scattered.direction);
         }
     }
 
@@ -93,9 +94,10 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
                 pdf = mix_pdf;
             }
 
-            ray_set(scattered, hit.p, pdf.generate(), r.time);
+            ray_set(scattered, hit.p, pdf_types[pdf.type].generate(pdf), r.time);
 
-            pdf_factor = hit.material.scattering_pdf.value(scattered.direction) / pdf.value(scattered.direction);
+            const scattering_pdf = hit.material.scattering_pdf;
+            pdf_factor = pdf_types[scattering_pdf.type].value(scattering_pdf, scattered.direction) / pdf_types[pdf.type].value(pdf, scattered.direction);
         }
 
         material_type.attenuate(hit.material, r, hit, bounce, scattered);

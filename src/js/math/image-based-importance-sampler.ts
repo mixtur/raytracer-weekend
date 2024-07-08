@@ -1,5 +1,5 @@
 import { PixelsData } from '../texture/image-parsers/types';
-import { PDF } from './pdf';
+import { PDF, pdf_types } from './pdf';
 import { convertXYZ2xyY, RGB2XYZ } from '../texture/image-parsers/rgbe_image_parser';
 import { mul_mat3_vec3_r } from './mat3.gen';
 import { set_vec3, unit_vec3, Vec3, vec3, vec3_dirty } from './vec3.gen';
@@ -11,7 +11,15 @@ const XYZcolor = vec3_dirty();
 const xyYColor = vec3_dirty();
 const tmp_color = vec3_dirty();
 
-export const create_image_based_importance_sampler = (pixels_data: PixelsData): PDF => {
+export interface IImageBasedImportanceSampler extends PDF {
+    type: 'image_based',
+    pdf: number[];
+    cdf: number[];
+    width: number;
+    height: number;
+}
+
+export const create_image_based_importance_sampler = (pixels_data: PixelsData): IImageBasedImportanceSampler => {
     const {pixels, width, height} = pixels_data;
     let acc = 0;
     const pdf = [];
@@ -42,52 +50,48 @@ export const create_image_based_importance_sampler = (pixels_data: PixelsData): 
         cdf[i] /= acc;
     }
 
-    return new ImageBasedImportanceSampler(pdf, cdf, width, height);
-}
+    return {
+        type: 'image_based',
+        pdf,
+        cdf,
+        width,
+        height
+    };
+};
 
-export class ImageBasedImportanceSampler implements PDF {
-    pdf: number[];
-    cdf: number[];
-    width: number;
-    height: number;
-    constructor(pdf: number[], cdf: number[], width: number, height: number) {
-        this.pdf = pdf;
-        this.cdf = cdf;
-        this.width = width;
-        this.height = height;
+const _generate_pixel_index = (pdf: IImageBasedImportanceSampler): number => {
+    const rand = Math.random();
+    const {cdf} = pdf;
+    let l = 0, r = cdf.length;
+    while (r - l > 3) {
+        const m = (l + r) >> 1;
+        if (rand < cdf[m]) {
+            r = m;
+        } else {
+            l = m;
+        }
     }
 
-    _generate_pixel_index(): number {
-        const rand = Math.random();
-        const {cdf} = this;
-        let l = 0, r = cdf.length;
-        while (r - l > 3) {
-            const m = (l + r) >> 1;
-            if (rand < cdf[m]) {
-                r = m;
-            } else {
-                l = m;
-            }
+    for (let i = l; i <= r; i++) {
+        if (cdf[i] < rand && rand <= cdf[i + 1]) {
+            return i + 1;
         }
-
-        for (let i = l; i <= r; i++) {
-            if (cdf[i] < rand && rand <= cdf[i + 1]) {
-                return i + 1;
-            }
-        }
-        return l;
     }
+    return l;
+};
 
-    generate(): Vec3 {
-        const pixel_index = this._generate_pixel_index();
-        const x = pixel_index % this.width;
-        const y = Math.floor(pixel_index / this.width);
+pdf_types.image_based = {
+    generate(pdf): Vec3 {
+        const image_pdf = pdf as IImageBasedImportanceSampler;
+        const pixel_index = _generate_pixel_index(image_pdf);
+        const x = pixel_index % image_pdf.width;
+        const y = Math.floor(pixel_index / image_pdf.width);
 
-        const theta_range_hi = (1 - y / this.height) * Math.PI;
-        const theta_range_lo = (1 - (y + 1) / this.height) * Math.PI;
+        const theta_range_hi = (1 - y / image_pdf.height) * Math.PI;
+        const theta_range_lo = (1 - (y + 1) / image_pdf.height) * Math.PI;
 
-        const phi_range_size = Math.PI * 2 / this.width;
-        const phi_range_lo = (x / this.width * 2 - 1) * Math.PI;
+        const phi_range_size = Math.PI * 2 / image_pdf.width;
+        const phi_range_lo = (x / image_pdf.width * 2 - 1) * Math.PI;
 
         const cos_theta_range_lo = Math.cos(theta_range_hi);
         const cos_theta_range_hi = Math.cos(theta_range_lo);
@@ -109,18 +113,19 @@ export class ImageBasedImportanceSampler implements PDF {
             cos_theta,
             sin_theta * sin_phi,
         );
-    }
+    },
 
-    value(direction: Vec3): number {
+    value(pdf, direction: Vec3): number {
+        const image_pdf = pdf as IImageBasedImportanceSampler;
         const dir = unit_vec3(direction);
         const phi = Math.atan2(dir[2], dir[0]);
         const theta = Math.acos(dir[1]);
 
-        const u = Math.floor((phi / Math.PI + 1) / 2 * this.width);
-        const v = Math.floor((1 - theta / Math.PI) * this.height);
+        const u = Math.floor((phi / Math.PI + 1) / 2 * image_pdf.width);
+        const v = Math.floor((1 - theta / Math.PI) * image_pdf.height);
 
-        const i = v * this.width + u;
+        const i = v * image_pdf.width + u;
 
-        return this.pdf[i];
+        return image_pdf.pdf[i];
     }
-}
+};
