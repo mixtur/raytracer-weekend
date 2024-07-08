@@ -6,7 +6,6 @@ import {
     rand_vec3_unit, reflect_incident_vec3, reflect_incident_vec3_r, reflect_vec3, unit_vec3, unit_vec3_r,
     Vec3, vec3_dirty
 } from './vec3.gen';
-import { Hittable } from '../hittable/hittable';
 import {
     invert_quat_r,
     mul_quat_vec3,
@@ -16,6 +15,7 @@ import {
     Quat,
     quat_dirty
 } from './quat.gen';
+import { Hittable, hittable_types } from '../hittable/hittable';
 
 export interface PDF {
     value(direction: Vec3): number;
@@ -69,11 +69,11 @@ export class HittablePDF implements PDF {
     origin!: Vec3;
 
     value(direction: Vec3): number {
-        return this.hittable.pdf_value(this.origin, direction);
+        return hittable_types[this.hittable.type].pdf_value(this.hittable, this.origin, direction);
     }
 
     generate(): Vec3 {
-        return this.hittable.random(this.origin);
+        return hittable_types[this.hittable.type].random(this.hittable, this.origin);
     }
 }
 

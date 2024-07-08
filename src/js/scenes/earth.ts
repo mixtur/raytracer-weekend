@@ -1,5 +1,4 @@
 import { create_scene, Scene } from './scene';
-import { Sphere } from '../hittable/sphere';
 import { point3, vec3 } from '../math/vec3.gen';
 import earthUrl from './earthmap.jpg';
 import { Camera } from '../camera';
@@ -7,11 +6,12 @@ import { create_lambertian } from '../materials/lambertian';
 import { Skybox } from '../hittable/skybox';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { ImageTexture } from '../texture/image_texture';
+import { create_sphere } from '../hittable/sphere';
 
 export const create_earth_scene = async (): Promise<Scene> => {
     const earth_image = await load_dom_image(earthUrl);
     return create_scene({
-        root_hittable: new Sphere(point3(0, 0, 0), 2, create_lambertian(new ImageTexture(earth_image, {flip_y: true, decode_srgb: true}))),
+        root_hittable: create_sphere(point3(0, 0, 0), 2, create_lambertian(new ImageTexture(earth_image, {flip_y: true, decode_srgb: true}))),
         camera: new Camera({
             look_from: point3(13, 2, 3),
             look_at: point3(0, 0, 0),

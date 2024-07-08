@@ -1,4 +1,10 @@
-import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from './hittable';
+import {
+    Hittable,
+    create_empty_hit_record, create_hittable_type,
+    HitRecord,
+    hittable_types,
+    set_face_normal
+} from './hittable';
 import {
     cross_vec3,
     cross_vec3_r,
@@ -19,7 +25,7 @@ import {
     vec3_dirty
 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
-import { AABB } from './aabb';
+import { AABB, union_aabb_point_r, create_empty_aabb, expand_aabb_r } from '../math/aabb';
 import { ray_dirty, Ray, ray_set, ray_at_r } from '../math/ray';
 import { Texture } from '../texture/texture';
 import { columns_to_mat3_r, mat3_dirty, mul_mat3_vec3_r, transpose_mat3, transpose_mat3_r } from '../math/mat3.gen';
@@ -28,61 +34,71 @@ const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray_dirty();
 const tmp_cross = vec3_dirty();
 
-export interface NormalStrategy {
-    get_normal(barycentric_weights: Vec3): Vec3;
-}
-
-export class ConstantNormal implements NormalStrategy {
+export type INormalStrategy = {
+    type: 'constant';
     normal: Vec3;
-    constructor(positions: TriangleVec3) {
-        const u = sub_vec3(positions[1], positions[0]);
-        const v = sub_vec3(positions[2], positions[0]);
-        this.normal = cross_vec3(u, v);
-    }
-    get_normal(): Vec3 {
-        return this.normal;
-    }
-}
-
-export class InterpolatedNormal implements NormalStrategy {
+} | {
+    type: 'interpolated';
     normals: TriangleVec3;
-    constructor(normals: TriangleVec3) {
-        this.normals = normals;
-    }
-    get_normal(barycentric_weights: Vec3): Vec3 {
-        const result = vec3_dirty();
-        interpolate_vec3_r(result, barycentric_weights, this.normals);
-        unit_vec3_r(result, result);
-        return result;
-    }
-}
-
-const tangent_space_transform = mat3_dirty();
-export class NormalMap implements NormalStrategy {
+} | {
+    type: 'normal-map';
     uvs: TriangleVec2;
     normals: TriangleVec3;
     //todo: Vec4
     tangents: TriangleVec3;
     tangent_ws: Vec3;
     normal_map: Texture;
-    constructor(normals: TriangleVec3, tangents: TriangleVec3, tangent_ws: Vec3, uvs: TriangleVec2, normal_map: Texture) {
-        this.normal_map = normal_map;
-        this.uvs = uvs;
-        this.normals = normals;
-        this.tangents = tangents;
-        this.tangent_ws = tangent_ws;
+} | {
+    type: 'unknown'// to make typescript happier in the default case
+}
 
+export const create_constant_normal = (positions: TriangleVec3): INormalStrategy => {
+    const u = sub_vec3(positions[1], positions[0]);
+    const v = sub_vec3(positions[2], positions[0]);
+    const normal = cross_vec3(u, v);
+    return {
+        type: 'constant',
+        normal
+    };
+};
+
+export const create_interpolated_normal = (normals: TriangleVec3): INormalStrategy => {
+    return {
+        type: 'interpolated',
+        normals
+    };
+};
+
+export const create_normal_map = (normals: TriangleVec3, tangents: TriangleVec3, tangent_ws: Vec3, uvs: TriangleVec2, normal_map: Texture): INormalStrategy => {
+    return {
+        type: 'normal-map',
+        normals,
+        tangents,
+        tangent_ws,
+        uvs,
+        normal_map
+    };
+}
+
+const tangent_space_transform = mat3_dirty();
+export const get_normal = (normal_strategy: INormalStrategy, barycentric_weights: Vec3): Vec3 => {
+    if (normal_strategy.type === 'constant') return normal_strategy.normal;
+    if (normal_strategy.type === 'interpolated') {
+        const result = vec3_dirty();
+        interpolate_vec3_r(result, barycentric_weights, normal_strategy.normals);
+        unit_vec3_r(result, result);
+        return result;
     }
-    get_normal(barycentric_weights: Vec3): Vec3 {
+    if (normal_strategy.type === 'normal-map') {
         const vertex_normal = vec3_dirty();
-        interpolate_vec3_r(vertex_normal, barycentric_weights, this.normals);
+        interpolate_vec3_r(vertex_normal, barycentric_weights, normal_strategy.normals);
         unit_vec3_r(vertex_normal, vertex_normal);
 
         const vertex_tangent = vec3_dirty();
-        interpolate_vec3_r(vertex_tangent, barycentric_weights, this.tangents);
+        interpolate_vec3_r(vertex_tangent, barycentric_weights, normal_strategy.tangents);
         unit_vec3_r(vertex_tangent, vertex_tangent);
 
-        const w = interpolate_scalar(barycentric_weights, this.tangent_ws);
+        const w = interpolate_scalar(barycentric_weights, normal_strategy.tangent_ws);
 
         const bitangent = cross_vec3(vertex_normal, vertex_tangent);
         mul_vec3_s_r(bitangent, bitangent, w);
@@ -90,18 +106,18 @@ export class NormalMap implements NormalStrategy {
 
         //todo: Vec2
         const uvs = vec3_dirty();
-        interpolate_vec3_r(uvs, barycentric_weights, this.uvs);
+        interpolate_vec3_r(uvs, barycentric_weights, normal_strategy.uvs);
 
         columns_to_mat3_r(tangent_space_transform, vertex_tangent, bitangent, vertex_normal);
 
-        const result = this.normal_map.value(uvs[0], uvs[1], uvs);
+        const result = normal_strategy.normal_map.value(uvs[0], uvs[1], uvs);
 
         fma_vec3_s_s_r(result, result, 2, -1);
         mul_mat3_vec3_r(result, tangent_space_transform, result);
         unit_vec3_r(result, result);
         return result;
-
     }
+    throw new Error(`unknown normal strategy ${normal_strategy.type}`);
 }
 
 export type TriangleVec2 = [Vec3, Vec3, Vec3];
@@ -130,8 +146,8 @@ const intersection = vec3_dirty();
 
 const barycentric_coordinates = vec3_dirty();
 
-//todo: make triangles indexed (mesh-hittable?)
-export class Triangle extends Hittable {
+export interface ITriangle extends Hittable {
+    type: 'triangle',
     q: Point3;
     u: Vec3;
     v: Vec3;
@@ -141,113 +157,122 @@ export class Triangle extends Hittable {
     w: Vec3;
     d: number;
     area: number;
-    normal_strategy: NormalStrategy;
+    normal_strategy: INormalStrategy;
     //todo: Vec2
     tex_coords: TriangleVec2[];
+}
 
-    constructor(vertex_positions: TriangleVec3, normal_strategy: NormalStrategy, uvs: TriangleVec2[], mat: MegaMaterial) {
-        super();
+export const create_triangle = (vertex_positions: TriangleVec3, normal_strategy: INormalStrategy, tex_coords: TriangleVec2[], mat: MegaMaterial): ITriangle => {
+    const a = vertex_positions[0];
+    const b = vertex_positions[1];
+    const c = vertex_positions[2];
 
-        const a = vertex_positions[0];
-        const b = vertex_positions[1];
-        const c = vertex_positions[2];
+    const q = a;
+    const u = sub_vec3(b, a);
+    const v = sub_vec3(c, a);
 
-        const q = a;
-        const u = sub_vec3(b, a);
-        const v = sub_vec3(c, a);
+    const normal = cross_vec3(u, v);
+    const area = len_vec3(normal);
+    const w = div_vec3_s(normal, dot_vec3(normal, normal));
+    unit_vec3_r(normal, normal);
+    const d = dot_vec3(q, normal);
 
-        this.normal_strategy = normal_strategy;
-        this.tex_coords = uvs;
+    const aabb = create_empty_aabb();
+    union_aabb_point_r(aabb, aabb, a);
+    union_aabb_point_r(aabb, aabb, b);
+    union_aabb_point_r(aabb, aabb, c);
 
-        this.q = q;
-        this.u = u;
-        this.v = v;
-        this.mat = mat;
-        this.normal = cross_vec3(u, v);
-        this.area = len_vec3(this.normal);
-        this.w = div_vec3_s(this.normal, dot_vec3(this.normal, this.normal));
-        unit_vec3_r(this.normal, this.normal);
-        this.d = dot_vec3(q, this.normal);
+    expand_aabb_r(aabb, aabb, 0.0001);
 
-        this.aabb = AABB.createEmpty();
-        this.aabb.consumePoint(a);
-        this.aabb.consumePoint(b);
-        this.aabb.consumePoint(c);
+    return {
+        type: 'triangle',
+        q, u, v, w, d,
+        normal,
+        area,
+        aabb,
+        normal_strategy,
+        tex_coords,
+        mat
+    };
+};
 
-        this.aabb.expand(0.0001);
+const is_triangle_interior = (a: number, b: number, hit: HitRecord): boolean => {
+    if (a < 0 || a > 1 || b < 0 || b > 1 || (a + b) > 1) {
+        return false;
     }
 
-    get_bounding_box(time0: number, time1: number, aabb: AABB) {
-        aabb.min.set(this.aabb.min);
-        aabb.max.set(this.aabb.max);
-    }
+    hit.u = a;
+    hit.v = b;
 
-    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
-        const denom = dot_vec3(this.normal, r.direction);
+    return true;
+};
+
+//todo: make triangles indexed (mesh-hittable?)
+hittable_types.triangle = create_hittable_type({
+    get_bounding_box(hittable, time0: number, time1: number, aabb: AABB) {
+        const triangle = hittable as ITriangle;
+        aabb.min.set(triangle.aabb.min);
+        aabb.max.set(triangle.aabb.max);
+    },
+
+    hit(hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
+        const triangle = hittable as ITriangle;
+        const denom = dot_vec3(triangle.normal, r.direction);
 
         if (Math.abs(denom) < 1e-8) {
             return false;
         }
 
-        const t = (this.d - dot_vec3(this.normal, r.origin)) / denom;
+        const t = (triangle.d - dot_vec3(triangle.normal, r.origin)) / denom;
         if (t < t_min || t > t_max) {
             return false;
         }
 
         ray_at_r(intersection, r, t);
-        sub_vec3_r(planar_hitpt_vector, intersection, this.q);
-        cross_vec3_r(tmp_cross, planar_hitpt_vector, this.v)
-        const a = dot_vec3(this.w, tmp_cross);
-        cross_vec3_r(tmp_cross, this.u, planar_hitpt_vector)
-        const b = dot_vec3(this.w, tmp_cross);
+        sub_vec3_r(planar_hitpt_vector, intersection, triangle.q);
+        cross_vec3_r(tmp_cross, planar_hitpt_vector, triangle.v)
+        const a = dot_vec3(triangle.w, tmp_cross);
+        cross_vec3_r(tmp_cross, triangle.u, planar_hitpt_vector)
+        const b = dot_vec3(triangle.w, tmp_cross);
 
-        if (!this.is_interior(a, b, hit)) {
+        if (!is_triangle_interior(a, b, hit)) {
             return false;
         }
 
         hit.t = t;
 
         set_vec3(barycentric_coordinates, 1 - (a + b), a, b);
-        const normal = this.normal_strategy.get_normal(barycentric_coordinates);
+        const normal = get_normal(triangle.normal_strategy, barycentric_coordinates);
 
         hit.normal.set(normal);
         hit.p.set(intersection);
-        hit.material = this.mat;
-        hit.tex_channels = this.tex_coords;
-        set_face_normal(hit, r, this.normal, normal);
+        hit.material = triangle.mat;
+        hit.tex_channels = triangle.tex_coords;
+        set_face_normal(hit, r, triangle.normal, normal);
 
         return true;
-    }
+    },
 
-    is_interior(a: number, b: number, hit: HitRecord): boolean {
-        if (a < 0 || a > 1 || b < 0 || b > 1 || (a + b) > 1) {
-            return false;
-        }
-
-        hit.u = a;
-        hit.v = b;
-
-        return true;
-    }
-
-    pdf_value(origin: Vec3, direction: Vec3): number {
+    pdf_value(hittable, origin: Vec3, direction: Vec3): number {
+        const triangle = hittable as ITriangle;
         ray_set(tmp_ray, origin, direction, 0);
-        if (!this.hit(tmp_ray, 0.00001, Infinity, tmp_hit)) {
+        if (!this.hit(triangle, tmp_ray, 0.00001, Infinity, tmp_hit)) {
             return 0;
         }
 
         const distance_squared = tmp_hit.t * tmp_hit.t * sq_len_vec3(direction);
-        const cos = Math.abs(dot_vec3(direction, this.normal)) / len_vec3(direction);
+        const cos = Math.abs(dot_vec3(direction, triangle.normal)) / len_vec3(direction);
 
-        return distance_squared / (cos * this.area);
-    }
+        return distance_squared / (cos * triangle.area);
+    },
 
-    random(origin: Vec3): Vec3 {
+    random(hittable, origin: Vec3): Vec3 {
+        const triangle = hittable as ITriangle;
         const r1 = Math.random();
         const r2 = Math.random();
-        const p = fma_vec3_s_vec3(this.u, r1, this.q);
-        fma_vec3_s_vec3_r(p, this.v, r2, p);
+        const p = fma_vec3_s_vec3(triangle.u, r1, triangle.q);
+        fma_vec3_s_vec3_r(p, triangle.v, r2, p);
         sub_vec3_r(p, p, origin);
         return p;
     }
-}
+});

@@ -1,20 +1,20 @@
 import { create_scene, Scene } from './scene';
 import { Camera } from '../camera';
-import { HittableList } from '../hittable/hittable_list';
 import { solid_color } from '../texture/solid_color';
-import { Quad } from '../hittable/quad';
 import { ArenaVec3Allocator, point3, use_vec3_allocator, vec3 } from '../math/vec3.gen';
-import { Box } from '../hittable/box';
 import { create_lambertian } from '../materials/lambertian';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_metal } from '../materials/metal';
 import { create_dielectric } from '../materials/dielectric';
-import { Sphere } from '../hittable/sphere';
 import { degrees_to_radians, run_with_hooks } from '../utils';
-import { Transform } from '../hittable/transform';
 import { trs_to_mat3x4 } from '../math/mat3.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { Skybox } from '../hittable/skybox';
+import { create_quad } from '../hittable/quad';
+import { create_transform } from '../hittable/transform';
+import { create_box } from '../hittable/box';
+import { create_sphere } from '../hittable/sphere';
+import { create_hittable_list } from '../hittable/hittable_list';
 
 const hittables = run_with_hooks(() => {
     use_vec3_allocator(new ArenaVec3Allocator(128));
@@ -26,41 +26,41 @@ const hittables = run_with_hooks(() => {
     const green = create_lambertian(solid_color(.12, .45, .15));
     const light = create_diffuse_light(solid_color(15, 15, 15));
 
-    const light_hittable = new Quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
+    const light_hittable = create_quad(point3(343, 554, 332), vec3(-130,0,0), vec3(0,0,-105), light);
 
-    const metal_box = new Transform(
+    const metal_box = create_transform(
         trs_to_mat3x4(
             vec3(265, 0, 295),
             axis_angle_to_quat(vec3(0, 1, 0), degrees_to_radians(15)),
             vec3(1, 1, 1)
         ),
-        new Box(point3(0, 0, 0), point3(165, 330, 165), aluminum)
+        create_box(point3(0, 0, 0), point3(165, 330, 165), aluminum)
     );
 
-    const glass_sphere = new Sphere(point3(190,90,190), 90, glass);
-    const root = new HittableList([
-        new Quad(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green),
-        new Quad(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red),
+    const glass_sphere = create_sphere(point3(190,90,190), 90, glass);
+    const root = create_hittable_list([
+        create_quad(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), green),
+        create_quad(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), red),
         light_hittable,
-        new Quad(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
-        new Quad(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
-        new Quad(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white),
+        create_quad(point3(0, 555, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
+        create_quad(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), white),
+        create_quad(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), white),
 
         metal_box,
         glass_sphere,
-        // new Transform(
+        // create_transform(
         //     trs_to_mat3x4(
         //         vec3(130, 0, 65),
         //         axis_angle_to_quat(vec3(0, 1, 0), degrees_to_radians(-18)),
         //         vec3(1, 1 ,1)
         //     ),
-        //     new Box(point3(0, 0, 0), point3(165, 165, 165), white)
+        //     create_box(point3(0, 0, 0), point3(165, 165, 165), white)
         // )
     ]);
 
     return {
         root,
-        light: new HittableList([
+        light: create_hittable_list([
             light_hittable,
             glass_sphere,
             metal_box

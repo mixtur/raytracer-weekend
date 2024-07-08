@@ -1,4 +1,10 @@
-import { create_empty_hit_record, HitRecord, Hittable, set_face_normal } from './hittable';
+import {
+    Hittable,
+    create_empty_hit_record, create_hittable_type,
+    HitRecord,
+    hittable_types,
+    set_face_normal
+} from './hittable';
 import {
     add_vec3, add_vec3_r,
     cross_vec3, cross_vec3_r, div_vec3_s, dot_vec3, fma_vec3_s_vec3, fma_vec3_s_vec3_r, len_vec3,
@@ -6,14 +12,15 @@ import {
     Vec3
 } from '../math/vec3.gen';
 import { MegaMaterial } from '../materials/megamaterial';
-import { AABB } from './aabb';
+import { AABB, union_aabb_point_r, create_empty_aabb, expand_aabb_r } from '../math/aabb';
 import { Ray, ray_at, ray_dirty, ray_set } from '../math/ray';
 
 const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray_dirty();
 const tmp_cross = vec3(0, 0, 0);
 
-export class Quad extends Hittable {
+export interface IQuad extends Hittable {
+    type: 'quad';
     q: Point3;
     u: Vec3;
     v: Vec3;
@@ -23,98 +30,109 @@ export class Quad extends Hittable {
     w: Vec3;
     d: number;
     area: number;
+}
 
-    constructor(q: Point3, u: Vec3, v: Vec3, mat: MegaMaterial) {
-        super();
-        this.q = q;
-        this.u = u;
-        this.v = v;
-        this.mat = mat;
-        this.normal = cross_vec3(u, v);
-        this.area = len_vec3(this.normal);
-        this.w = div_vec3_s(this.normal, dot_vec3(this.normal, this.normal));
-        unit_vec3_r(this.normal, this.normal);
-        this.d = dot_vec3(q, this.normal);
+export const create_quad = (q: Point3, u: Vec3, v: Vec3, mat: MegaMaterial): IQuad => {
+    const normal = cross_vec3(u, v);
+    const area = len_vec3(normal);
+    const w = div_vec3_s(normal, dot_vec3(normal, normal));
+    unit_vec3_r(normal, normal);
+    const d = dot_vec3(q, normal);
 
-        this.aabb = AABB.createEmpty();
-        this.aabb.consumePoint(q);
+    const aabb = create_empty_aabb();
+    union_aabb_point_r(aabb, aabb, q);
 
-        const t = add_vec3(q, u);
-        this.aabb.consumePoint(t);
-        add_vec3_r(t, q, v);
-        this.aabb.consumePoint(t);
-        add_vec3_r(t, t, u);
-        this.aabb.consumePoint(t);
+    const t = add_vec3(q, u);
+    union_aabb_point_r(aabb, aabb, t);
+    add_vec3_r(t, q, v);
+    union_aabb_point_r(aabb, aabb, t);
+    add_vec3_r(t, t, u);
+    union_aabb_point_r(aabb, aabb, t);
 
-        this.aabb.expand(0.0001);
+    expand_aabb_r(aabb, aabb, 0.0001);
+
+    return {
+        type: 'quad',
+        q, u, v,
+        mat,
+        aabb,
+        normal,
+        w, d,
+        area
+    };
+}
+
+const is_quad_interior = (a: number, b: number, hit: HitRecord): boolean => {
+    if (a < 0 || a > 1 || b < 0 || b > 1) {
+        return false;
     }
 
-    get_bounding_box(time0: number, time1: number, aabb: AABB) {
-        aabb.min.set(this.aabb.min);
-        aabb.max.set(this.aabb.max);
-    }
+    hit.u = a;
+    hit.v = b;
 
-    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
-        const denom = dot_vec3(this.normal, r.direction);
+    return true;
+};
+
+hittable_types.quad = create_hittable_type({
+    get_bounding_box(hittable, time0: number, time1: number, aabb: AABB) {
+        const quad = hittable as IQuad;
+        aabb.min.set(quad.aabb.min);
+        aabb.max.set(quad.aabb.max);
+    },
+
+    hit(hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
+        const quad = hittable as IQuad;
+        const denom = dot_vec3(quad.normal, r.direction);
 
         if (Math.abs(denom) < 1e-8) {
             return false;
         }
 
-        const t = (this.d - dot_vec3(this.normal, r.origin)) / denom;
+        const t = (quad.d - dot_vec3(quad.normal, r.origin)) / denom;
         if (t < t_min || t > t_max) {
             return false;
         }
 
         const intersection = ray_at(r, t);
-        const planar_hitpt_vector = sub_vec3(intersection, this.q);
-        cross_vec3_r(tmp_cross, planar_hitpt_vector, this.v)
-        const a = dot_vec3(this.w, tmp_cross);
-        cross_vec3_r(tmp_cross, this.u, planar_hitpt_vector)
-        const b = dot_vec3(this.w, tmp_cross);
+        const planar_hitpt_vector = sub_vec3(intersection, quad.q);
+        cross_vec3_r(tmp_cross, planar_hitpt_vector, quad.v)
+        const a = dot_vec3(quad.w, tmp_cross);
+        cross_vec3_r(tmp_cross, quad.u, planar_hitpt_vector)
+        const b = dot_vec3(quad.w, tmp_cross);
 
-        if (!this.is_interior(a, b, hit)) {
+        if (!is_quad_interior(a, b, hit)) {
             return false;
         }
 
         hit.t = t;
-        hit.normal.set(this.normal);
+        hit.normal.set(quad.normal);
         hit.p.set(intersection);
-        hit.material = this.mat;
-        set_face_normal(hit, r, this.normal, hit.normal);
+        hit.material = quad.mat;
+        set_face_normal(hit, r, quad.normal, hit.normal);
 
         return true;
-    }
+    },
 
-    is_interior(a: number, b: number, hit: HitRecord): boolean {
-        if (a < 0 || a > 1 || b < 0 || b > 1) {
-            return false;
-        }
-
-        hit.u = a;
-        hit.v = b;
-
-        return true;
-    }
-
-    pdf_value(origin: Vec3, direction: Vec3): number {
+    pdf_value(hittable, origin: Vec3, direction: Vec3): number {
+        const quad = hittable as IQuad;
         ray_set(tmp_ray, origin, direction, 0);
-        if (!this.hit(tmp_ray, 0.00001, Infinity, tmp_hit)) {
+        if (!this.hit(quad, tmp_ray, 0.00001, Infinity, tmp_hit)) {
             return 0;
         }
 
         const distance_squared = tmp_hit.t * tmp_hit.t * sq_len_vec3(direction);
-        const cos = Math.abs(dot_vec3(direction, this.normal)) / len_vec3(direction);
+        const cos = Math.abs(dot_vec3(direction, quad.normal)) / len_vec3(direction);
 
-        return distance_squared / (cos * this.area);
-    }
+        return distance_squared / (cos * quad.area);
+    },
 
-    random(origin: Vec3): Vec3 {
+    random(hittable, origin: Vec3): Vec3 {
+        const quad = hittable as IQuad;
         const r1 = Math.random();
         const r2 = Math.random();
-        const p = fma_vec3_s_vec3(this.u, r1, this.q);
-        fma_vec3_s_vec3_r(p, this.v, r2, p);
+        const p = fma_vec3_s_vec3(quad.u, r1, quad.q);
+        fma_vec3_s_vec3_r(p, quad.v, r2, p);
         sub_vec3_r(p, p, origin);
         return p;
     }
-}
+});

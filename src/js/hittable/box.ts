@@ -1,9 +1,15 @@
-import { HitRecord, Hittable, set_face_normal } from './hittable';
+import {
+    Hittable,
+    create_hittable_type,
+    HitRecord,
+    hittable_types,
+    set_face_normal
+} from './hittable';
 import { len_vec3, Point3, sq_len_vec3, sub_vec3, Vec3, vec3 } from '../math/vec3.gen';
 import { Ray, ray_at_r } from '../math/ray';
-import { AABB } from './aabb';
 import { MegaMaterial } from '../materials/megamaterial';
 import { random_min_max } from '../math/random';
+import { AABB } from '../math/aabb';
 
 function get_t(val: number, o: number, d: number, default_t: number): number {
     // val = o + d * t; t = (val - o) / d;
@@ -11,30 +17,70 @@ function get_t(val: number, o: number, d: number, default_t: number): number {
     return (val - o) / d;
 }
 
-export class Box extends Hittable {
+export interface IBox extends Hittable {
+    type: 'box';
     min: Point3;
     max: Point3;
     mat: MegaMaterial;
-    constructor(p0: Point3, p1: Point3, mat: MegaMaterial) {
-        super();
-        this.min = p0;
-        this.max = p1;
-        this.mat = mat;
-    }
+}
 
-    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
+export const create_box = (p0: Point3, p1: Point3, mat: MegaMaterial): IBox => {
+    return {
+        type: 'box',
+        min: p0,
+        max: p1,
+        mat
+    };
+}
+
+const random_side = (box: IBox, px: boolean, py: boolean, pz: boolean, nx: boolean, ny: boolean, nz: boolean): number => {
+    const dx = box.max[0] - box.min[0];
+    const dy = box.max[1] - box.min[1];
+    const dz = box.max[2] - box.min[2];
+
+    const a_xy = dx * dy;
+    const a_yz = dy * dz;
+    const a_zx = dz * dx;
+
+    const p_px = !px ? 0 : a_yz;
+    const p_nx = !nx ? 0 : a_yz;
+    const p_py = !py ? 0 : a_zx;
+    const p_ny = !ny ? 0 : a_zx;
+    const p_pz = !pz ? 0 : a_xy;
+    const p_nz = !nz ? 0 : a_xy;
+
+    const c_px = p_px;
+    const c_py = p_py + c_px;
+    const c_pz = p_pz + c_py;
+    const c_nx = p_nx + c_pz;
+    const c_ny = p_ny + c_nx;
+    const c_nz = p_nz + c_ny;
+
+    // 0..5 = px, py, pz, nx, ny, nz
+    const r = Math.random() * c_nz;
+    if (r < c_px) return 0;
+    if (r < c_py) return 1;
+    if (r < c_pz) return 2;
+    if (r < c_nx) return 3;
+    if (r < c_ny) return 4;
+    return 5;
+}
+
+hittable_types.box = create_hittable_type({
+    hit: (hittable: Hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean => {
+        const box = hittable as IBox;
         const ox = r.origin[0];
         const oy = r.origin[1];
         const oz = r.origin[2];
         const dx = r.direction[0];
         const dy = r.direction[1];
         const dz = r.direction[2];
-        const min_x = this.min[0];
-        const min_y = this.min[1];
-        const min_z = this.min[2];
-        const max_x = this.max[0];
-        const max_y = this.max[1];
-        const max_z = this.max[2];
+        const min_x = box.min[0];
+        const min_y = box.min[1];
+        const min_z = box.min[2];
+        const max_x = box.max[0];
+        const max_y = box.max[1];
+        const max_z = box.max[2];
 
         const tx0 = get_t(dx > 0 ? min_x : max_x, ox, dx, -Infinity);
         const ty0 = get_t(dy > 0 ? min_y : max_y, oy, dy, -Infinity);
@@ -54,7 +100,7 @@ export class Box extends Hittable {
                            t_enter === ty0 ? vec3(0, dy > 0 ? -1 : 1, 0) :
                                              vec3(0, 0, dz > 0 ? -1 : 1));
             hit.t = t_enter;
-            hit.material = this.mat;
+            hit.material = box.mat;
             hit.u = t_enter === tx0 ? (p[1] - min_y) / (max_y - min_y) :
                     t_enter === ty0 ? (p[2] - min_z) / (max_z - min_z) :
                                       (p[0] - min_x) / (max_x - min_x);
@@ -68,7 +114,7 @@ export class Box extends Hittable {
                 t_exit === ty1 ? vec3(0, dy > 0 ? 1 : -1, 0) :
                                  vec3(0, 0, dz > 0 ? 1 : -1));
             hit.t = t_exit;
-            hit.material = this.mat;
+            hit.material = box.mat;
             hit.u = t_exit === tx1 ? (p[1] - min_y) / (max_y - min_y) :
                     t_exit === ty1 ? (p[2] - min_z) / (max_z - min_z) :
                                      (p[0] - min_x) / (max_x - min_x);
@@ -82,48 +128,17 @@ export class Box extends Hittable {
         set_face_normal(hit, r, hit.normal, hit.normal);
 
         return true;
-    }
+    },
 
-    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
-        aabb.min.set(this.min);
-        aabb.max.set(this.max);
-    }
+    get_bounding_box: (hittable: Hittable, time0: number, time1: number, aabb: AABB): void => {
+        const box = hittable as IBox;
+        aabb.min.set(box.min);
+        aabb.max.set(box.max);
+    },
 
-    random_side(px: boolean, py: boolean, pz: boolean, nx: boolean, ny: boolean, nz: boolean): number {
-        const dx = this.max[0] - this.min[0];
-        const dy = this.max[1] - this.min[1];
-        const dz = this.max[2] - this.min[2];
-
-        const a_xy = dx * dy;
-        const a_yz = dy * dz;
-        const a_zx = dz * dx;
-
-        const p_px = !px ? 0 : a_yz;
-        const p_nx = !nx ? 0 : a_yz;
-        const p_py = !py ? 0 : a_zx;
-        const p_ny = !ny ? 0 : a_zx;
-        const p_pz = !pz ? 0 : a_xy;
-        const p_nz = !nz ? 0 : a_xy;
-
-        const c_px = p_px;
-        const c_py = p_py + c_px;
-        const c_pz = p_pz + c_py;
-        const c_nx = p_nx + c_pz;
-        const c_ny = p_ny + c_nx;
-        const c_nz = p_nz + c_ny;
-
-        // 0..5 = px, py, pz, nx, ny, nz
-        const r = Math.random() * c_nz;
-        if (r < c_px) return 0;
-        if (r < c_py) return 1;
-        if (r < c_pz) return 2;
-        if (r < c_nx) return 3;
-        if (r < c_ny) return 4;
-        return 5;
-    }
-
-    random(origin: Vec3): Vec3 {
-        const { min, max } = this;
+    random: (hittable: Hittable, origin: Vec3): Vec3 => {
+        const box = hittable as IBox;
+        const { min, max } = box;
 
         const use_px = origin[0] > max[0];
         const use_py = origin[1] > max[1];
@@ -134,14 +149,14 @@ export class Box extends Hittable {
         const use_nz = origin[2] < min[2];
 
         const side = (!use_px && !use_py && !use_pz && !use_nx && !use_ny && !use_nz)
-            ? this.random_side(true, true, true, true, true, true)
-            : this.random_side(use_px, use_py, use_pz, use_nx, use_ny, use_nz);
+            ? random_side(box, true, true, true, true, true, true)
+            : random_side(box, use_px, use_py, use_pz, use_nx, use_ny, use_nz);
 
 
         const point_on_the_surface = vec3(
-            random_min_max(this.min[0], this.max[0]),
-            random_min_max(this.min[1], this.max[1]),
-            random_min_max(this.min[2], this.max[2])
+            random_min_max(box.min[0], box.max[0]),
+            random_min_max(box.min[1], box.max[1]),
+            random_min_max(box.min[2], box.max[2])
         );
         // 0..5 = px, py, pz, nx, ny, nz
         switch (side) {
@@ -154,21 +169,22 @@ export class Box extends Hittable {
         }
 
         return sub_vec3(point_on_the_surface, origin);
-    }
+    },
 
-    pdf_value(origin: Vec3, direction: Vec3): number {
+    pdf_value: (hittable, origin: Vec3, direction: Vec3): number => {
+        const box = hittable as IBox;
         const ox = origin[0];
         const oy = origin[1];
         const oz = origin[2];
         const dx = direction[0];
         const dy = direction[1];
         const dz = direction[2];
-        const min_x = this.min[0];
-        const min_y = this.min[1];
-        const min_z = this.min[2];
-        const max_x = this.max[0];
-        const max_y = this.max[1];
-        const max_z = this.max[2];
+        const min_x = box.min[0];
+        const min_y = box.min[1];
+        const min_z = box.min[2];
+        const max_x = box.max[0];
+        const max_y = box.max[1];
+        const max_z = box.max[2];
 
         const tx0 = get_t(dx > 0 ? min_x : max_x, ox, dx, -Infinity);
         const ty0 = get_t(dy > 0 ? min_y : max_y, oy, dy, -Infinity);
@@ -203,9 +219,9 @@ export class Box extends Hittable {
         const distance_squared = t_hit * t_hit * sq_len_vec3(direction);
         const cos = Math.abs(direction[side % 3] / len_vec3(direction));
 
-        const a_xy = (this.max[0] - this.min[0]) * (this.max[1] - this.min[1]);
-        const a_yz = (this.max[1] - this.min[1]) * (this.max[2] - this.min[2]);
-        const a_zx = (this.max[2] - this.min[2]) * (this.max[0] - this.min[0]);
+        const a_xy = (box.max[0] - box.min[0]) * (box.max[1] - box.min[1]);
+        const a_yz = (box.max[1] - box.min[1]) * (box.max[2] - box.min[2]);
+        const a_zx = (box.max[2] - box.min[2]) * (box.max[0] - box.min[0]);
 
         const use_px = ox > max_x;
         const use_py = oy > max_y;
@@ -223,5 +239,4 @@ export class Box extends Hittable {
 
         return distance_squared / (cos * total_area);
     }
-}
-
+});

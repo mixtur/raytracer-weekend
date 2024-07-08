@@ -1,7 +1,7 @@
-import { HitRecord, Hittable } from './hittable';
+import { Hittable, create_hittable_type, HitRecord, hittable_types } from './hittable';
 import { add_vec3, vec3, Vec3 } from '../math/vec3.gen';
 import { Ray } from '../math/ray';
-import { AABB } from './aabb';
+import { AABB, create_aabb } from '../math/aabb';
 
 function get_t(val: number, o: number, d: number, default_t: number): number {
     // val = o + d * t; t = (val - o) / d;
@@ -9,49 +9,61 @@ function get_t(val: number, o: number, d: number, default_t: number): number {
     return (val - o) / d;
 }
 
-export class ZXGrid extends Hittable {
-    cells: (Hittable | null)[] = [];
+export interface IZXGrid extends Hittable {
+    type: 'zx_grid';
+    cells: (Hittable | null)[];
     cell_size: number;
     min: Vec3;
     max: Vec3;
     x_cols: number;
     z_rows: number;
+    //todo: aabb
     aabb: AABB;
+}
 
-    constructor(x_cols: number, z_rows: number, y_size: number, cell_size: number, min: Vec3) {
-        super();
-        this.x_cols = x_cols;
-        this.z_rows = z_rows;
-        this.cell_size = cell_size;
-        this.min = min;
-        this.max = add_vec3(min, vec3(x_cols * cell_size, y_size, z_rows * cell_size));
-        for (let i = 0; i < z_rows * x_cols; i++) {
-            this.cells[i] = null;
-        }
-        this.aabb = new AABB(min, this.max);
+export const create_zx_grid = (x_cols: number, z_rows: number, y_size: number, cell_size: number, min: Vec3): IZXGrid => {
+    const max = add_vec3(min, vec3(x_cols * cell_size, y_size, z_rows * cell_size));
+    const cells = [];
+    for (let i = 0; i < z_rows * x_cols; i++) {
+        cells[i] = null;
     }
+    const aabb = create_aabb(min, max);
 
-    addHittable(x_col: number, z_row: number, obj: Hittable): void {
-        const p = z_row * this.x_cols + x_col;
-        const cell = this.cells[p];
-        if (cell !== null) { throw new Error(`Only one object is allowed per grid cell`); }
-        this.cells[p] = obj;
-    }
+    return {
+        type: 'zx_grid',
+        cells,
+        cell_size,
+        min,
+        max,
+        x_cols,
+        z_rows,
+        aabb
+    };
+};
 
-    hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
-        const { cell_size, x_cols, z_rows } = this;
+export const zx_grid_add_hittable = (grid: IZXGrid, x_col: number, z_row: number, obj: Hittable) => {
+    const p = z_row * grid.x_cols + x_col;
+    const cell = grid.cells[p];
+    if (cell !== null) { throw new Error(`Only one object is allowed per grid cell`); }
+    grid.cells[p] = obj;
+};
+
+hittable_types.zx_grid = create_hittable_type({
+    hit(hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
+        const grid = hittable as IZXGrid;
+        const { cell_size, x_cols, z_rows } = grid;
         const ox = r.origin[0];
         const oy = r.origin[1];
         const oz = r.origin[2];
         const dx = r.direction[0];
         const dy = r.direction[1];
         const dz = r.direction[2];
-        const min_x = this.min[0];
-        const min_y = this.min[1];
-        const min_z = this.min[2];
-        const max_x = this.max[0];
-        const max_y = this.max[1];
-        const max_z = this.max[2];
+        const min_x = grid.min[0];
+        const min_y = grid.min[1];
+        const min_z = grid.min[2];
+        const max_x = grid.max[0];
+        const max_y = grid.max[1];
+        const max_z = grid.max[2];
 
         //todo: can exit earlier if test coordinates one by one
         const tx0 = get_t(dx > 0 ? min_x : max_x, ox, dx, -Infinity);
@@ -108,9 +120,9 @@ export class ZXGrid extends Hittable {
         const z_inc = Math.sign(dz) * cell_size;
         const x_inc = Math.sign(dx) * cell_size;
         while (current_t < t_exit) {
-            const obj = this.cells[p];
+            const obj = grid.cells[p];
             if (obj !== null) {// try to hit the object in the cell
-                if (obj.hit(r, t_min, t_max, hit)) {
+                if (hittable_types[obj.type].hit(obj, r, t_min, t_max, hit)) {
                     return true;
                 }
             }
@@ -128,10 +140,11 @@ export class ZXGrid extends Hittable {
             }
         }
         return false;
-    }
+    },
 
-    get_bounding_box(time0: number, time1: number, aabb: AABB): void {
-        aabb.min.set(this.aabb.min);
-        aabb.max.set(this.aabb.max);
+    get_bounding_box(hittable, time0: number, time1: number, aabb: AABB): void {
+        const grid = hittable as IZXGrid;
+        aabb.min.set(grid.aabb.min);
+        aabb.max.set(grid.aabb.max);
     }
-}
+});

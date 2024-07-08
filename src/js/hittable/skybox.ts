@@ -1,8 +1,8 @@
-import { HitRecord, Hittable } from './hittable';
+import { Hittable, create_hittable_type, HitRecord, hittable_types } from './hittable';
 import { Ray, ray_at_r } from '../math/ray';
 import { MegaMaterial } from '../materials/megamaterial';
 import { negate_vec3_r, unit_vec3, Vec3 } from '../math/vec3.gen';
-import { AABB } from './aabb';
+import { AABB } from '../math/aabb';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';
 import { PixelsData } from '../texture/image-parsers/types';
@@ -11,39 +11,24 @@ import { create_image_based_importance_sampler } from '../texture/image-based-im
 import { ImageTexture } from '../texture/image_texture';
 import { GLWrappingMode } from '../gltf_loader/gl_types';
 
-export class Skybox extends Hittable {
-    static create_white(): Skybox {
-        return new Skybox(create_diffuse_light(solid_color(1, 1, 1)), new SpherePDF())
-    }
-
-    static create_black(): Skybox {
-        return new Skybox(create_diffuse_light(solid_color(0, 0, 0)), new SpherePDF())
-    }
-
-    static create_solid(r: number, g: number, b: number): Skybox {
-        return new Skybox(create_diffuse_light(solid_color(r, g, b)), new SpherePDF())
-    }
-
-    static create_hdr(image: PixelsData): Skybox {
-        return new Skybox(create_diffuse_light(new ImageTexture(image, {
-            filter: true,
-            wrap_s: GLWrappingMode.REPEAT,
-            wrap_t: GLWrappingMode.MIRRORED_REPEAT,
-            flip_y: true
-        })), create_image_based_importance_sampler(image));
-    }
-
+export interface ISkybox extends Hittable {
+    type: 'skybox';
     material: MegaMaterial;
     pdf: PDF;
+}
 
-    // assuming diffuse_light
-    constructor(material: MegaMaterial, pdf: PDF) {
-        super();
-        this.material = material;
-        this.pdf = pdf;
+export const create_skybox = (material: MegaMaterial, pdf: PDF): ISkybox => {
+    return {
+        type: 'skybox',
+        // assuming diffuse_light
+        material,
+        pdf
     }
+};
 
-    hit(r: Ray, _t_min: number, t_max: number, hit: HitRecord): boolean {
+hittable_types.skybox = create_hittable_type({
+    hit(hittable, r: Ray, _t_min: number, t_max: number, hit: HitRecord): boolean {
+        const skybox = hittable as ISkybox;
         const unit_dir = unit_vec3(r.direction);
 
         const x = unit_dir[0];
@@ -56,24 +41,50 @@ export class Skybox extends Hittable {
         hit.u = (phi / Math.PI + 1) / 2;
         hit.v = theta / Math.PI;
         hit.t = t_max;
-        hit.material = this.material;
+        hit.material = skybox.material;
         negate_vec3_r(hit.normal, unit_dir);
         ray_at_r(hit.p, r, t_max);
         hit.front_face = true;
 
         return true;
-    }
+    },
 
-    get_bounding_box(time0: number, time1: number, aabb: AABB) {
+    get_bounding_box(hittable, time0: number, time1: number, aabb: AABB) {
+        const skybox = hittable as ISkybox;
         aabb.min.fill(-Infinity);
         aabb.max.fill(Infinity);
+    },
+
+    random(hittable, _origin: Vec3): Vec3 {
+        const skybox = hittable as ISkybox;
+        return skybox.pdf.generate();
+    },
+
+    pdf_value(hittable, _origin: Vec3, direction: Vec3): number {
+        const skybox = hittable as ISkybox;
+        return skybox.pdf.value(direction);
+    }
+})
+
+export class Skybox {
+    static create_white(): ISkybox {
+        return create_skybox(create_diffuse_light(solid_color(1, 1, 1)), new SpherePDF())
     }
 
-    random(_origin: Vec3): Vec3 {
-        return this.pdf.generate();
+    static create_black(): ISkybox {
+        return create_skybox(create_diffuse_light(solid_color(0, 0, 0)), new SpherePDF())
     }
 
-    pdf_value(_origin: Vec3, direction: Vec3): number {
-        return this.pdf.value(direction);
+    static create_solid(r: number, g: number, b: number): ISkybox {
+        return create_skybox(create_diffuse_light(solid_color(r, g, b)), new SpherePDF())
+    }
+
+    static create_hdr(image: PixelsData): ISkybox {
+        return create_skybox(create_diffuse_light(new ImageTexture(image, {
+            filter: true,
+            wrap_s: GLWrappingMode.REPEAT,
+            wrap_t: GLWrappingMode.MIRRORED_REPEAT,
+            flip_y: true
+        })), create_image_based_importance_sampler(image));
     }
 }

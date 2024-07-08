@@ -1,4 +1,3 @@
-import { Hittable } from '../hittable/hittable';
 import {
     add_vec3, ArenaVec3Allocator,
     color, len_vec3,
@@ -7,11 +6,7 @@ import {
 } from '../math/vec3.gen';
 import { Checker3DTexture } from '../texture/checker_3d_texture';
 import { solid_color, SolidColor } from '../texture/solid_color';
-import { Sphere } from '../hittable/sphere';
 import { get_predefined_random, random, random_min_max, use_random } from '../math/random';
-import { MovingSphere } from '../hittable/moving_sphere';
-import { ZXGrid } from '../hittable/zx-grid';
-import { BVHNode } from '../hittable/bvh';
 import { Camera } from '../camera';
 import { create_scene, Scene } from './scene';
 import { create_lambertian } from '../materials/lambertian';
@@ -20,6 +15,11 @@ import { create_dielectric } from '../materials/dielectric';
 import { MegaMaterial } from '../materials/megamaterial';
 import { run_with_hooks } from '../utils';
 import { Skybox } from '../hittable/skybox';
+import { Hittable } from '../hittable/hittable';
+import { create_sphere } from '../hittable/sphere';
+import { create_moving_sphere } from '../hittable/moving_sphere';
+import { create_zx_grid, zx_grid_add_hittable } from '../hittable/zx-grid';
+import { create_bvh_node } from '../hittable/bvh';
 
 function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittable {
     const rng = get_predefined_random(scene_creation_random_numbers);
@@ -28,7 +28,7 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
         use_vec3_allocator(new ArenaVec3Allocator(1024 * 1024))
         const world_objects: Hittable[] = [];
         const ground_material = create_lambertian(new Checker3DTexture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9)));
-        world_objects.push(new Sphere(point3(0, -1000, 0), 1000, ground_material));
+        world_objects.push(create_sphere(point3(0, -1000, 0), 1000, ground_material));
         const objects = [];
         for (let a = -11; a < 11; a++) {
             for (let b = -11; b < 11; b++) {
@@ -47,13 +47,13 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
                     objects.push({
                         xCell: a + 11,
                         zCell: b + 11,
-                        obj: new MovingSphere(center1, center2, 0, 1, 0.2, sphere_mat)
+                        obj: create_moving_sphere(center1, center2, 0, 1, 0.2, sphere_mat)
                     });
                 }
             }
         }
-        const grid = new ZXGrid(22, 22, 0.9, 1, vec3(-11, 0, -11));
-        for (const obj of objects) { grid.addHittable(obj.xCell, obj.zCell, obj.obj); }
+        const grid = create_zx_grid(22, 22, 0.9, 1, vec3(-11, 0, -11));
+        for (const obj of objects) { zx_grid_add_hittable(grid, obj.xCell, obj.zCell, obj.obj); }
         world_objects.push(grid);
 
         // const bvh = new BVHNode(objects.map(o => o.obj), 0, 1);
@@ -66,11 +66,11 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
         const mat2 = create_lambertian(new SolidColor(color(0.4, 0.2, 0.1)));
         const mat3 = create_metal(new SolidColor(color(0.7, 0.6, 0.5)), 0.0);
 
-        world_objects.push(new Sphere(point3(0, 1, 0), 1.0, mat1));
-        world_objects.push(new Sphere(point3(-4, 1, 0), 1.0, mat2));
-        world_objects.push(new Sphere(point3(4, 1, 0), 1.0, mat3));
+        world_objects.push(create_sphere(point3(0, 1, 0), 1.0, mat1));
+        world_objects.push(create_sphere(point3(-4, 1, 0), 1.0, mat2));
+        world_objects.push(create_sphere(point3(4, 1, 0), 1.0, mat3));
 
-        return new BVHNode(world_objects, 0, 1);
+        return create_bvh_node(world_objects, 0, 1);
         // return new HittableList(world_objects);
     });
 }

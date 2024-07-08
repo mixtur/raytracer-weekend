@@ -1,6 +1,6 @@
 import { ray_dirty, Ray, ray_set } from './math/ray';
-import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r, vec3, } from './math/vec3.gen';
-import { create_empty_hit_record, HitRecord, Hittable } from './hittable/hittable';
+import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r } from './math/vec3.gen';
+import { Hittable, create_empty_hit_record, HitRecord, hittable_types } from './hittable/hittable';
 import { BounceRecord, create_bounce_record } from './materials/megamaterial';
 import { HittablePDF, MixturePDF } from './math/pdf';
 
@@ -25,8 +25,8 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
     if (depth <= 0) {
         return color(0, 0, 0);
     }
-    if (!world.hit(r, 0.0001, Infinity, hit)) {
-        if (!background.hit(r, 0.0001, Infinity, hit)) {
+    if (!hittable_types[world.type].hit(world, r, 0.0001, Infinity, hit)) {
+        if (!hittable_types[background.type].hit(background, r, 0.0001, Infinity, hit)) {
             return color(0, 0, 0);
         }
     }
@@ -67,7 +67,7 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
     const total_emission = color(0, 0, 0);
     const total_attenuation = color(1, 1, 1);
     for (let i = 0; i < depth; i++) {
-        if (!world.hit(r, 0.0001, Infinity, hit) && !background.hit(r, 0.0001, Infinity, hit)) {
+        if (!hittable_types[world.type].hit(world, r, 0.0001, Infinity, hit) && !hittable_types[background.type].hit(background, r, 0.0001, Infinity, hit)) {
             fma_vec3_r(total_emission, total_attenuation, color(0, 0, 0), total_emission);
             break;
         }

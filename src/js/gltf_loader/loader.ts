@@ -1,17 +1,12 @@
-import { Hittable } from '../hittable/hittable';
 import { GLTF2 } from './gltf_spec';
 import { GLDataType, GLPrimitiveMode, GLTextureFilter } from './gl_types';
 import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
 import {
-    ConstantNormal,
-    InterpolatedNormal,
-    NormalMap,
-    Triangle,
+    create_constant_normal, create_interpolated_normal, create_normal_map, create_triangle,
     TriangleVec2,
     TriangleVec3
 } from '../hittable/triangle';
-import { BVHNode } from '../hittable/bvh';
 import {
     ArenaMat3x4Allocator,
     mat3x4,
@@ -24,13 +19,15 @@ import {
 } from '../math/mat3.gen';
 import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec3.gen';
 import { quat } from '../math/quat.gen';
-import { HittableList } from '../hittable/hittable_list';
-import { Transform } from '../hittable/transform';
 import { run_with_hooks } from '../utils';
 import { create_burley_pbr_separate } from '../materials/pbr/burley-pbr-separate';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Texture } from '../texture/texture';
 import { ImageTexture } from '../texture/image_texture';
+import { Hittable } from '../hittable/hittable';
+import { create_bvh_node } from '../hittable/bvh';
+import { create_transform } from '../hittable/transform';
+import { create_hittable_list } from '../hittable/hittable_list';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -206,12 +203,12 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             const material = p.material === undefined ? default_material : materials[p.material];
             const get_normal_strategy = (positions: TriangleVec3, vertex_normals: TriangleVec3 | null, vertex_tangents: TriangleVec3 | null, tangents_ws: Vec3 | null, uvs: TriangleVec2 | null, normal_map: Texture | null) => {
                 if (!vertex_normals) {
-                    return new ConstantNormal(positions);
+                    return create_constant_normal(positions);
                 }
                 if (!vertex_tangents || !tangents_ws || !uvs || !normal_map) {
-                    return new InterpolatedNormal(vertex_normals);
+                    return create_interpolated_normal(vertex_normals);
                 }
-                return new NormalMap(vertex_normals, vertex_tangents, tangents_ws, uvs, normal_map);
+                return create_normal_map(vertex_normals, vertex_tangents, tangents_ws, uvs, normal_map);
             }
 
             if (material.normal_map !== null) {
@@ -236,10 +233,10 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 ]);
 
                 const normal_strategy = get_normal_strategy(vertex_positions, vertex_normals, vertex_tangents, vertex_tangents_ws, uv_channels[0] ?? null, material.normal_map);
-                triangles.push(new Triangle(vertex_positions, normal_strategy, uv_channels, material));
+                triangles.push(create_triangle(vertex_positions, normal_strategy, uv_channels, material));
             }
 
-            return new BVHNode(triangles, 0, 0);
+            return create_bvh_node(triangles, 0, 0);
         };
 
         const meshes = (gltf.meshes ?? []).map(m => {
@@ -286,7 +283,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             const collect_hittables = (n: Node, parent_matrix: Mat3x4) => {
                 const child_matrix = mul_mat3x4(parent_matrix, n.matrix);
                 if (n.mesh !== null) {
-                    hittables.push(new Transform(child_matrix, new HittableList(n.mesh)));
+                    hittables.push(create_transform(child_matrix, create_hittable_list(n.mesh)));
                 }
                 for (const child of n.children) {
                     collect_hittables(child, child_matrix);
@@ -295,7 +292,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
 
             (s.nodes ?? []).forEach((n_index) => collect_hittables(nodes[n_index], mat3x4(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)));
 
-            return new BVHNode(hittables, 0, 1);
+            return create_bvh_node(hittables, 0, 1);
         });
 
         return scenes[0];

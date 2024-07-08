@@ -1,6 +1,6 @@
 import { Ray } from "../math/ray";
-import { dot_vec3, point3, Point3, vec3, Vec3, vec3_dirty } from '../math/vec3.gen';
-import { AABB } from './aabb';
+import { dot_vec3, point3, Point3, vec3, Vec3 } from '../math/vec3.gen';
+import { AABB } from '../math/aabb';
 import { create_mega_material, MegaMaterial } from '../materials/megamaterial';
 import { TriangleVec2 } from './triangle';
 
@@ -46,16 +46,34 @@ export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3, re
     }
 };
 
-
-export abstract class Hittable {
-    abstract hit(r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean;
-    abstract get_bounding_box(time0: number, time1: number, aabb: AABB): void;
-
-    pdf_value(origin: Vec3, direction: Vec3): number {
-        return 0;
-    }
-
-    random(origin: Vec3): Vec3 {
-        return vec3(1, 0, 0);
-    }
+// we create POJOs for hittables themselves and register methods in hittable_types,
+// We do it like that because we need an ability to send hittables to workers, and this is a way to force it.
+export interface Hittable {
+    type: string;
 }
+
+export interface HittableType {
+    hit: (hittable: Hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord) => boolean;
+    get_bounding_box: (hittable: Hittable, time0: number, time1: number, aabb: AABB) => void;
+    pdf_value: (hittable: Hittable, origin: Point3, direction: Vec3) => number;
+    random: (hittable: Hittable, origin: Point3) => Vec3;
+}
+
+export interface HittableTypeConfig {
+    hit: (hittable: Hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord) => boolean;
+    get_bounding_box: (hittable: Hittable, time0: number, time1: number, aabb: AABB) => void;
+    pdf_value?: (hittable: Hittable, origin: Point3, direction: Vec3) => number;
+    random?: (hittable: Hittable, origin: Point3) => Vec3;
+}
+
+// note: we don't want to create wrapping functions for hit, get_bounding_box etc. because that would screw up ICs.
+export const hittable_types: Record<string, HittableType> = {};
+
+export const create_hittable_type = (config: HittableTypeConfig): HittableType => {
+    return {
+        hit: config.hit,
+        get_bounding_box: config.get_bounding_box,
+        pdf_value: config.pdf_value ?? (() => 0),
+        random: config.random ?? (() => vec3(1, 0, 0))
+    };
+};
