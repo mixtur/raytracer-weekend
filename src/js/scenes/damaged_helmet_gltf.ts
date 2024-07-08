@@ -1,7 +1,7 @@
 import { load_gltf } from '../gltf_loader/loader';
 import { create_scene, Scene } from './scene';
 import { point3, vec3 } from '../math/vec3.gen';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { load_rgbe } from '../texture/image-parsers/rgbe_image_parser';
 import { Skybox } from '../hittable/skybox';
 
@@ -12,7 +12,7 @@ export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
 
     return create_scene({
         // light: skybox,
-        camera: new Camera({
+        camera: create_camera({
             look_from: point3(3, -1, 3),
             look_at: point3(0, 0, 0),
             v_up: vec3(0, 1, 0),

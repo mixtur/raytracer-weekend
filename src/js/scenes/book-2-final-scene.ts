@@ -8,9 +8,9 @@ import {
     vec3
 } from '../math/vec3.gen';
 import { solid_color } from '../texture/solid_color';
-import { get_predefined_random, random_min_max, use_random } from '../math/random';
+import { random_min_max } from '../math/random';
 import earthUrl from './earthmap.jpg';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_dielectric } from '../materials/dielectric';
 import { create_metal } from '../materials/metal';
@@ -34,9 +34,8 @@ import { create_bvh_node } from '../hittable/bvh';
 import { create_image_texture } from '../texture/image_texture';
 import { create_noise_texture } from '../texture/noise_texture';
 
-export const book2_final_scene = async (scene_creation_random_numbers: number[]): Promise<Scene> => {
+export const book2_final_scene = async (): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
-        use_random(get_predefined_random(scene_creation_random_numbers));
         use_vec3_allocator(new ArenaVec3Allocator(1024 * 6));
 
         const objects = create_hittable_list([]);
@@ -108,7 +107,7 @@ export const book2_final_scene = async (scene_creation_random_numbers: number[])
                 light_hittable,
                 subsurface_scattering_sphere
             ]),
-            camera: new Camera({
+            camera: create_camera({
                 look_from: point3(478, 278, -600),
                 look_at: point3(278, 278, 0),
                 v_up: vec3(0, 1, 0),

@@ -4,6 +4,15 @@ import { multi_threaded_render } from './multi_threaded_render';
 import { generate_random_permutation_u16, generate_straight_order_u16 } from './utils';
 import { ConsoleProgressReporter, MultipleReporters, ProgressBar, ProgressText } from './progress-reporters';
 import { ACES, apply_gamma, clip_to_unit_range, compose_tone_mappers, expose } from './output/tone-mappers';
+import { create_earth_scene } from './scenes/earth';
+import { book1_final_scene } from './scenes/book-1-final-scene';
+import { simple_light } from './scenes/simple_light';
+import { cornell_box_matrix } from './scenes/cornell_box_matrix';
+import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
+import { book2_final_scene } from './scenes/book-2-final-scene';
+import { load_simple_gltf } from './scenes/simple_gltf';
+import { load_damaged_helmet_gltf } from './scenes/damaged_helmet_gltf';
+import { two_spheres } from './scenes/two_spheres';
 
 const aspect_ratio = 1;
 const image_width = 840;
@@ -21,6 +30,18 @@ const tone_mapper = compose_tone_mappers([
     ACES,
     apply_gamma(1 / 2.2),
 ]);
+
+// const scene = lots_of_spheres;
+// const scene = two_spheres;
+// const scene = await create_earth_scene();
+// const scene = book1_final_scene();
+// const scene = simple_light;
+// const scene = cornell_box_matrix;
+// const scene = cornell_box_with_smoke;
+// const scene = await book2_final_scene();
+// const scene = await load_simple_gltf();
+const scene = await load_damaged_helmet_gltf();
+
 
 const writer = create_canvas_color_writer(document.getElementById('right-panel') as HTMLDivElement, image_width, image_height);
 // const writer = create_array_writer(image_width, image_height, default_tone_mapper, (array) => {
@@ -45,6 +66,7 @@ multi_threaded_render({
         image_height,
         samples_per_pixel,
         max_depth,
+        scene,
         // line_order: generate_straight_order_u16(image_height)
         line_order: generate_random_permutation_u16(image_height),
     },

@@ -1,5 +1,5 @@
 import { create_scene, Scene } from './scene';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { solid_color } from '../texture/solid_color';
 import { ArenaVec3Allocator, point3, use_vec3_allocator, vec3 } from '../math/vec3.gen';
 import { create_lambertian } from '../materials/lambertian';
@@ -71,7 +71,7 @@ const hittables = run_with_hooks(() => {
 export const cornell_box_matrix: Scene = create_scene({
     root_hittable: hittables.root,
     light: hittables.light,
-    camera: new Camera({
+    camera: create_camera({
         look_from: point3(278, 278, -800),
         look_at: point3(278, 278, 0),
         v_up: vec3(0, 1, 0),

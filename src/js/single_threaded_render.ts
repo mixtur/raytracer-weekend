@@ -1,21 +1,20 @@
 import { RenderParameters } from './types';
-import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
-import { book2_final_scene } from './scenes/book-2-final-scene';
-import { two_spheres } from './scenes/two_spheres';
 import { add_vec3_r, ArenaVec3Allocator, color, use_vec3_allocator } from './math/vec3.gen';
-import { ray_color, ray_color_iterative } from './ray_color';
+import { ray_color_iterative } from './ray_color';
 import { ColorWriter } from './output/color-writers';
 import { async_run_with_hooks } from './utils';
 import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { ToneMapper } from './output/tone-mappers';
+import { configure_camera, get_ray } from './camera';
 
 export async function single_threaded_render({
-                                        aspect_ratio,
-                                        image_height,
-                                        image_width,
-                                        samples_per_pixel,
-                                        max_depth
-                                    }: RenderParameters, writer: ColorWriter, tone_mapper: ToneMapper) {
+    aspect_ratio,
+    image_height,
+    image_width,
+    samples_per_pixel,
+    max_depth,
+    scene
+}: RenderParameters, writer: ColorWriter, tone_mapper: ToneMapper) {
     const { write_color, dump_line, dump_image } = writer;
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
@@ -26,15 +25,8 @@ export async function single_threaded_render({
         scene_creation_random_numbers.push(Math.random());
     }
 
-//    const scene = await create_earth_scene();
-//    const scene = lots_of_spheres;
-//    const scene = simple_light;
-//    const scene = cornell_box;
-    const scene = cornell_box_with_smoke;
-//    const scene = await book2_final_scene(scene_creation_random_numbers);
-//    const scene = two_spheres;
     const cam = scene.camera;
-    cam.configure(aspect_ratio);
+    configure_camera(cam, aspect_ratio);
 
     await async_run_with_hooks(async () => {
         const vec3_allocator = new ArenaVec3Allocator(8192);
@@ -60,7 +52,7 @@ export async function single_threaded_render({
                         const u = (i + su) / (image_width - 1);
                         const v = (j + sv) / (image_height - 1);
 
-                        const r = cam.get_ray(u, v);
+                        const r = get_ray(cam, u, v);
                         add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
@@ -72,7 +64,7 @@ export async function single_threaded_render({
                     const u = (i + Math.random()) / (image_width - 1);
                     const v = (j + Math.random()) / (image_height - 1);
 
-                    const r = cam.get_ray(u, v);
+                    const r = get_ray(cam, u, v);
                     add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
                 write_color(x, y, pixel_color, samples_per_pixel, tone_mapper);

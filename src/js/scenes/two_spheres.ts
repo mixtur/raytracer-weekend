@@ -1,6 +1,6 @@
 import { create_scene, Scene } from './scene';
 import { point3, vec3 } from '../math/vec3.gen';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { Hittable } from '../hittable/hittable';
 import { solid_color } from '../texture/solid_color';
 import { create_lambertian } from '../materials/lambertian';
@@ -20,7 +20,7 @@ const create_two_spheres = (): Hittable => {
 export const two_spheres: Scene = create_scene({
     root_hittable: create_two_spheres(),
 
-    camera: new Camera({
+    camera: create_camera({
         look_from: point3(13, 2, 3),
         look_at: point3(0, 0, 0),
         v_up: vec3(0, 1, 0),

@@ -1,4 +1,4 @@
-import { Camera } from '../camera';
+import { Camera, create_camera } from '../camera';
 import { point3, vec3 } from '../math/vec3.gen';
 import { Skybox } from '../hittable/skybox';
 import { Hittable } from '../hittable/hittable';
@@ -15,7 +15,7 @@ export const create_scene = (config: Partial<Scene>): Scene => {
     return {
         root_hittable: config.root_hittable ?? create_hittable_list([]),
         light: config.light ?? null,
-        camera: config.camera ?? new Camera({
+        camera: config.camera ?? create_camera({
             look_from: point3(13, 2, 3),
             look_at: point3(0, 0, 0),
             v_up: vec3(0, 1, 0),

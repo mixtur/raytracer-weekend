@@ -6,8 +6,8 @@ import {
 } from '../math/vec3.gen';
 import { create_checker_3d_texture } from '../texture/checker_3d_texture';
 import { solid_color, create_solid_color } from '../texture/solid_color';
-import { get_predefined_random, random, random_min_max, use_random } from '../math/random';
-import { Camera } from '../camera';
+import { random, random_min_max } from '../math/random';
+import { create_camera } from '../camera';
 import { create_scene, Scene } from './scene';
 import { create_lambertian } from '../materials/lambertian';
 import { create_metal } from '../materials/metal';
@@ -21,10 +21,8 @@ import { create_moving_sphere } from '../hittable/moving_sphere';
 import { create_zx_grid, zx_grid_add_hittable } from '../hittable/zx-grid';
 import { create_bvh_node } from '../hittable/bvh';
 
-function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittable {
-    const rng = get_predefined_random(scene_creation_random_numbers);
+function create_lots_of_spheres(): Hittable {
     return run_with_hooks(() => {
-        use_random(rng);
         use_vec3_allocator(new ArenaVec3Allocator(1024 * 1024))
         const world_objects: Hittable[] = [];
         const ground_material = create_lambertian(create_checker_3d_texture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9)));
@@ -75,8 +73,8 @@ function create_lots_of_spheres(scene_creation_random_numbers: number[]): Hittab
     });
 }
 
-export const book1_final_scene = (scene_creation_random_numbers: number[]): Scene => create_scene({
-    camera: new Camera({
+export const book1_final_scene = (): Scene => create_scene({
+    camera: create_camera({
         look_from: point3(13, 2, 3),
         look_at: point3(0, 0, 0),
         v_up: vec3(0, 1, 0),
@@ -86,6 +84,6 @@ export const book1_final_scene = (scene_creation_random_numbers: number[]): Scen
         time0: 0,
         time1: 1
     }),
-    root_hittable: create_lots_of_spheres(scene_creation_random_numbers),
+    root_hittable: create_lots_of_spheres(),
     background: Skybox.create_solid(0.7, 0.8, 1.0)
 });

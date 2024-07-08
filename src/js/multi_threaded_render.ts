@@ -20,7 +20,8 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
         samples_per_pixel: total_samples_per_pixel,
         aspect_ratio,
         max_depth,
-        line_order
+        line_order,
+        scene
     } = render_parameters;
 
     thread_count = Math.min(thread_count, total_samples_per_pixel);
@@ -52,7 +53,8 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
             max_depth,
             scene_creation_random_numbers,
             first_line_index: Math.floor(i / thread_count * image_height),
-            line_order
+            line_order,
+            scene
         } as RenderWorkerParametersMessage);
 
         const tmp_color = color(0, 0, 0);

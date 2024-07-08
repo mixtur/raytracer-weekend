@@ -1,5 +1,5 @@
 import { create_scene, Scene } from './scene';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { point3, vec3 } from '../math/vec3.gen';
 import { create_noise_texture } from '../texture/noise_texture';
 import { solid_color } from '../texture/solid_color';
@@ -25,7 +25,7 @@ export const simple_light: Scene = create_scene({
         light1,
         light2
     ]),
-    camera: new Camera({
+    camera: create_camera({
         look_from: point3(26, 3, 6),
         look_at: point3(0, 2, 0),
         v_up: vec3(0, 1, 0),

@@ -1,17 +1,12 @@
 import { add_vec3_r, ArenaVec3Allocator, use_vec3_allocator } from './math/vec3.gen';
-import { ray_color, ray_color_iterative } from './ray_color';
+import { ray_color } from './ray_color';
 import { RenderWorkerParametersMessage } from './types';
-import { cornell_box_with_smoke } from './scenes/cornell_box_with_smoke';
-import { book2_final_scene } from './scenes/book-2-final-scene';
-import { simple_light } from './scenes/simple_light';
-import { book1_final_scene } from './scenes/book-1-final-scene';
-import { create_earth_scene } from './scenes/earth';
 import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { run_with_hooks } from './utils';
-import { cornell_box_matrix } from './scenes/cornell_box_matrix';
-import { load_gltf } from './gltf_loader/loader';
-import { load_simple_gltf } from './scenes/simple_gltf';
-import { load_damaged_helmet_gltf } from './scenes/damaged_helmet_gltf';
+import { configure_camera, get_ray } from './camera';
+
+import './hittable';
+import './materials';
 
 export interface RenderWorkerMessageData {
     y: number;
@@ -24,35 +19,24 @@ onmessage = (ev: MessageEvent<RenderWorkerParametersMessage>) => {
     render(ev.data);
 };
 
-async function render({
-                          aspect_ratio,
-                          image_height,
-                          image_width,
-                          samples_per_pixel,
-                          max_depth,
-                          line_order,
-                          first_line_index,
-                          scene_creation_random_numbers
-                      }: RenderWorkerParametersMessage): Promise<void> {
+function render(
+    {
+      aspect_ratio,
+      image_height,
+      image_width,
+      samples_per_pixel,
+      max_depth,
+      line_order,
+      first_line_index,
+      scene
+  }: RenderWorkerParametersMessage
+): void {
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
     const stratification_grid_step = 1 / stratification_grid_size;
 
-    // const scene_creation_random_numbers = [];
-    // for (let i = 0; i < 2048; i++) {
-    //     scene_creation_random_numbers.push(Math.random());
-    // }
-
-    // const scene = await create_earth_scene();
-    // const scene = book1_final_scene(scene_creation_random_numbers);
-    // const scene = simple_light;
-    // const scene = cornell_box_matrix;
-    // const scene = cornell_box_with_smoke;
-    // const scene = await book2_final_scene(scene_creation_random_numbers);
-    // const scene = await load_simple_gltf();
-    const scene = await load_damaged_helmet_gltf();
     const cam = scene.camera;
-    cam.configure(aspect_ratio);
+    configure_camera(cam, aspect_ratio);
 
     const local_order = line_order.map((x, i) => line_order[(i + first_line_index) % image_height]);
 
@@ -80,7 +64,7 @@ async function render({
                         const u = (i + su) / (image_width - 1);
                         const v = (j + sv) / (image_height - 1);
 
-                        const r = cam.get_ray(u, v);
+                        const r = get_ray(cam, u, v);
                         add_vec3_r(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                     }
                 }
@@ -92,7 +76,7 @@ async function render({
                     const u = (i + Math.random()) / (image_width - 1);
                     const v = (j + Math.random()) / (image_height - 1);
 
-                    const r = cam.get_ray(u, v);
+                    const r = get_ray(cam, u, v);
                     add_vec3_r(pixel_color, pixel_color, ray_color(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
             }

@@ -1,7 +1,7 @@
 import { create_noise_texture } from '../texture/noise_texture';
 import { point3, vec3 } from '../math/vec3.gen';
 import { create_scene, Scene } from './scene';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { create_lambertian } from '../materials/lambertian';
 import { Skybox } from '../hittable/skybox';
 import { create_hittable_list } from '../hittable/hittable_list';
@@ -15,7 +15,7 @@ export const two_perlin_spheres: Scene = create_scene({
         create_sphere(point3(0, 2, 0), 2, create_lambertian(pertext))
     ]),
 
-    camera: new Camera({
+    camera: create_camera({
         look_from: point3(13, 2, 3),
         look_at: point3(0, 0, 0),
         v_up: vec3(0, 1, 0),

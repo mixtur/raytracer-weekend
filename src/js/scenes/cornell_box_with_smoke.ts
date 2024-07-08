@@ -1,5 +1,5 @@
 import { create_scene, Scene } from './scene';
-import { Camera } from '../camera';
+import { create_camera } from '../camera';
 import { solid_color } from '../texture/solid_color';
 import { point3, vec3 } from '../math/vec3.gen';
 import { create_diffuse_light } from '../materials/diffuse_light';
@@ -60,7 +60,7 @@ export const cornell_box_with_smoke: Scene = create_scene({
 
     light: light_hittable,
 
-    camera: new Camera({
+    camera: create_camera({
         look_from: point3(278, 278, -800),
         look_at: point3(278, 278, 0),
         v_up: vec3(0, 1, 0),
