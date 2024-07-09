@@ -80,14 +80,11 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
 
                 if (event_count === image_height) {
                     progress_reporter.report_thread_done(i);
+                    worker.terminate();
                     resolve();
                 }
             };
         }));
-    }
-
-    for (const p of promises) {
-        await p;
     }
 
     const total_time_ms = performance.now() - t0;

@@ -15,7 +15,8 @@ export const load_dom_image = async (url: string): Promise<PixelsData> => {
     ctx.drawImage(image_bitmap, 0, 0);
     const image_data = ctx.getImageData(0, 0, tmp_canvas.width, tmp_canvas.height);
 
-    const pixels = new Uint8Array(image_data.data.buffer);
+    const pixels = new Uint8Array(new SharedArrayBuffer(image_data.data.buffer.byteLength));
+    pixels.set(image_data.data);
 
     return {
         width: image_data.width,

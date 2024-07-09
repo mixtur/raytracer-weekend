@@ -50,7 +50,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
     ]);
 
     return run_with_hooks(() => {
-        use_vec3_allocator(new ArenaVec3Allocator(vec3_arena_size));
+        use_vec3_allocator(new ArenaVec3Allocator(vec3_arena_size, true));
         use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size));
 
         const buffer_views = (gltf.bufferViews ?? []).map(b => {

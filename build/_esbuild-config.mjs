@@ -16,6 +16,7 @@ export const get_esbuild_config = (outdir, prod) => {
         entryPoints: {
             index: project_path('src/js/index.ts'),
             render_worker: project_path('src/js/render_worker.ts'),
+            coi: project_path('src/js/coi-service-worker.js')
         },
         bundle: true,
         sourcemap: dev,

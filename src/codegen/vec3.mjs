@@ -15,8 +15,9 @@ export class ArenaVec3Allocator {
     nextToAlloc: number = 0;
     dump: Float64Array;
     vectors: Float64Array[] = [];
-    constructor(max_vectors: number) {
+    constructor(max_vectors: number, shared = false) {
         const vector_byte_length = Float64Array.BYTES_PER_ELEMENT * 3;
+        const buffer_type = shared ? SharedArrayBuffer : ArrayBuffer;
         const buffer = new ArrayBuffer(max_vectors * vector_byte_length);
         this.dump = new Float64Array(buffer);
         for (let i = 0; i < max_vectors; i++) {

@@ -113,7 +113,8 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
     function _parse(luminance: number, buffer: Uint8Array): PixelsData {
         const { width, height, end } = _read_header(buffer);
 
-        const buffer_f32 = new Float32Array(width * height * 4);
+        const array_buffer = new SharedArrayBuffer(width * height * 4 * Float32Array.BYTES_PER_ELEMENT);
+        const buffer_f32 = new Float32Array(array_buffer);
 
         const sub_buffer = buffer.subarray(end);
 
