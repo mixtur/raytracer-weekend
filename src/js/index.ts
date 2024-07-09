@@ -38,7 +38,7 @@ const writer = create_canvas_color_writer(document.getElementById('right-panel')
 // });
 
 const thread_count = globalThis?.navigator?.hardwareConcurrency
-    ? Math.max(1, Math.floor(globalThis?.navigator?.hardwareConcurrency / 2))
+    ? globalThis?.navigator?.hardwareConcurrency - 1
     : 4;
 
 const progress_reporter = new MultipleReporters([

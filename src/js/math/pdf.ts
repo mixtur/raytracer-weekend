@@ -1,4 +1,3 @@
-// Probability Distribution Function
 import {
     add_vec3,
     dot_vec3, rand_vec3_cosine_unit,
@@ -7,6 +6,7 @@ import {
     Vec3, vec3_dirty
 } from './vec3.gen';
 import {
+    invert_quat,
     invert_quat_r,
     mul_quat_vec3,
     mul_quat_vec3_r,
@@ -25,6 +25,9 @@ export interface PDFType {
     value: (pdf: PDF, direction: Vec3) => number;
     generate: (pdf: PDF) => Vec3;
 }
+
+const tmp_quat = quat_dirty()
+const tmp_vec3 = vec3_dirty();
 
 export const pdf_types: Record<string, PDFType> = {};
 
@@ -77,14 +80,14 @@ export interface ICosinePDF extends PDF {
 export const create_cosine_pdf = (): ICosinePDF => {
     return {
         type: 'cosine',
-        quat: quat_dirty(),
-        lobe_direction: vec3_dirty()
+        quat: tmp_quat,
+        lobe_direction: tmp_quat
     };
 };
 
 export const cosine_pdf_set_direction = (pdf: ICosinePDF, lobe_direction: Vec3) => {
-    newz_to_quat_r(pdf.quat, lobe_direction);
-    unit_vec3_r(pdf.lobe_direction, lobe_direction);
+    pdf.quat = newz_to_quat(lobe_direction);
+    pdf.lobe_direction = unit_vec3(lobe_direction);
 };
 
 pdf_types.cosine = {
@@ -166,10 +169,10 @@ export interface IReflectionPDF<T extends string> extends PDF {
 export const create_partial_reflection_pdf = <T extends string>(type_name: T): IReflectionPDF<T> => {
     return {
         type: type_name,
-        quat: quat_dirty(),
-        inv_quat: quat_dirty(),
-        unit_view: vec3_dirty(),
-        unit_normal: vec3_dirty()
+        quat: tmp_quat,
+        inv_quat: tmp_quat,
+        unit_view: tmp_vec3,
+        unit_normal: tmp_vec3
     };
 };
 
@@ -211,8 +214,8 @@ export const create_reflection_pdf_type = <T extends string>({generate_h, value_
 //note: anisotropic micro-facet distribution would require tangent, not just normal,
 //      and quaternion would be computed differently (not sure how yet)
 export const setup_reflection_pdf = <T extends string>(pdf: IReflectionPDF<T>, unit_normal: Vec3, unit_view: Vec3): void => {
-    newz_to_quat_r(pdf.quat, unit_normal);
-    pdf.unit_normal.set(unit_normal);
-    invert_quat_r(pdf.inv_quat, pdf.quat);
-    pdf.unit_view.set(unit_view);
+    pdf.quat = newz_to_quat(unit_normal);
+    pdf.unit_normal = unit_normal;
+    pdf.inv_quat = invert_quat(pdf.quat);
+    pdf.unit_view = unit_view;
 };
