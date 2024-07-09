@@ -32,7 +32,7 @@ const tone_mapper = compose_tone_mappers([
 ]);
 
 
-const writer = create_canvas_color_writer(document.getElementById('right-panel') as HTMLDivElement, image_width, image_height);
+const writer = create_canvas_color_writer(document.getElementById('rendering-panel') as HTMLDivElement, image_width, image_height);
 // const writer = create_array_writer(image_width, image_height, default_tone_mapper, (array) => {
 //     console.log(array);
 // });
@@ -44,7 +44,7 @@ const thread_count = globalThis?.navigator?.hardwareConcurrency
 const progress_reporter = new MultipleReporters([
     // new ConsoleProgressReporter(image_height, thread_count),
     new ProgressBar(document.getElementById('top-row') as HTMLDivElement, thread_count, image_height),
-    new ProgressText(document.getElementById('left-panel') as HTMLDivElement)
+    new ProgressText(document.getElementById('statistics-panel') as HTMLDivElement)
 ]);
 
 // const scene = lots_of_spheres;
