@@ -87,6 +87,8 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
         }));
     }
 
+    await Promise.all(promises);
+
     const total_time_ms = performance.now() - t0;
     progress_reporter.report_done(total_rays, total_time_ms);
     dump_image();
