@@ -7,7 +7,7 @@ import { Skybox } from '../hittable/skybox';
 
 export const load_simple_gltf = async (): Promise<Scene> => {
     const scene = await load_gltf('gltf/simple/model.gltf', 102400, 1024);
-    const env = await load_rgbe(20, 'hdr/street.hdr');
+    const env = await load_rgbe(2048, 'hdr/street.hdr');
     const skybox = Skybox.create_hdr(env);
 
     return create_scene({
@@ -23,6 +23,12 @@ export const load_simple_gltf = async (): Promise<Scene> => {
             time1: 1
         }),
         root_hittable: scene,
-        background: skybox
+        background: skybox,
+        exposure_config: {
+            aperture: 16,
+            shutter_speed: 1/10,
+            ISO: 400,
+            exp_comp: 0
+        }
     });
 }

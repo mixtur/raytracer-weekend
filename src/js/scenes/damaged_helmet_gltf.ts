@@ -23,6 +23,12 @@ export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
             time1: 1
         }),
         root_hittable: scene,
-        background: skybox
+        background: skybox,
+        exposure_config: {
+            aperture: 16,
+            shutter_speed: 1/25,
+            ISO: 100,
+            exp_comp: 0
+        }
     });
 }

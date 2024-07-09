@@ -1,17 +1,17 @@
 import {
-    add_vec3_s, add_vec3_s_r,
+    add_vec3_s_r,
     Color, color_dirty,
     div_vec3_r,
-    fma_vec3_s_s, fma_vec3_s_s_r,
-    mul_vec3, mul_vec3_r, mul_vec3_s_r,
+    fma_vec3_s_s_r,
+    mul_vec3_r, mul_vec3_s_r,
     sub_vec3_s_r
-} from '../math/vec3.gen';
-import { clamp } from '../utils';
-import { mat3, mul_mat3_vec3_r, transpose_mat3, transpose_mat3_r } from '../math/mat3.gen';
+} from './math/vec3.gen';
+import { clamp } from './utils';
+import { mat3, mul_mat3_vec3_r, transpose_mat3 } from './math/mat3.gen';
 
-export type ToneMapper = (result: Color, hdr_color: Color) => void;
+export type ColorFlowItem = (result: Color, input_color: Color) => void;
 
-export const compose_tone_mappers = (mappers: ToneMapper[]): ToneMapper => (result, hdr_color) => {
+export const compose_color_flow = (mappers: ColorFlowItem[]): ColorFlowItem => (result, hdr_color) => {
     result.set(hdr_color);
     for (let i = 0; i < mappers.length; i++) {
         const mapper = mappers[i];
@@ -19,26 +19,26 @@ export const compose_tone_mappers = (mappers: ToneMapper[]): ToneMapper => (resu
     }
 }
 
-export const clip_to_unit_range: ToneMapper = (result, hdr_color) => {
+export const clip_to_unit_range: ColorFlowItem = (result, hdr_color) => {
     result[0] = clamp(hdr_color[0], 0, 0.999999);
     result[1] = clamp(hdr_color[1], 0, 0.999999);
     result[2] = clamp(hdr_color[2], 0, 0.999999);
 }
 
-export const apply_gamma = (gamma: number): ToneMapper =>(result, hdr_color) => {
+export const apply_gamma = (gamma: number): ColorFlowItem =>(result, hdr_color) => {
     result[0] = hdr_color[0] ** gamma;
     result[1] = hdr_color[1] ** gamma;
     result[2] = hdr_color[2] ** gamma;
 };
 
-export interface ExposuerConfig {
+export interface ExposureConfig {
     aperture: number;
     shutter_speed: number;
     ISO: number;
     exp_comp: number;
 }
 
-export const expose = ({aperture, shutter_speed, ISO, exp_comp}: ExposuerConfig): ToneMapper => {
+export const expose = ({aperture, shutter_speed, ISO, exp_comp}: ExposureConfig): ColorFlowItem => {
     const EV100 = Math.log2(aperture ** 2 / shutter_speed * 100 / ISO) - exp_comp;
     const max_luminance = 2 ** (EV100 - 3);
     const exposure = 1 / max_luminance;
@@ -49,7 +49,7 @@ export const expose = ({aperture, shutter_speed, ISO, exp_comp}: ExposuerConfig)
 
 
 // https://github.com/TheRealMJP/BakingLab/blob/master/BakingLab/ACES.hlsl
-export const ACES = ((): ToneMapper => {
+export const ACES = ((): ColorFlowItem => {
     // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const ACES_input_mat = transpose_mat3(mat3(

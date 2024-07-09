@@ -1,10 +1,10 @@
 import { RenderParameters } from './types';
 import { add_vec3_r, ArenaVec3Allocator, color, use_vec3_allocator } from './math/vec3.gen';
 import { ray_color_iterative } from './ray_color';
-import { ColorWriter } from './output/color-writers';
+import { ColorWriter } from './ui/color-writers';
 import { async_run_with_hooks } from './utils';
 import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
-import { ToneMapper } from './output/tone-mappers';
+import { ColorFlowItem } from './color-flow';
 import { configure_camera, get_ray } from './camera';
 
 export async function single_threaded_render({
@@ -14,7 +14,7 @@ export async function single_threaded_render({
     samples_per_pixel,
     max_depth,
     scene
-}: RenderParameters, writer: ColorWriter, tone_mapper: ToneMapper) {
+}: RenderParameters, writer: ColorWriter, color_flow: ColorFlowItem) {
     const { write_color, dump_line, dump_image } = writer;
     const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
@@ -67,7 +67,7 @@ export async function single_threaded_render({
                     const r = get_ray(cam, u, v);
                     add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
                 }
-                write_color(x, y, pixel_color, samples_per_pixel, tone_mapper);
+                write_color(x, y, pixel_color, samples_per_pixel, color_flow);
             }
             console.timeEnd(mark);
             await new Promise(resolve => setTimeout(resolve, 0));

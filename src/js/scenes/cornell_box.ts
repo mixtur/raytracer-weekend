@@ -68,7 +68,7 @@ const hittables = run_with_hooks(() => {
     };
 });
 
-export const cornell_box_matrix: Scene = create_scene({
+export const cornell_box: Scene = create_scene({
     root_hittable: hittables.root,
     light: hittables.light,
     camera: create_camera({

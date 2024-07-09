@@ -15,13 +15,13 @@ export interface HitRecord {
     tex_channels: TriangleVec2[];
 }
 
-const dummy_material: MegaMaterial = create_mega_material({
-    type: 'dummy',
-    fuzz: NaN,
-    ior: NaN,
-});
-
 export const create_empty_hit_record = (): HitRecord => {
+    const dummy_material: MegaMaterial = create_mega_material({
+        type: 'dummy',
+        fuzz: NaN,
+        ior: NaN,
+    });
+
     return {
         p: point3(0, 0, 0),
         normal: vec3(0, 0, 0),

@@ -3,12 +3,14 @@ import { point3, vec3 } from '../math/vec3.gen';
 import { Skybox } from '../hittable/skybox';
 import { Hittable } from '../hittable/hittable';
 import { create_hittable_list } from '../hittable/hittable_list';
+import { ExposureConfig } from '../color-flow';
 
 export interface Scene {
     root_hittable: Hittable;
     light: Hittable | null;
     camera: Camera;
     background: Hittable;
+    exposure_config: ExposureConfig;
 }
 
 export const create_scene = (config: Partial<Scene>): Scene => {
@@ -25,6 +27,12 @@ export const create_scene = (config: Partial<Scene>): Scene => {
             time0: 0,
             time1: 1
         }),
-        background: config.background ?? Skybox.create_white()
+        background: config.background ?? Skybox.create_white(),
+        exposure_config: config.exposure_config ?? {
+            aperture: 2,
+            shutter_speed: 1/4,
+            ISO: 100,
+            exp_comp: 0
+        }
     };
 }

@@ -1,10 +1,10 @@
 import { Color, color_dirty, mul_vec3_s_r } from '../math/vec3.gen';
-import { clip_to_unit_range, compose_tone_mappers, apply_gamma, ToneMapper } from './tone-mappers';
+import { ColorFlowItem } from '../color-flow';
 
 export interface ColorWriter {
     dump_line: (y: number) => void;
     dump_image: () => void;
-    write_color: (x: number, y: number, pixelColor: Color, samples_per_pixel: number, tone_mapper: ToneMapper) => void;
+    write_color: (x: number, y: number, pixelColor: Color, samples_per_pixel: number, color_flow: ColorFlowItem) => void;
 }
 
 export const create_canvas_color_writer = (container: HTMLElement, image_width: number, image_height: number): ColorWriter => {
@@ -23,9 +23,9 @@ export const create_canvas_color_writer = (container: HTMLElement, image_width: 
     const output_color = color_dirty();
 
     return {
-        write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number, tone_mapper: ToneMapper): void => {
+        write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number, color_flow: ColorFlowItem): void => {
             mul_vec3_s_r(output_color, pixel_color, 1 / samples_per_pixel);
-            tone_mapper(output_color, output_color);
+            color_flow(output_color, output_color);
             image_data.data[(y * image_data.width + x) * 4 + 0] = 256 * output_color[0];
             image_data.data[(y * image_data.width + x) * 4 + 1] = 256 * output_color[1];
             image_data.data[(y * image_data.width + x) * 4 + 2] = 256 * output_color[2];
@@ -45,9 +45,9 @@ export const create_array_writer = (image_width: number, image_height: number, i
     const output_color = color_dirty();
 
     return {
-        write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number, tone_mapper: ToneMapper): void => {
+        write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number, color_flow: ColorFlowItem): void => {
             mul_vec3_s_r(output_color, pixel_color, 1 / samples_per_pixel);
-            tone_mapper(output_color, output_color);
+            color_flow(output_color, output_color);
             data[(x + y * image_width) * 4 + 0] = 256 * output_color[0];
             data[(x + y * image_width) * 4 + 1] = 256 * output_color[1];
             data[(x + y * image_width) * 4 + 2] = 256 * output_color[2];

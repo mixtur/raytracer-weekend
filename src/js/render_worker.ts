@@ -7,6 +7,7 @@ import { configure_camera, get_ray } from './camera';
 
 import './hittable';
 import './materials';
+import './texture';
 
 export interface RenderWorkerMessageData {
     y: number;

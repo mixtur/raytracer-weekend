@@ -73,7 +73,7 @@ hittable_types.transform = create_hittable_type({
                 i & 4 ? aabb.min[2] : aabb.max[2],
             );
             mul_mat3x4_vec3_r(tmp_point, transform.matrix, tmp_point);
-            union_aabb_point_r(tmp_aabb, aabb, tmp_point);
+            union_aabb_point_r(tmp_aabb, tmp_aabb, tmp_point);
         }
         aabb.min.set(tmp_aabb.min);
         aabb.max.set(tmp_aabb.max);

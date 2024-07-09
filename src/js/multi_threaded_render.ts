@@ -1,19 +1,19 @@
 import { RenderParameters, RenderWorkerParametersMessage } from './types';
-import { ColorWriter } from './output/color-writers';
+import { ColorWriter } from './ui/color-writers';
 import { RenderWorkerMessageData } from './render_worker';
 import { color } from './math/vec3.gen';
 import { ProgressReporter } from './progress-reporters';
-import { ToneMapper } from './output/tone-mappers';
+import { ColorFlowItem } from './color-flow';
 
 export interface MultiThreadedRenderConfig {
     thread_count: number;
     render_parameters: RenderParameters;
     writer: ColorWriter;
-    tone_mapper: ToneMapper;
+    color_flow: ColorFlowItem;
     progress_reporter: ProgressReporter;
 }
 
-export async function multi_threaded_render({render_parameters, thread_count, writer, progress_reporter, tone_mapper}: MultiThreadedRenderConfig): Promise<void> {
+export async function multi_threaded_render({render_parameters, thread_count, writer, progress_reporter, color_flow}: MultiThreadedRenderConfig): Promise<void> {
     const {
         image_width,
         image_height,
@@ -72,7 +72,7 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
                     tmp_color[0] = output_buffer[y_offset + x * 3];
                     tmp_color[1] = output_buffer[y_offset + x * 3 + 1];
                     tmp_color[2] = output_buffer[y_offset + x * 3 + 2];
-                    write_color(x, y, tmp_color, rays_casted_per_line[y], tone_mapper);
+                    write_color(x, y, tmp_color, rays_casted_per_line[y], color_flow);
                 }
                 dump_line(y);
                 const dt = performance.now() - t0;
