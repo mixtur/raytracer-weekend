@@ -29,12 +29,13 @@ export const prepareSingleFile = async (basePath, filePath) => {
 
 export const createPrepareFile = (pathFallbackChain) => async (url) => {
   let preparation = null;
-  for (const basePath of pathFallbackChain) {
-    const filePath = url.endsWith("/")
-    ? path.join(basePath, url, 'index.html')
-    : path.join(basePath, url);
+  for (const base_file_path of pathFallbackChain) {
+    const url_path = new URL(url, 'http://dummy').pathname;
+    const file_path = url.endsWith("/")
+    ? path.join(base_file_path, url_path, 'index.html')
+    : path.join(base_file_path, url_path);
 
-    preparation = await prepareSingleFile(basePath, filePath);
+    preparation = await prepareSingleFile(base_file_path, file_path);
 
     if (preparation.found) {
       return preparation;

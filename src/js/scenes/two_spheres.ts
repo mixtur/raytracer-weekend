@@ -17,7 +17,7 @@ const create_two_spheres = (): Hittable => {
     ]);
 };
 
-export const two_spheres: Scene = create_scene({
+export const create = (): Scene => create_scene({
     root_hittable: create_two_spheres(),
 
     camera: create_camera({

@@ -1,8 +1,8 @@
 - **bug** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case.
+- **bug** with new scene selection phase everything is slow
 - matrix-based camera
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
 - pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
-- separate page for selecting a scene
 - configuration UI
 - schedule thread load more evenly. Think something like Masonry layout, but for threads and ray counts
 - glTF

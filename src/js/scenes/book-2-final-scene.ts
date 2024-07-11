@@ -1,12 +1,5 @@
 import { create_scene, Scene } from './scene';
-import {
-    add_vec3,
-    ArenaVec3Allocator,
-    point3,
-    rand_vec3_min_max,
-    use_vec3_allocator,
-    vec3
-} from '../math/vec3.gen';
+import { add_vec3, ArenaVec3Allocator, point3, rand_vec3_min_max, use_vec3_allocator, vec3 } from '../math/vec3.gen';
 import { solid_color } from '../texture/solid_color';
 import { random_min_max } from '../math/random';
 import earthUrl from './earthmap.jpg';
@@ -34,7 +27,7 @@ import { create_bvh_node } from '../hittable/bvh';
 import { create_image_texture } from '../texture/image_texture';
 import { create_noise_texture } from '../texture/noise_texture';
 
-export const book2_final_scene = async (): Promise<Scene> => {
+export const create = async (): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
         use_vec3_allocator(new ArenaVec3Allocator(1024 * 6));
 
@@ -47,23 +40,23 @@ export const book2_final_scene = async (): Promise<Scene> => {
         const y0 = 0.0;
         const boxes1 = create_zx_grid(boxes_per_side, boxes_per_side, 101, w, point3(-1000, 0, -1000));
         for (let i = 0; i < boxes_per_side; i++) {
-            const x0 = -1000.0 + i*w;
+            const x0 = -1000.0 + i * w;
             const x1 = x0 + w;
             for (let j = 0; j < boxes_per_side; j++) {
-                const z0 = -1000.0 + j*w;
-                const y1 = random_min_max(1,101);
+                const z0 = -1000.0 + j * w;
+                const y1 = random_min_max(1, 101);
                 const z1 = z0 + w;
 
-                zx_grid_add_hittable(boxes1, i, j, create_box(point3(x0,y0,z0), point3(x1,y1,z1), ground));
+                zx_grid_add_hittable(boxes1, i, j, create_box(point3(x0, y0, z0), point3(x1, y1, z1), ground));
             }
         }
         objects.objects.push(boxes1);
         const light = create_diffuse_light(solid_color(7, 7, 7));
-        const light_hittable = create_quad(point3(123, 554, 147), vec3(300,0,0), vec3(0,0,265), light);
+        const light_hittable = create_quad(point3(123, 554, 147), vec3(300, 0, 0), vec3(0, 0, 265), light);
         objects.objects.push(light_hittable);
 
         const center1 = point3(400, 400, 200);
-        const center2 = add_vec3(center1, vec3(30,0,0));
+        const center2 = add_vec3(center1, vec3(30, 0, 0));
 
         const moving_sphere_material = create_lambertian(solid_color(0.7, 0.3, 0.1));
         objects.objects.push(create_moving_sphere(center1, center2, 0, 1, 50, moving_sphere_material));
@@ -73,16 +66,19 @@ export const book2_final_scene = async (): Promise<Scene> => {
             point3(0, 150, 145), 50, create_metal(solid_color(0.8, 0.8, 0.9), 1.0)
         ));
 
-        const subsurface_scattering_sphere = create_sphere(point3(360,150,145), 70, create_dielectric(1.5));
+        const subsurface_scattering_sphere = create_sphere(point3(360, 150, 145), 70, create_dielectric(1.5));
         objects.objects.push(subsurface_scattering_sphere);
         objects.objects.push(create_constant_medium(subsurface_scattering_sphere, 0.2, create_isotropic_phase_function(solid_color(0.2, 0.4, 0.9))));
 
         const fog_boundary = create_sphere(point3(0, 0, 0), 5000, create_dielectric(1.5));
         objects.objects.push(create_constant_medium(fog_boundary, .0001, create_isotropic_phase_function(solid_color(1, 1, 1))));
-        const emat = create_lambertian(create_image_texture(await load_dom_image(earthUrl), {flip_y: true, decode_srgb: true}));
-        objects.objects.push(create_sphere(point3(400,200,400), 100, emat));
+        const emat = create_lambertian(create_image_texture(await load_dom_image(earthUrl), {
+            flip_y: true,
+            decode_srgb: true
+        }));
+        objects.objects.push(create_sphere(point3(400, 200, 400), 100, emat));
         const pertext = create_noise_texture(0.2);
-        objects.objects.push(create_sphere(point3(220,280,300), 80, create_lambertian(pertext)));
+        objects.objects.push(create_sphere(point3(220, 280, 300), 80, create_lambertian(pertext)));
 
         const spheres: Hittable[] = [];
         const white = create_lambertian(solid_color(.73, .73, .73));
@@ -93,7 +89,7 @@ export const book2_final_scene = async (): Promise<Scene> => {
 
         objects.objects.push(create_transform(
             trs_to_mat3x4(
-                vec3(-100,270,395),
+                vec3(-100, 270, 395),
                 axis_angle_to_quat(vec3(0, 1, 0), degrees_to_radians(15)),
                 vec3(1, 1, 1)
             ),

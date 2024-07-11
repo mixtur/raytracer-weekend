@@ -8,10 +8,13 @@ import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { create_image_texture } from '../texture/image_texture';
 import { create_sphere } from '../hittable/sphere';
 
-export const create_earth_scene = async (): Promise<Scene> => {
+export const create = async (): Promise<Scene> => {
     const earth_image = await load_dom_image(earthUrl);
     return create_scene({
-        root_hittable: create_sphere(point3(0, 0, 0), 2, create_lambertian(create_image_texture(earth_image, {flip_y: true, decode_srgb: true}))),
+        root_hittable: create_sphere(point3(0, 0, 0), 2, create_lambertian(create_image_texture(earth_image, {
+            flip_y: true,
+            decode_srgb: true
+        }))),
         camera: create_camera({
             look_from: point3(13, 2, 3),
             look_at: point3(0, 0, 0),
@@ -24,4 +27,4 @@ export const create_earth_scene = async (): Promise<Scene> => {
         }),
         background: Skybox.create_solid(0.7, 0.8, 1.0)
     });
-}
+};

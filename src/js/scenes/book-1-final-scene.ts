@@ -1,11 +1,16 @@
 import {
-    add_vec3, ArenaVec3Allocator,
+    add_vec3,
+    ArenaVec3Allocator,
     len_vec3,
-    point3, rand_vec3, rand_vec3_min_max, sub_vec3, use_vec3_allocator,
+    point3,
+    rand_vec3,
+    rand_vec3_min_max,
+    sub_vec3,
+    use_vec3_allocator,
     vec3
 } from '../math/vec3.gen';
 import { create_checker_3d_texture } from '../texture/checker_3d_texture';
-import { solid_color, create_solid_color } from '../texture/solid_color';
+import { create_solid_color, solid_color } from '../texture/solid_color';
 import { random, random_min_max } from '../math/random';
 import { create_camera } from '../camera';
 import { create_scene, Scene } from './scene';
@@ -73,7 +78,7 @@ function create_lots_of_spheres(): Hittable {
     });
 }
 
-export const book1_final_scene = (): Scene => create_scene({
+export const create = (): Scene => create_scene({
     camera: create_camera({
         look_from: point3(13, 2, 3),
         look_at: point3(0, 0, 0),

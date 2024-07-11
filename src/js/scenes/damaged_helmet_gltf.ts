@@ -5,7 +5,7 @@ import { create_camera } from '../camera';
 import { load_rgbe } from '../texture/image-parsers/rgbe_image_parser';
 import { Skybox } from '../hittable/skybox';
 
-export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
+export const create = async (): Promise<Scene> => {
     const scene = await load_gltf('gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', 1024000, 1024, 25);
     const env = await load_rgbe(2000, 'hdr/Cannon_Exterior.hdr');
     const skybox = Skybox.create_hdr(env);
@@ -26,9 +26,9 @@ export const load_damaged_helmet_gltf = async (): Promise<Scene> => {
         background: skybox,
         exposure_config: {
             aperture: 16,
-            shutter_speed: 1/25,
+            shutter_speed: 1 / 25,
             ISO: 100,
             exp_comp: 0
         }
     });
-}
+};

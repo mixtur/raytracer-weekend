@@ -14,10 +14,11 @@ export const get_esbuild_config = (outdir, prod) => {
 
     return ({
         entryPoints: {
-            index: project_path('src/js/index.ts'),
-            render_worker: project_path('src/js/render_worker.ts'),
-            coi: project_path('src/js/coi-service-worker.js'),
-            styles: project_path('src/js/main.css')
+            styles: project_path('src/js/main.css'),
+            render: project_path('src/js/entry-points/render.ts'),
+            select_scene: project_path('src/js/entry-points/select_scene.ts'),
+            render_worker: project_path('src/js/entry-points/render_worker.ts'),
+            coi: project_path('src/js/coi-service-worker.js')
         },
         bundle: true,
         sourcemap: dev,

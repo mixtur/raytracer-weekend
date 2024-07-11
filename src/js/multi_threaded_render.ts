@@ -1,6 +1,6 @@
 import { RenderParameters, RenderWorkerParametersMessage } from './types';
 import { ColorWriter } from './ui/color-writers';
-import { RenderWorkerMessageData } from './render_worker';
+import { RenderWorkerMessageData } from './entry-points/render_worker';
 import { color } from './math/vec3.gen';
 import { ProgressReporter } from './progress-reporters';
 import { ColorFlowItem } from './color-flow';

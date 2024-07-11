@@ -16,6 +16,10 @@ body {
     gap: 12px;
 }
 
+a {
+    color: #4493f8;
+}
+
 #top-row {
     flex: 0 0 auto;
     padding: 0 12px;

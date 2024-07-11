@@ -1,13 +1,13 @@
-import { add_vec3_r, ArenaVec3Allocator, use_vec3_allocator } from './math/vec3.gen';
-import { ray_color } from './ray_color';
-import { RenderWorkerParametersMessage } from './types';
-import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
-import { run_with_hooks } from './utils';
-import { configure_camera, get_ray } from './camera';
+import { add_vec3_r, ArenaVec3Allocator, use_vec3_allocator } from '../math/vec3.gen';
+import { ray_color } from '../ray_color';
+import { RenderWorkerParametersMessage } from '../types';
+import { ArenaQuatAllocator, use_quat_allocator } from '../math/quat.gen';
+import { run_with_hooks } from '../utils';
+import { configure_camera, get_ray } from '../camera';
 
-import './hittable';
-import './materials';
-import './texture';
+import '../hittable';
+import '../materials';
+import '../texture';
 
 export interface RenderWorkerMessageData {
     y: number;
