@@ -1,5 +1,5 @@
-import { mat3, mul_mat3_vec3_r } from '../../math/mat3.gen';
-import { mul_vec3_s_r, set_vec3, Vec3, vec3_dirty } from '../../math/vec3.gen';
+import { columns_to_mat3_r, Mat3, mat3, mat3_dirty, mul_mat3_vec3_r } from '../../math/mat3.gen';
+import { mul_vec3_s_r, set_vec3, vec3, Vec3, vec3_dirty } from '../../math/vec3.gen';
 import { PixelsData } from './types';
 
 export interface RGBEImporterOptions {
@@ -75,6 +75,20 @@ const XYZColor = vec3_dirty();
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const xyYColor = vec3_dirty();
 
+export interface RGBEHeader {
+    valid: number;
+    string: string;
+    comments: string[];
+    xy_transform: Mat3;//todo: Mat2
+    color_corr: Vec3;
+    pixel_aspect: number;
+    format: string;
+    exposure: number;
+    width: number;
+    height: number;
+    end: number;
+}
+
 export const parse_rgbe = (options: RGBEImporterOptions) => {
     const { bytes, luminance } = options;
     let max_env_luminance = 0;
@@ -110,8 +124,13 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
             }
         };
 
-    function _parse(luminance: number, buffer: Uint8Array): PixelsData {
-        const { width, height, end } = _read_header(buffer);
+    function _parse(luminance: number, buffer: Uint8Array): [PixelsData, RGBEHeader] {
+        const header = _read_header(buffer);
+
+        //todo: xyz
+        //todo: primaries
+        //todo: exposure
+        const { width, height, end } = header;
 
         const array_buffer = new SharedArrayBuffer(width * height * 4 * Float32Array.BYTES_PER_ELEMENT);
         const buffer_f32 = new Float32Array(array_buffer);
@@ -124,25 +143,15 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
 
         _scale_luminance(width * height, buffer_f32);
 
-        return {
-            pixels: buffer_f32,
-            width,
-            height,
-            normalization: 1
-        };
-    }
-
-    interface RGBEHeader {
-        valid: number;
-        string: string;
-        comments: string;
-        programType: 'RGBE';
-        format: string;
-        gamma: number;
-        exposure: number;
-        width: number;
-        height: number;
-        end: number;
+        return [
+            {
+                pixels: buffer_f32,
+                width,
+                height,
+                normalization: 1
+            },
+            header
+        ];
     }
 
     function _read_header(buffer: Uint8Array): RGBEHeader {
@@ -151,57 +160,115 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
         const VALID_DIMENSIONS = 0x04;
         const RGBE_VALID = VALID_MAGIC_TOKEN | VALID_FORMAT | VALID_DIMENSIONS;
 
-        const comment_re = /^#(.+)/mg;
-        const gamma_re = /^\s*GAMMA\s*=\s*(\d+(\.\d+)?)\s*$/m;
-        const exposure_re = /^\s*EXPOSURE\s*=\s*(\d+(\.\d+)?)\s*$/m;
-        const format_re = /^\s*FORMAT=(\S+)\s*$/m;
-        const dimensions_re = /^\s*-Y\s+(\d+)\s+\+X\s+(\d+)\s*$/m;
-
-        const string = String.fromCharCode(...buffer.subarray(0, 256));
         const header: RGBEHeader = {
             valid: 0,
-            string,
-            comments: '',
-            programType: 'RGBE',
+            string: '',
+            comments: [],
+            xy_transform: mat3_dirty(),
+            color_corr: vec3(1, 1, 1),
+            pixel_aspect: 1,
             format: '',
-            gamma: 1,
-            exposure: 1,
+            exposure: 1,// should divide by resulting floats by this number
             width: 0,
             height: 0,
-            end: string.lastIndexOf('\n') + 1
+            end: 0
         };
 
-        const comments = header.string.match(comment_re);
+        let line_start = 0;
+        for(let i = 0; i < buffer.length; i++) {
+            if (buffer[i] === 10) {
+                const line = String.fromCharCode(...buffer.subarray(line_start, i)).trim();
+                line_start = i + 1;
+                if (line === '') break;
 
-        if (comments !== null && comments.includes('#?RADIANCE')) {
-            header.valid |= VALID_MAGIC_TOKEN;
+                if (line.startsWith('#')) {
+                    // comment
+                    if (line.startsWith('#?RADIANCE')) {
+                        header.valid |= VALID_MAGIC_TOKEN;
+                    } else {
+                        header.comments.push(line.slice(1));
+                    }
+                } else {
+                    const [name, value] = line.split('=');
+                    let color_corr_components;
+                    switch (name.toUpperCase()) {
+                        case 'FORMAT':
+                            if (header.format !== '') {
+                                throw new Error(`There must be exactly one FORMAT in HDR file, got at least ${JSON.stringify(header.format)} and ${JSON.stringify(value)}`);
+                            } else if (value !== '32-bit_rle_rgbe' && value !== '32-bit_rle_xyze') {
+                                throw new Error(`Invalid format. Expected "32-bit_rle_rgbe" or "32-bit_rle_xyze", got ${value}`)
+                            } else {
+                                header.format = value;
+                                header.valid |= VALID_FORMAT;
+                            }
+                            break;
+                        case 'EXPOSURE':
+                            header.exposure *= parseFloat(value);
+                            break;
+                        case 'COLORCORR':
+                            color_corr_components = value.split(/\s+/g).map(x => parseFloat(x.trim()));
+                            header.color_corr[0] *= color_corr_components[0] ?? 1;
+                            header.color_corr[1] *= color_corr_components[1] ?? 1;
+                            header.color_corr[2] *= color_corr_components[2] ?? 1;
+                            break;
+                        case 'PIXASPECT':
+                            header.pixel_aspect *= parseFloat(value);
+                            break;
+                        case 'PRIMARIES':
+                            throw new Error(`Primaries header is not supported`);
+                        default:
+                            throw new Error(`Unknown header parameter ${name}`);
+                    }
+                }
+            }
         }
 
-        const gamma = header.string.match(gamma_re);
-        if (gamma !== null) { header.gamma = parseFloat(gamma[1]); }
+        for(let i = line_start; i < buffer.length; i++) {
+            if (buffer[i] === 10) {
+                const dimension_line = String.fromCharCode(...buffer.subarray(line_start, i)).trim();
+                line_start = i + 1;
 
-        const exposure = header.string.match(exposure_re);
-        if (exposure !== null) { header.exposure = parseFloat(exposure[1]); }
+                const [a, b, c, d] = dimension_line.split(/\s+/).map(x => x.trim());
+                let M;
+                let N;
+                if (a === '-Y' || a === '+Y') {
+                    N = parseInt(b);
+                    M = parseInt(d);
+                } else {
+                    N = parseInt(d);
+                    M = parseInt(b);
+                }
 
-        const format = header.string.match(format_re);
+                const mapping_column = (desc: string): Vec3 => {
+                    switch (desc.toUpperCase()) {
+                        case '+X': return vec3( 1,  0, 0);
+                        case '-X': return vec3(-1,  0, 0);
+                        case '+Y': return vec3( 0,  1, 0);
+                        case '-Y': return vec3( 0, -1, 0);
+                        default:
+                            throw new Error(`Invalid dimension format ${JSON.stringify(dimension_line)}`);
+                    }
+                };
 
-        if (format !== null) {
-            header.format = format[1];
-            header.valid |= VALID_FORMAT;
+                columns_to_mat3_r(
+                    header.xy_transform,
+                    mapping_column(c),
+                    mapping_column(a),
+                    vec3(0, 0, 1)
+                );
+
+
+                header.width = M;
+                header.height = N;
+                header.valid |= VALID_DIMENSIONS;
+
+                break;
+            }
         }
 
-        const dimensions = header.string.match(dimensions_re);
 
-        if (dimensions !== null) {
-            header.width = parseInt(dimensions[2], 10);
-            header.height = parseInt(dimensions[1], 10);
-
-            header.valid |= VALID_DIMENSIONS;
-        }
-
-        if (header.valid !== RGBE_VALID) {
-            throw new Error(`RGBEImporter read error ${header.valid}`);
-        }
+        header.string = String.fromCharCode(...buffer.subarray(0, line_start));
+        header.end = line_start;
 
         return header;
     }
@@ -292,11 +359,10 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
     return _parse(luminance, bytes);
 };
 
-export const load_rgbe = async (luminance: number, url: string): Promise<PixelsData> => {
+export const load_rgbe = async (luminance: number, url: string): Promise<[PixelsData, RGBEHeader]> => {
     const response = await fetch(url);
     return parse_rgbe({
         bytes: new Uint8Array(await response.arrayBuffer()),
         luminance
     })
 }
-

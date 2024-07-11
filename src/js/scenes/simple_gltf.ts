@@ -7,7 +7,7 @@ import { Skybox } from '../hittable/skybox';
 
 export const create = async (): Promise<Scene> => {
     const scene = await load_gltf('gltf/simple/model.gltf', 102400, 1024);
-    const env = await load_rgbe(2048, 'hdr/street.hdr');
+    const [env] = await load_rgbe(2048, 'hdr/street.hdr');
     const skybox = Skybox.create_hdr(env);
 
     return create_scene({
