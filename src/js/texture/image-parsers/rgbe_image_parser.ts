@@ -76,12 +76,12 @@ const XYZColor = vec3_dirty();
 const xyYColor = vec3_dirty();
 
 export interface RGBEHeader {
-    valid: number;
     string: string;
     comments: string[];
     xy_transform: Mat3;//todo: Mat2
     color_corr: Vec3;
     pixel_aspect: number;
+    gamma: number;
     format: string;
     exposure: number;
     width: number;
@@ -155,17 +155,17 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
     }
 
     function _read_header(buffer: Uint8Array): RGBEHeader {
-        const VALID_MAGIC_TOKEN = 0x01;
-        const VALID_FORMAT = 0x02;
-        const VALID_DIMENSIONS = 0x04;
-        const RGBE_VALID = VALID_MAGIC_TOKEN | VALID_FORMAT | VALID_DIMENSIONS;
+        const NO_MAGIC_COMMENT = 0x01;
+        const NO_FORMAT = 0x02;
+        const NO_DIMENSIONS = 0x04;
+        let FLAGS = NO_MAGIC_COMMENT | NO_FORMAT | NO_DIMENSIONS;
 
         const header: RGBEHeader = {
-            valid: 0,
             string: '',
             comments: [],
             xy_transform: mat3_dirty(),
             color_corr: vec3(1, 1, 1),
+            gamma: 1,
             pixel_aspect: 1,
             format: '',
             exposure: 1,// should divide by resulting floats by this number
@@ -184,7 +184,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
                 if (line.startsWith('#')) {
                     // comment
                     if (line.startsWith('#?RADIANCE')) {
-                        header.valid |= VALID_MAGIC_TOKEN;
+                        FLAGS &= ~NO_MAGIC_COMMENT;
                     } else {
                         header.comments.push(line.slice(1));
                     }
@@ -199,7 +199,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
                                 throw new Error(`Invalid format. Expected "32-bit_rle_rgbe" or "32-bit_rle_xyze", got ${value}`)
                             } else {
                                 header.format = value;
-                                header.valid |= VALID_FORMAT;
+                                FLAGS &= ~NO_FORMAT;
                             }
                             break;
                         case 'EXPOSURE':
@@ -214,10 +214,16 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
                         case 'PIXASPECT':
                             header.pixel_aspect *= parseFloat(value);
                             break;
+                        case 'GAMMA':
+                            header.gamma *= parseFloat(value);
+                            break;
                         case 'PRIMARIES':
-                            throw new Error(`Primaries header is not supported`);
+                            // note: in Cannon_Exterior.hdr primaries make no sense (0 0 0 0 0 0)
+                            //       need to validate before applying.
+                            console.warn(`Primaries header is not supported`);
+                            break;
                         default:
-                            throw new Error(`Unknown header parameter ${name}`);
+                            console.warn(`Unknown parameter ${name} in RGBE header`);
                     }
                 }
             }
@@ -260,7 +266,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
 
                 header.width = M;
                 header.height = N;
-                header.valid |= VALID_DIMENSIONS;
+                FLAGS &= ~NO_DIMENSIONS;
 
                 break;
             }
@@ -269,6 +275,16 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
 
         header.string = String.fromCharCode(...buffer.subarray(0, line_start));
         header.end = line_start;
+
+        if (FLAGS & NO_DIMENSIONS) {
+            throw new Error(`Dimensions not found`);
+        }
+        if (FLAGS & NO_FORMAT) {
+            throw new Error(`Format not found`);
+        }
+        if (FLAGS & NO_MAGIC_COMMENT) {
+            throw new Error(`No magic comment`);
+        }
 
         return header;
     }
