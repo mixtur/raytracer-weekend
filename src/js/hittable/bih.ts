@@ -5,11 +5,11 @@ import { mul_vec3, sub_vec3 } from '../math/vec3.gen';
 //note: this one is not exactly Hittable. It can only be hit by hitting the root node. Which is an actual hittable.
 export interface BIHNode extends Hittable {
     type: 'bih_node';
-    left: Hittable;
-    right: Hittable;
     axis: number;
     c0: number;
     c1: number;
+    left: Hittable;
+    right: Hittable;
 }
 
 export interface BIHRoot extends BIHNode {
@@ -112,10 +112,10 @@ const create_bih_child = (hittables: Hittable[], time0: number, time1: number): 
 
     return {
         type: 'bih_node',
-        left,
-        right,
         c0, c1,
-        axis
+        axis,
+        left,
+        right
     };
 };
 

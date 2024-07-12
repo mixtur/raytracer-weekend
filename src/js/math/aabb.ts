@@ -28,6 +28,13 @@ export const hit_aabb = (aabb: AABB, r: Ray, t_min: number, t_max: number): bool
     return Math.max(t0_0, t1_0, t2_0, t_min) < Math.min(t0_1, t1_1, t2_1, t_max);
 };
 
+export const aabb_surface_area = (aabb: AABB): number => {
+    const x = aabb.max[0] - aabb.min[0];
+    const y = aabb.max[1] - aabb.min[1];
+    const z = aabb.max[2] - aabb.min[2];
+    return 2 * (x * y + y * z + z * x);
+}
+
 export const union_aabb_r = (result: AABB, a: AABB, b: AABB): void => {
     result.min[0] = Math.min(a.min[0], b.min[0]);
     result.min[1] = Math.min(a.min[1], b.min[1]);
