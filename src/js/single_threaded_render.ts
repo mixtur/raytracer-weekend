@@ -20,11 +20,6 @@ export async function single_threaded_render({
     const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
     const stratification_grid_step = 1 / stratification_grid_size;
 
-    const scene_creation_random_numbers = [];
-    for (let i = 0; i < 2048; i++) {
-        scene_creation_random_numbers.push(Math.random());
-    }
-
     const cam = scene.camera;
     configure_camera(cam, aspect_ratio);
 

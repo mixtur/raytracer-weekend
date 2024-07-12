@@ -26,12 +26,6 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
 
     thread_count = Math.min(thread_count, total_samples_per_pixel);
 
-    //this is needed for all threads to work on the same scene, that is yet random. (didn't want to bother with seeded random)
-    const scene_creation_random_numbers = [];
-    for (let i = 0; i < 2048; i++) {
-        scene_creation_random_numbers.push(Math.random());
-    }
-
     const { write_color, dump_line, dump_image } = writer;
     const output_buffer = new Float64Array(image_width * image_height * 3);
     const rays_casted_per_line = new Uint32Array(image_height);
@@ -51,7 +45,6 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
             image_height,
             samples_per_pixel: samples_to_send,
             max_depth,
-            scene_creation_random_numbers,
             first_line_index: Math.floor(i / thread_count * image_height),
             line_order,
             scene
