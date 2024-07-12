@@ -1,12 +1,14 @@
 * {
     box-sizing: border-box;
 }
+
 html {
     height: 100%;
     margin: 0;
     font-family: sans-serif;
     color: white;
 }
+
 body {
     background: #222;
     height: 100%;
@@ -14,6 +16,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    padding: 12px;
 }
 
 a {
@@ -22,12 +25,10 @@ a {
 
 #top-row {
     flex: 0 0 auto;
-    padding: 0 12px;
 }
 
 #bottom-row {
     display: flex;
-    padding: 0 12px;
     flex: 1 1 auto;
     flex-direction: column;
     min-height: 0;
@@ -69,7 +70,6 @@ canvas {
     height: 100%;
     object-fit: scale-down;
 }
-
 
 .select-model-ui {
     display: flex;
