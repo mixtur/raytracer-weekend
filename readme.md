@@ -4,7 +4,7 @@ It is written in TypeScript.
 
 
 ## Features
-- grids
+- grids, BVH, BIH+SAH
 - multithreaded rendering
 - loading glTF models
 - IBL

@@ -29,7 +29,7 @@ export class BufferStream {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function convertXYZ2xyY(XYZ: Vec3, xyY: Vec3): void {
+export function convert_XYZ_to_xyY(XYZ: Vec3, xyY: Vec3): void {
     const denominator = 1.0 / (XYZ[0] + XYZ[1] + XYZ[2]);
 
     set_vec3(xyY,
@@ -44,7 +44,7 @@ export function convertXYZ2xyY(XYZ: Vec3, xyY: Vec3): void {
 }
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
-export function convertxyY2XYZ(xyY: Vec3, XYZ: Vec3): void {
+export function convert_xyY_to_XYZ(xyY: Vec3, XYZ: Vec3): void {
     set_vec3(XYZ,
         xyY[0] * xyY[2] / xyY[1],
         xyY[2],
@@ -56,13 +56,13 @@ export function convertxyY2XYZ(xyY: Vec3, XYZ: Vec3): void {
     }
 }
 
-export const RGB2XYZ = mat3(
+export const RGB_TO_XYZ = mat3(
     0.4124564, 0.2126729, 0.0193339,
     0.3575761, 0.7151522, 0.1191920,
     0.1804375, 0.0721750, 0.9503041
 );
 
-export const XYZ2RGB = mat3(
+export const XYZ_TO_RGB = mat3(
     3.2404542, -0.9692660, 0.0556434,
     -1.5371385, 1.8760108, -0.2040259,
     -0.4985314, 0.0415560, 1.0572252
@@ -99,7 +99,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
 
             set_vec3(colorXYZ, rgbe[0], rgbe[1], rgbe[2]);
             mul_vec3_s_r(colorXYZ, colorXYZ, scale);
-            mul_mat3_vec3_r(colorXYZ, RGB2XYZ, colorXYZ)
+            mul_mat3_vec3_r(colorXYZ, RGB_TO_XYZ, colorXYZ)
 
             max_env_luminance = Math.max(max_env_luminance, colorXYZ[1]);
 
@@ -113,13 +113,13 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
                 const base_index = i * 4;
                 set_vec3(XYZColor, buffer_f32[base_index], buffer_f32[base_index + 1], buffer_f32[base_index + 2]);
 
-                convertXYZ2xyY(XYZColor, xyYColor);
+                convert_XYZ_to_xyY(XYZColor, xyYColor);
 
                 xyYColor[2] *= _luminance_scale;
 
-                convertxyY2XYZ(xyYColor, XYZColor);
+                convert_xyY_to_XYZ(xyYColor, XYZColor);
 
-                mul_mat3_vec3_r(XYZColor, XYZ2RGB, XYZColor);
+                mul_mat3_vec3_r(XYZColor, XYZ_TO_RGB, XYZColor);
                 buffer_f32.set(XYZColor, base_index);
             }
         };

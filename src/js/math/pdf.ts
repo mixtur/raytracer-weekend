@@ -109,7 +109,7 @@ export interface IHittablePDF extends PDF {
 export const create_hittable_pdf = (): IHittablePDF => {
     return {
         type: 'hittable',
-        hittable: {type: 'dummy-hittable'},
+        hittable: {type: 'dummy-hittable', area: 0},
         origin: vec3_dirty()
     }
 };

@@ -172,7 +172,7 @@ export const create_triangle = (vertex_positions: TriangleVec3, normal_strategy:
     const v = sub_vec3(c, a);
 
     const normal = cross_vec3(u, v);
-    const area = len_vec3(normal);
+    const area = len_vec3(normal) / 2;
     const w = div_vec3_s(normal, dot_vec3(normal, normal));
     unit_vec3_r(normal, normal);
     const d = dot_vec3(q, normal);

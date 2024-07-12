@@ -1,6 +1,6 @@
 import { PixelsData } from '../texture/image-parsers/types';
 import { PDF, pdf_types } from './pdf';
-import { convertXYZ2xyY, RGB2XYZ } from '../texture/image-parsers/rgbe_image_parser';
+import { convert_XYZ_to_xyY, RGB_TO_XYZ } from '../texture/image-parsers/rgbe_image_parser';
 import { mul_mat3_vec3_r } from './mat3.gen';
 import { set_vec3, unit_vec3, Vec3, vec3, vec3_dirty } from './vec3.gen';
 
@@ -33,8 +33,8 @@ export const create_image_based_importance_sampler = (pixels_data: PixelsData): 
             const i = x + y * width;
 
             set_vec3(tmp_color, pixels[i * 4], pixels[i * 4 + 1], pixels[i * 4 + 2]);
-            mul_mat3_vec3_r(XYZcolor, RGB2XYZ, tmp_color);
-            convertXYZ2xyY(XYZcolor, xyYColor);
+            mul_mat3_vec3_r(XYZcolor, RGB_TO_XYZ, tmp_color);
+            convert_XYZ_to_xyY(XYZcolor, xyYColor);
 
             const pixel_weight = xyYColor[2];
 

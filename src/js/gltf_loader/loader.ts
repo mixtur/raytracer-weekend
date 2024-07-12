@@ -28,6 +28,7 @@ import { create_bvh_node } from '../hittable/bvh';
 import { create_transform } from '../hittable/transform';
 import { create_hittable_list } from '../hittable/hittable_list';
 import { create_image_texture } from '../texture/image_texture';
+import { create_bih_root } from '../hittable/bih';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -237,6 +238,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             }
 
             return create_bvh_node(triangles, 0, 0);
+            // return create_bih_root(triangles, 0, 0);
         };
 
         const meshes = (gltf.meshes ?? []).map(m => {

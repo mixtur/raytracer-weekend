@@ -1,5 +1,6 @@
 import './box';
 import './bvh';
+import './bih';
 import './constant_medium';
 import './hittable_list';
 import './moving_sphere';
