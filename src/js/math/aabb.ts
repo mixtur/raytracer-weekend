@@ -83,6 +83,11 @@ export const expand_aabb_r = (result: AABB, aabb: AABB, amount: number) => {
 
 export const create_empty_aabb = () => create_aabb(vec3(Infinity, Infinity, Infinity), vec3(-Infinity, -Infinity, -Infinity));
 
+export const aabb_set_empty = (aabb: AABB): void => {
+    aabb.min.fill(Infinity);
+    aabb.max.fill(-Infinity);
+}
+
 export function surrounding_box(b1: AABB, b2: AABB): AABB {
     return create_aabb(
         point3(
