@@ -3,7 +3,6 @@
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
 - pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
 - configuration UI
-- batch render messages with few samples
 - work stealing
 - stratified sampling
 - scene creation progress ui

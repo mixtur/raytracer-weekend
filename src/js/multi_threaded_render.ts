@@ -1,6 +1,6 @@
 import { InitRenderWorkerParameters, RenderParameters } from './types';
 import { ColorWriter } from './ui/color-writers';
-import { RenderWorkerMessageData } from './entry-points/render_worker';
+import { TileResult } from './entry-points/render_worker';
 import { color } from './math/vec3.gen';
 import { ProgressReporter } from './ui/progress-reporters';
 import { ColorFlowItem } from './color-flow';
@@ -56,28 +56,31 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
         promises.push(new Promise<void>(resolve => {
             worker.onmessage = (ev: MessageEvent): void => {
                 event_count++;
-                const {tile_index, x, y, width, height, pixels, samples_per_pixel, progress} = ev.data as RenderWorkerMessageData;
-                rays_casted_per_tile[tile_index] += samples_per_pixel;
+                const tiles = ev.data as TileResult[];
+                for (let i = 0; i < tiles.length; i++){
+                    const {tile_index, x, y, width, height, pixels, samples_per_pixel, progress} = tiles[i];
+                    rays_casted_per_tile[tile_index] += samples_per_pixel;
 
-                for (let i = 0; i < height; i++) {
-                    const w_offset = ((y + i) * image_width + x) * 3;
-                    const r_offset = (i * width) * 3;
-                    for (let j = 0; j < width; j++) {
-                        tmp_color[0] = output_buffer[w_offset + j * 3]     += pixels[r_offset + j * 3];
-                        tmp_color[1] = output_buffer[w_offset + j * 3 + 1] += pixels[r_offset + j * 3 + 1];
-                        tmp_color[2] = output_buffer[w_offset + j * 3 + 2] += pixels[r_offset + j * 3 + 2];
-                        write_color(x + j, (image_height - y - i - 1), tmp_color, rays_casted_per_tile[tile_index], color_flow);
+                    for (let i = 0; i < height; i++) {
+                        const w_offset = ((y + i) * image_width + x) * 3;
+                        const r_offset = (i * width) * 3;
+                        for (let j = 0; j < width; j++) {
+                            tmp_color[0] = output_buffer[w_offset + j * 3]     += pixels[r_offset + j * 3];
+                            tmp_color[1] = output_buffer[w_offset + j * 3 + 1] += pixels[r_offset + j * 3 + 1];
+                            tmp_color[2] = output_buffer[w_offset + j * 3 + 2] += pixels[r_offset + j * 3 + 2];
+                            write_color(x + j, (image_height - y - i - 1), tmp_color, rays_casted_per_tile[tile_index], color_flow);
+                        }
                     }
-                }
 
-                dump_tile(x, (image_height - y - height), width, height);
-                const dt = performance.now() - t0;
-                progress_reporter.report(thread_id, progress, samples_per_pixel * width * height, total_rays, dt);
+                    dump_tile(x, (image_height - y - height), width, height);
+                    const dt = performance.now() - t0;
+                    progress_reporter.report(thread_id, progress, samples_per_pixel * width * height, total_rays, dt);
 
-                if (event_count === load[thread_id].length) {
-                    progress_reporter.report_thread_done(thread_id);
-                    worker.terminate();
-                    resolve();
+                    if (event_count === load[thread_id].length) {
+                        progress_reporter.report_thread_done(thread_id);
+                        worker.terminate();
+                        resolve();
+                    }
                 }
             };
         }));
