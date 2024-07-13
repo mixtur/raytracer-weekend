@@ -2,6 +2,7 @@ import { Color, color_dirty, mul_vec3_s_r } from '../math/vec3.gen';
 import { ColorFlowItem } from '../color-flow';
 
 export interface ColorWriter {
+    dump_tile: (x: number, y: number, width: number, height: number) => void;
     dump_line: (y: number) => void;
     dump_image: () => void;
     write_color: (x: number, y: number, pixelColor: Color, samples_per_pixel: number, color_flow: ColorFlowItem) => void;
@@ -31,6 +32,9 @@ export const create_canvas_color_writer = (container: HTMLElement, image_width: 
             image_data.data[(y * image_data.width + x) * 4 + 2] = 256 * output_color[2];
             image_data.data[(y * image_data.width + x) * 4 + 3] = 255;
         },
+        dump_tile: (x, y, width, height) => {
+            ctx.putImageData(image_data, 0, 0, x, y, width, height);
+        },
         dump_line: (y: number): void => {
             ctx.putImageData(image_data, 0, 0, 0, y, image_width, 1);
         },
@@ -52,6 +56,7 @@ export const create_array_writer = (image_width: number, image_height: number, i
             data[(x + y * image_width) * 4 + 1] = 256 * output_color[1];
             data[(x + y * image_width) * 4 + 2] = 256 * output_color[2];
         },
+        dump_tile(): void {},
         dump_line(): void {},
         dump_image(): void {
             image_data_callback(data);

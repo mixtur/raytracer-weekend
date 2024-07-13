@@ -1,7 +1,7 @@
 import { format_time } from './utils';
 
 export interface ProgressReporter {
-    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void
+    report(thread_id: number, thread_progress: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void
     report_thread_done(thread_id: number): void;
     report_done(total_rays: number, total_time_ms: number): void;
 }
@@ -14,7 +14,7 @@ export class ConsoleProgressReporter implements ProgressReporter {
         this.expected_report_call_count = image_height * thread_count;
     }
 
-    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
+    report(thread_id: number, thread_progress: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
         this.done_rays += rays_casted_increment;
         if (Math.random() < 100 / this.expected_report_call_count) {
             const overall_progress = this.done_rays / total_rays_to_cast;
@@ -36,9 +36,9 @@ export class MultipleReporters implements ProgressReporter {
     constructor(reporters: ProgressReporter[]) {
         this.reporters = reporters;
     }
-    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number) {
+    report(thread_id: number, thread_progress: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number) {
         for (const reporter of this.reporters) {
-            reporter.report(thread_id, line_id, rays_casted_increment, total_rays_to_cast, time_passed);
+            reporter.report(thread_id, thread_progress, rays_casted_increment, total_rays_to_cast, time_passed);
         }
     }
     report_thread_done(thread_id: number) {
@@ -54,31 +54,27 @@ export class MultipleReporters implements ProgressReporter {
 }
 
 export class ProgressBar implements ProgressReporter {
-    // per_line_progress: Uint8Array;
-    per_thread_progress: Uint32Array;
+    per_thread_progress: Float64Array;
     thread_count: number;
-
-    // per_line_ctx: CanvasRenderingContext2D;
     per_thread_ctx: CanvasRenderingContext2D;
+    canvas_width = 840;
 
-    constructor(container: HTMLElement, thread_count: number, image_height: number) {
+    constructor(container: HTMLElement, thread_count: number) {
         const progress_reporter_div = document.createElement('div');
         container.appendChild(progress_reporter_div);
 
         progress_reporter_div.insertAdjacentHTML('afterbegin',
             [
                 '<div class="progress-reporter__label-per-thread">Progress per thread</div>',
-                `<canvas class="progress-reporter__canvas_per_thread"></canvas>`,
-                // '<div class="progress-reporter__label-per-line">Progress per line</div>',
-                // '<canvas class="progress-reporter__canvas_per_line"></canvas>'
+                `<canvas class="progress-reporter__canvas_per_thread"></canvas>`
             ].join('')
         );
 
         progress_reporter_div.className = 'progress-bar';
 
-        function create_ctx(selector: string): CanvasRenderingContext2D {
+        const create_ctx = (selector: string): CanvasRenderingContext2D => {
             const canvas = progress_reporter_div.querySelector(selector) as HTMLCanvasElement;
-            canvas.width = image_height;
+            canvas.width = this.canvas_width;
             canvas.height = thread_count;
             canvas.style.width = '100%';
             canvas.style.height = `${thread_count}px`;
@@ -88,22 +84,21 @@ export class ProgressBar implements ProgressReporter {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#fff';
             return ctx;
-        }
+        };
 
         this.per_thread_ctx = create_ctx('canvas.progress-reporter__canvas_per_thread');
-        // this.per_line_ctx = create_ctx('canvas.progress-reporter__canvas_per_line');
-
-        // this.per_line_progress = new Uint8Array(image_height);
-        this.per_thread_progress = new Uint32Array(thread_count);
+        this.per_thread_progress = new Float64Array(thread_count);
         this.thread_count = thread_count;
     }
 
-    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
+    report(thread_id: number, thread_progress: number, total_rays_to_cast: number, time_passed: number): void {
         // this.per_line_progress[line_id]++;
         // this.per_line_ctx.fillRect(line_id, this.thread_count - this.per_line_progress[line_id], 1, 1);
 
-        this.per_thread_ctx.fillRect(this.per_thread_progress[thread_id], thread_id, 1, 1);
-        this.per_thread_progress[thread_id]++;
+        const span_start = this.per_thread_progress[thread_id];
+        const span_end = thread_progress * this.canvas_width;
+        this.per_thread_progress[thread_id] = span_end;
+        this.per_thread_ctx.fillRect(Math.floor(span_start), thread_id, Math.ceil(span_end - span_start), 1);
     }
 
     report_thread_done(thread_id: number): void {}
@@ -157,7 +152,7 @@ export class ProgressText implements ProgressReporter {
     }
 
     prev_update_time = 0;
-    report(thread_id: number, line_id: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
+    report(thread_id: number, thread_progress: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void {
         this.rays_casted += rays_casted_increment;
 
         if (time_passed - this.prev_update_time > 300) {

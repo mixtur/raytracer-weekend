@@ -1,5 +1,3 @@
-import { random_int_min_max } from './math/random';
-
 const deg_rad_factor = Math.PI / 180;
 
 export const degrees_to_radians = (deg: number): number => deg * deg_rad_factor;
@@ -48,25 +46,3 @@ export const async_run_with_hooks = async <T>(f: () => Promise<T>): Promise<T> =
 };
 
 export const run_hook = (f: () => () => void) => teardowns.push(f());
-
-export const generate_random_permutation_u16 = (size: number): Uint16Array => {
-    function permute(xs: Uint16Array): void {
-        for (let i = xs.length - 1; i >= 0; i--) {
-            const j = random_int_min_max(0, i);
-            const t = xs[i];
-            xs[i] = xs[j];
-            xs[j] = t;
-        }
-    }
-
-    const line_order = generate_straight_order_u16(size);
-    permute(line_order);
-
-    return line_order;
-}
-
-export const generate_straight_order_u16 = (size: number): Uint16Array => {
-    const line_order = new Uint16Array(size);
-    for (let i = 0; i < size; i++) { line_order[i] = i; }
-    return line_order;
-}

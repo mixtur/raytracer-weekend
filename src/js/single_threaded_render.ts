@@ -1,11 +1,12 @@
 import { RenderParameters } from './types';
-import { add_vec3_r, ArenaVec3Allocator, color, use_vec3_allocator } from './math/vec3.gen';
+import { ArenaVec3Allocator, color_dirty } from './math/vec3.gen';
 import { ray_color_iterative } from './ray_color';
 import { ColorWriter } from './ui/color-writers';
 import { async_run_with_hooks } from './utils';
-import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { ColorFlowItem } from './color-flow';
 import { configure_camera, get_ray } from './camera';
+import { schedule_tiles, TILES_COUNT } from './work-scheduling';
+import { render_tile } from './render_tile';
 
 export async function single_threaded_render({
     aspect_ratio,
@@ -15,58 +16,41 @@ export async function single_threaded_render({
     max_depth,
     scene
 }: RenderParameters, writer: ColorWriter, color_flow: ColorFlowItem) {
-    const { write_color, dump_line, dump_image } = writer;
-    const stratification_grid_size = Math.floor(Math.sqrt(samples_per_pixel));
-    const stratification_remainder = samples_per_pixel - stratification_grid_size ** 2;
-    const stratification_grid_step = 1 / stratification_grid_size;
-
+    const { write_color, dump_tile, dump_image } = writer;
     const cam = scene.camera;
     configure_camera(cam, aspect_ratio);
+    const [tiles] = schedule_tiles(image_width, image_height, samples_per_pixel, 1);
 
+    const rays_casted_per_tile = new Uint32Array(TILES_COUNT);
+    const max_tile_size = tiles.reduce((max_size, tile) => Math.max(max_size, tile.width * tile.height), 0);
+    const tile_data_allocator = new ArenaVec3Allocator(max_tile_size);
+    const output_buffer = new Float64Array(image_width * image_height * 3);
+    const tmp_color = color_dirty();
     await async_run_with_hooks(async () => {
-        const vec3_allocator = new ArenaVec3Allocator(8192);
-        const quat_allocator = new ArenaQuatAllocator(640);
-
-        use_vec3_allocator(vec3_allocator);
-        use_quat_allocator(quat_allocator);
-        for (let j = 0; j < image_height; j++) {
-            const mark = `scanline remaining ${image_height - j - 1}`;
-            const y = image_height -1 - j;
+        for (let i = 0; i < tiles.length; i++) {
+            const tile = tiles[i];
+            const mark = `progressive tiles remaining ${tiles.length - i - 1}`;
             console.time(mark);
-            for (let i = 0; i < image_width; i++) {
-                const x = i;
-                const pixel_color = color(0, 0, 0);
+            tile_data_allocator.reset();
+            render_tile(tile, scene, image_width, image_height, max_depth, tile_data_allocator);
+            const pixels = tile_data_allocator.dump;
+            const { tile_index, x, y, width, height, sample_count } = tile;
+            rays_casted_per_tile[tile_index] += sample_count;
 
-                for (let sj = 0; sj < stratification_grid_size; sj++) {
-                    for (let si = 0; si < stratification_grid_size; si++) {
-                        vec3_allocator.reset();
-                        quat_allocator.reset();
-                        const su = stratification_grid_step * (si + Math.random());
-                        const sv = stratification_grid_step * (sj + Math.random());
-
-                        const u = (i + su) / (image_width - 1);
-                        const v = (j + sv) / (image_height - 1);
-
-                        const r = get_ray(cam, u, v);
-                        add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
-                    }
+            for (let i = 0; i < height; i++) {
+                const w_offset = ((y + i) * image_width + x) * 3;
+                const r_offset = (i * width) * 3;
+                for (let j = 0; j < width; j++) {
+                    tmp_color[0] = output_buffer[w_offset + j * 3]     += pixels[r_offset + j * 3];
+                    tmp_color[1] = output_buffer[w_offset + j * 3 + 1] += pixels[r_offset + j * 3 + 1];
+                    tmp_color[2] = output_buffer[w_offset + j * 3 + 2] += pixels[r_offset + j * 3 + 2];
+                    write_color(x + j, (image_height - y - i - 1), tmp_color, rays_casted_per_tile[tile_index], color_flow);
                 }
-
-
-                for (let s = 0; s < stratification_remainder; s++) {
-                    vec3_allocator.reset();
-                    quat_allocator.reset();
-                    const u = (i + Math.random()) / (image_width - 1);
-                    const v = (j + Math.random()) / (image_height - 1);
-
-                    const r = get_ray(cam, u, v);
-                    add_vec3_r(pixel_color, pixel_color, ray_color_iterative(r, scene.background, scene.root_hittable, scene.light, max_depth));
-                }
-                write_color(x, y, pixel_color, samples_per_pixel, color_flow);
             }
+
             console.timeEnd(mark);
             await new Promise(resolve => setTimeout(resolve, 0));
-            dump_line(y);
+            dump_tile(x, (image_height - y - height - 1), width, height);
         }
     });
     dump_image();
