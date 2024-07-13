@@ -7,7 +7,9 @@
 - batch render messages with few samples
 - work stealing
 - stratified sampling
+- scene creation progress ui
 - glTF
+  - loading progress
   - combine factors with textures
   - alpha channel
   - texture transforms
