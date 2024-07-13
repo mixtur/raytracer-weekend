@@ -1,4 +1,4 @@
-import { format_time } from './utils';
+import { format_time } from '../utils';
 
 export interface ProgressReporter {
     report(thread_id: number, thread_progress: number, rays_casted_increment: number, total_rays_to_cast: number, time_passed: number): void

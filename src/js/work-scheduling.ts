@@ -7,8 +7,8 @@ export interface TileScheduleItem {
     y: number;
 }
 
-const X_TILE_COUNT = 12;
-const Y_TILE_COUNT = 12;
+const X_TILE_COUNT = 24;
+const Y_TILE_COUNT = 24;
 export const TILES_COUNT = X_TILE_COUNT * Y_TILE_COUNT;
 
 // result[thread_id][work_index] = tile_schedule_item

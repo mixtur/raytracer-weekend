@@ -2,7 +2,7 @@ import { InitRenderWorkerParameters, RenderParameters } from './types';
 import { ColorWriter } from './ui/color-writers';
 import { RenderWorkerMessageData } from './entry-points/render_worker';
 import { color } from './math/vec3.gen';
-import { ProgressReporter } from './progress-reporters';
+import { ProgressReporter } from './ui/progress-reporters';
 import { ColorFlowItem } from './color-flow';
 import { schedule_tiles, TILES_COUNT } from './work-scheduling';
 
@@ -70,7 +70,7 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
                     }
                 }
 
-                dump_tile(x, (image_height - y - height - 1), width, height);
+                dump_tile(x, (image_height - y - height), width, height);
                 const dt = performance.now() - t0;
                 progress_reporter.report(thread_id, progress, samples_per_pixel * width * height, total_rays, dt);
 

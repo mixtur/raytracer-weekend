@@ -50,7 +50,7 @@ export async function single_threaded_render({
 
             console.timeEnd(mark);
             await new Promise(resolve => setTimeout(resolve, 0));
-            dump_tile(x, (image_height - y - height - 1), width, height);
+            dump_tile(x, (image_height - y - height), width, height);
         }
     });
     dump_image();

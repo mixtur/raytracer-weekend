@@ -1,14 +1,14 @@
 import { create_array_writer, create_canvas_color_writer } from '../ui/color-writers';
 import { single_threaded_render } from '../single_threaded_render';
 import { multi_threaded_render } from '../multi_threaded_render';
-import { ConsoleProgressReporter, MultipleReporters, ProgressBar, ProgressText } from '../progress-reporters';
+import { ConsoleProgressReporter, MultipleReporters, ProgressBar, ProgressText } from '../ui/progress-reporters';
 import { ACES, apply_gamma, clip_to_unit_range, compose_color_flow, expose } from '../color-flow';
 import { scenes } from '../scenes/index';
 
 const aspect_ratio = 1;
-const image_width = 843;
+const image_width = 840;
 const image_height = Math.round(image_width / aspect_ratio);
-const samples_per_pixel = 101;
+const samples_per_pixel = 100;
 const max_depth = 50;
 
 const thread_count = globalThis?.navigator?.hardwareConcurrency
