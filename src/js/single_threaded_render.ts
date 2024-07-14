@@ -8,14 +8,14 @@ import { configure_camera, get_ray } from './camera';
 import { schedule_tiles, TILES_COUNT } from './work-scheduling';
 import { render_tile } from './render_tile';
 
-export async function single_threaded_render({
-    aspect_ratio,
-    image_height,
-    image_width,
-    samples_per_pixel,
-    max_depth,
-    scene
-}: RenderParameters, writer: ColorWriter, color_flow: ColorFlowItem) {
+export async function single_threaded_render(parameters: RenderParameters, writer: ColorWriter, color_flow: ColorFlowItem) {
+    const {
+        aspect_ratio,
+        image_height,
+        image_width,
+        samples_per_pixel,
+        scene
+    } = parameters;
     const { write_color, dump_tile, dump_image } = writer;
     const cam = scene.camera;
     configure_camera(cam, aspect_ratio);
@@ -32,7 +32,7 @@ export async function single_threaded_render({
             const mark = `progressive tiles remaining ${tiles.length - i - 1}`;
             console.time(mark);
             tile_data_allocator.reset();
-            render_tile(tile, scene, image_width, image_height, max_depth, tile_data_allocator);
+            render_tile(tile, scene, tile_data_allocator, parameters);
             const pixels = tile_data_allocator.dump;
             const { tile_index, x, y, width, height, sample_count } = tile;
             rays_casted_per_tile[tile_index] += sample_count;

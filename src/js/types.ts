@@ -14,6 +14,7 @@ export interface InitRenderWorkerParameters {
     aspect_ratio: number,
     image_width: number,
     image_height: number,
+    samples_per_pixel: number,
     work: TileScheduleItem[],
     max_depth: number,
     scene: Scene

@@ -24,16 +24,12 @@ onmessage = (ev: MessageEvent<InitRenderWorkerParameters>) => {
 
 const BATCH_MIN_TIME = 100;
 const BATCH_MAX_SIZE = 4;
-function render(
-    {
+function render(parameters: InitRenderWorkerParameters): void {
+    const {
         aspect_ratio,
-        image_height,
-        image_width,
-        max_depth,
         work,
         scene
-    }: InitRenderWorkerParameters
-): void {
+    } = parameters;
     const cam = scene.camera;
     configure_camera(cam, aspect_ratio);
 
@@ -53,7 +49,7 @@ function render(
         const output_allocator = output_allocators[tile_report.length];
         const tile = work[i];
         output_allocator.reset();
-        render_tile(tile, scene, image_width, image_height, max_depth, output_allocator);
+        render_tile(tile, scene, output_allocator, parameters);
         work_so_far += tile.width * tile.height * tile.sample_count;
         tile_report.push({
             tile_index: tile.tile_index,

@@ -4,7 +4,6 @@
 - pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
 - configuration UI
 - work stealing
-- stratified sampling
 - scene creation progress ui
 - glTF
   - loading progress

@@ -5,6 +5,7 @@ export interface TileScheduleItem {
     height: number;
     x: number;
     y: number;
+    stratification_offset: number;
 }
 
 const X_TILE_COUNT = 24;
@@ -79,7 +80,7 @@ export const schedule_tiles = (width: number, height: number, samples_per_pixel:
 
 
     const result: TileScheduleItem[][] = [];
-    for (let i = 0; i < progression.length; i++){
+    for (let i = 0; i < progression.length; i++) {
         const suggested_samples = progression[i];
         for (let j = 0; j < tile_grid.length; j++) {
             const tile = tile_grid[j];
@@ -109,7 +110,8 @@ export const schedule_tiles = (width: number, height: number, samples_per_pixel:
                 height: tile.tile_height,
                 x: tile.x,
                 y: tile.y,
-                sample_count: samples_to_cast
+                sample_count: samples_to_cast,
+                stratification_offset: tile.samples_left
             });
         }
     }

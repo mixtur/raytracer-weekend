@@ -42,14 +42,16 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
     for (let thread_id = 0; thread_id < load.length; thread_id++) {
         const worker = workers[thread_id];
         let event_count = 0;
-        worker.postMessage({
+        const init_message: InitRenderWorkerParameters = {
             aspect_ratio,
             image_width,
             image_height,
             max_depth,
+            samples_per_pixel: total_samples_per_pixel,
             work: load[thread_id],
             scene
-        } as InitRenderWorkerParameters);
+        };
+        worker.postMessage(init_message);
 
         const tmp_color = color(0, 0, 0);
         promises.push(new Promise<void>(resolve => {
