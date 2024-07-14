@@ -7,6 +7,7 @@ import {
     mul_mat4_vec3_r
 } from './math/mat3.gen';
 import {
+    add_vec3_r,
     mul_vec3_s_r,
     point3,
     Point3,
@@ -64,9 +65,7 @@ export const configure_camera = (camera: Camera, aspect: number) => {
     const projection_matrix = gl_perspective_projection(
         aspect,
         degrees_to_radians(config.y_fov),
-        //near=1, far=1+focus_dist
-        //so when we map a direction from point(x, y, -1) to point(x, y, 1) we get a direction from 0 to (x, y) on the focus plane
-        1, 1 + config.focus_dist
+        config.focus_dist / 2, config.focus_dist
     );
     invert_mat4_r(camera.projection_matrix_inverse, projection_matrix);
 
@@ -90,14 +89,17 @@ export const get_ray = (camera: Camera, u: number, v: number): Ray => {
 
     // compute ray direction in camera's space
     const dir = sub_vec3(to, from);
+    mul_vec3_s_r(dir, dir, 2);
 
-    //ray origin in camera space is 0,0,0, but we make it slightly random for DoF
-    const origin = rand_vec3_in_unit_disk();//todo: non-circular aperture
-    mul_vec3_s_r(origin, origin, camera.origin_radius);
+    const origin = sub_vec3(to, dir);
 
-    // since origin is not 0,0,0 because DoF, ray no longer points to correct location.
-    // Need to compensate for origin offset.
-    sub_vec3_r(dir, dir, origin);
+    //offset the ray for DoF
+    const dof_offset = rand_vec3_in_unit_disk();//todo: non-circular aperture
+    mul_vec3_s_r(dof_offset, dof_offset, camera.origin_radius);
+
+    // need the ray to point to the same location as if there was no DoF
+    add_vec3_r(origin, origin, dof_offset);
+    sub_vec3_r(dir, dir, dof_offset);
 
     //transform origin and dir to world_space
     mul_mat3x4_vec3_r(origin, camera.world_matrix, origin);
