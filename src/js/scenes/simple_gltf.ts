@@ -15,7 +15,7 @@ export const create = async (): Promise<Scene> => {
         camera: create_camera({
             look_from: point3(-5, 10, 5),
             look_at: point3(1, 1, -1),
-            v_up: vec3(0, 1, 0),
+            y_up: vec3(0, 1, 0),
             focus_dist: 10,
             aperture: 0,
             y_fov: 50,

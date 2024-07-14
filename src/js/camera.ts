@@ -1,117 +1,113 @@
 import {
-    add_vec3, add_vec3_r,
-    cross_vec3, cross_vec3_r, div_vec3_s, fma_vec3_s_vec3_r, mul_vec3_s, mul_vec3_s_r,
-    Point3, point3_dirty, rand_vec3_in_unit_disk, sub_vec3, sub_vec3_r, unit_vec3, unit_vec3_r,
-    Vec3, vec3_dirty
+    gl_perspective_projection,
+    invert_mat4_r,
+    look_target_to_mat3x4_r,
+    Mat3x4, mat3x4_dirty,
+    Mat4, mat4_dirty, mul_mat3_vec3_r, mul_mat3x4_vec3_r,
+    mul_mat4_vec3_r
+} from './math/mat3.gen';
+import {
+    mul_vec3_s_r,
+    point3,
+    Point3,
+    rand_vec3_in_unit_disk,
+    sub_vec3,
+    sub_vec3_r,
+    Vec3
 } from './math/vec3.gen';
-import { Ray, ray_allocator, ray_dirty, ray_set } from './math/ray';
+import { Ray, ray_dirty, ray_set } from './math/ray';
 import { degrees_to_radians } from './utils';
-import { random_min_max } from './math/random';
-
-export interface CameraConfig {
-    look_from: Point3,
-    look_at: Point3,
-    v_up: Vec3,
-    y_fov: number,
-    aperture: number,
-    focus_dist: number,
-    time0: number,
-    time1: number
-}
-
-const ray = ray_dirty();
 
 export interface Camera {
-    origin: Point3;
-    lower_left_corner: Point3;
-    vertical: Vec3;
-    horizontal: Vec3;
-    u: Vec3;
-    v: Vec3;
-    w: Vec3;
-    lens_radius: number;
-    time0: number;
-    time1: number;
+    world_matrix: Mat3x4;
+    projection_matrix_inverse: Mat4;
 
-    config: CameraConfig;
+    //depth of field
+    origin_radius: number,
+
+    //motion blur
+    t0: number;
+    dt: number;
+
+    config: Camera2Config;
 }
 
-export const create_camera = (config: CameraConfig): Camera => {
+export interface Camera2Config {
+    //view
+    y_up: Vec3;
+    look_from: Point3;
+    look_at: Point3;
+    //projection
+    y_fov: number;
+    //depth of field
+    aperture: number;
+    focus_dist: number;
+    //motion blur
+    time0: number;
+    time1: number;
+}
+
+export const create_camera = (config: Camera2Config): Camera => {
     return {
-        origin: point3_dirty(),
-        lower_left_corner: point3_dirty(),
-        vertical: vec3_dirty(),
-        horizontal: vec3_dirty(),
-        u: vec3_dirty(),
-        v: vec3_dirty(),
-        w: vec3_dirty(),
-        lens_radius: NaN,
-        time0: NaN,
-        time1: NaN,
-
+        world_matrix: mat3x4_dirty(),
+        projection_matrix_inverse: mat4_dirty(),
+        origin_radius: 0,
+        t0: 0,
+        dt: 0,
         config
-    }
-};
+    };
+}
 
-export const configure_camera = (camera: Camera, aspect_ratio: number): void => {
-    const {
-        look_from,
-        look_at,
-        v_up,
-        y_fov,
-        aperture,
-        focus_dist,
-        time0,
-        time1
-    } = camera.config;
-
-    const theta = degrees_to_radians(y_fov);
-    const h = Math.tan(theta / 2);
-    const viewport_height = 2 * h;
-    const viewport_width = aspect_ratio * viewport_height;
-
-    unit_vec3_r(camera.w, sub_vec3(look_from, look_at));
-    unit_vec3_r(camera.u, cross_vec3(v_up, camera.w));
-    cross_vec3_r(camera.v, camera.w, camera.u);
-
-    camera.time0 = time0;
-    camera.time1 = time1;
-
-    camera.origin.set(look_from);
-    mul_vec3_s_r(camera.horizontal, camera.u, viewport_width * focus_dist);
-    mul_vec3_s_r(camera.vertical, camera.v, viewport_height * focus_dist);
-    sub_vec3_r(
-        camera.lower_left_corner,
-        camera.origin,
-        add_vec3(
-            add_vec3(
-                div_vec3_s(camera.horizontal, 2),
-                div_vec3_s(camera.vertical, 2)
-            ),
-            mul_vec3_s(camera.w, focus_dist)
-        )
+export const configure_camera = (camera: Camera, aspect: number) => {
+    const config = camera.config;
+    look_target_to_mat3x4_r(camera.world_matrix, config.look_from, config.look_at, config.y_up);
+    const projection_matrix = gl_perspective_projection(
+        aspect,
+        degrees_to_radians(config.y_fov),
+        //near=1, far=1+focus_dist
+        //so when we map a direction from point(x, y, -1) to point(x, y, 1) we get a direction from 0 to (x, y) on the focus plane
+        1, 1 + config.focus_dist
     );
-    camera.lens_radius = aperture / 2;
+    invert_mat4_r(camera.projection_matrix_inverse, projection_matrix);
+
+    camera.origin_radius = config.aperture / 2;
+    camera.dt = config.time1 - config.time0;
+    camera.t0 = config.time0;
 };
 
+const ray = ray_dirty();
 export const get_ray = (camera: Camera, u: number, v: number): Ray => {
-    const rd = rand_vec3_in_unit_disk();
-    mul_vec3_s_r(rd, rd, camera.lens_radius);
-    const offset = mul_vec3_s(camera.u, rd[0]);
-    fma_vec3_s_vec3_r(offset, camera.v, rd[1], offset)
+    const ndc_u = u * 2 - 1;
+    const ndc_v = 1 - 2 * v;
 
-    const direction = sub_vec3(camera.lower_left_corner, offset);
-    add_vec3_r(direction, direction, mul_vec3_s(camera.horizontal, u));
-    add_vec3_r(direction, direction, mul_vec3_s(camera.vertical, v));
-    sub_vec3_r(direction, direction, camera.origin);
+    //"from to" in NDC
+    const from = point3(ndc_u, ndc_v, -1);
+    const to = point3(ndc_u, ndc_v, 1);
 
-    add_vec3_r(offset, offset, camera.origin);
+    //transform "from to" to camera's space
+    mul_mat4_vec3_r(from, camera.projection_matrix_inverse, from);
+    mul_mat4_vec3_r(to, camera.projection_matrix_inverse, to);
+
+    // compute ray direction in camera's space
+    const dir = sub_vec3(to, from);
+
+    //ray origin in camera space is 0,0,0, but we make it slightly random for DoF
+    const origin = rand_vec3_in_unit_disk();//todo: non-circular aperture
+    mul_vec3_s_r(origin, origin, camera.origin_radius);
+
+    // since origin is not 0,0,0 because DoF, ray no longer points to correct location.
+    // Need to compensate for origin offset.
+    sub_vec3_r(dir, dir, origin);
+
+    //transform origin and dir to world_space
+    mul_mat3x4_vec3_r(origin, camera.world_matrix, origin);
+    mul_mat3_vec3_r(dir, camera.world_matrix, dir);//note: we abuse the fact that matrices are column-major, therefore we can interpret Mat3x4 as Mat3 in this case.
+
     ray_set(
         ray,
-        offset,
-        direction,
-        random_min_max(camera.time0, camera.time1)
+        origin,
+        dir,
+        camera.t0 + camera.dt * Math.random()
     );
-
     return ray;
-};
+}

@@ -20,7 +20,7 @@ export const create_scene = (config: Partial<Scene>): Scene => {
         camera: config.camera ?? create_camera({
             look_from: point3(13, 2, 3),
             look_at: point3(0, 0, 0),
-            v_up: vec3(0, 1, 0),
+            y_up: vec3(0, 1, 0),
             focus_dist: 10,
             aperture: 0,
             y_fov: 20,

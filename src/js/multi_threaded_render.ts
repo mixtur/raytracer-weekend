@@ -72,11 +72,11 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
                             tmp_color[0] = output_buffer[w_offset + j * 3]     += pixels[r_offset + j * 3];
                             tmp_color[1] = output_buffer[w_offset + j * 3 + 1] += pixels[r_offset + j * 3 + 1];
                             tmp_color[2] = output_buffer[w_offset + j * 3 + 2] += pixels[r_offset + j * 3 + 2];
-                            write_color(x + j, (image_height - y - i - 1), tmp_color, rays_casted_per_tile[tile_index], color_flow);
+                            write_color(x + j, y + i, tmp_color, rays_casted_per_tile[tile_index], color_flow);
                         }
                     }
 
-                    dump_tile(x, (image_height - y - height), width, height);
+                    dump_tile(x, y, width, height);
                     const dt = performance.now() - t0;
                     progress_reporter.report(thread_id, progress, samples_per_pixel * width * height, total_rays, dt);
 

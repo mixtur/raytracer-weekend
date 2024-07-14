@@ -9,8 +9,8 @@ const gen_type_name = ({rows, cols}) => {
         : `Mat${rows}x${cols}`;
 };
 
-const get_idx_fn = (t) => {
-    return (row_index, col_index) => col_index * t.rows + row_index;
+const get_idx_fn = (matrix_layout) => {
+    return (row_index, col_index) => col_index * matrix_layout.rows + row_index;
 };
 
 // we follow the standard math notation, where m12 is an element on row 1 and column 2
@@ -586,9 +586,160 @@ export const gen_transpose = (template) => (use_result_arg) => {
     return gen_fn(name, signature, body, use_result_arg);
 }
 
+export const gen_gl_asymmetric_perspective_projection = (use_result_arg) => {
+    const name = 'gl_asymmetric_perspective_projection_to_mat4';
+    const signature = gen_signature(use_result_arg, sig('Mat4', 'left: number, right: number, bottom: number, top: number, near: number, far: number'));
+    const preamble = [
+        'const near2 = near * 2;',
+        'const inv_width = 1 / (right - left);',
+        'const inv_height = 1 / (top - bottom);',
+        'let m10, m14;',
+        'if (Number.isFinite(far)) {',
+        '    const inv_neg_depth = 1 / (near - far);',
+        '    m10 = (near + far) * inv_neg_depth;',
+        '    m14 = near2 * far * inv_neg_depth;',
+        '} else {',
+        '    m10 = -1;',
+        '    m14 = -near2;',
+        '}',
+    ].map(x => ind + x).join('\n');
+
+    const components = [
+        'near2 * inv_width',
+        '0',
+        '0',
+        '0',
+        '0',
+        'near2 * inv_height',
+        '0',
+        '0',
+        '(left + right) * inv_width',
+        '(bottom + top) * inv_height',
+        'm10',
+        '-1',
+        '0',
+        '0',
+        'm14',
+        '0',
+    ];
+    const body = [
+        preamble,
+        gen_output(use_result_arg, 'mat4', components)
+    ].join('\n\n');
+
+    return gen_fn(name, signature, body, use_result_arg);
+};
+
+export const gen_gl_perspective_projection = (use_result_arg) => {
+    const name = `gl_perspective_projection`;
+    const signature = gen_signature(use_result_arg, sig('Mat4', 'aspect: number, y_fov: number, near: number, far: number'));
+    const preamble = [
+        ind + 'const top = near * Math.tan(y_fov * 0.5);',
+        ind + 'const right = top * aspect;',
+    ].join('\n');
+
+    const body = [
+        preamble,
+        use_result_arg
+            ? ind + `gl_asymmetric_perspective_projection_to_mat4_r(result, -right, right, -top, top, near, far);`
+            : ind + `return gl_asymmetric_perspective_projection_to_mat4(-right, right, -top, top, near, far);`
+    ].join('\n\n');
+
+    return gen_fn(name, signature, body, use_result_arg);
+}
+
+export const gen_look_direction_to_mat = (matrix_layout) => (use_result_arg) => {
+    const mat_type_name = gen_type_name(matrix_layout);
+
+    const mat_name = mat_type_name.toLowerCase();
+
+    const fn_name = `look_direction_to_${mat_name}`;
+    const signature = gen_signature(use_result_arg, sig(mat_type_name, `direction: Vec3, up: Vec3`));
+
+    const preamble = [
+        'const x = vec3_dirty();',
+        'const y = vec3_dirty();',
+        'const z = vec3_dirty();',
+        '',
+        'z.set(direction);',
+        'unit_vec3_r(z, z);',
+        '',
+        'if (!z.every(Number.isFinite)) {',
+        'orthogonal_vec3_r(z, up);',
+        'unit_vec3_r(z, z);',
+        '} else {',
+        'negate_vec3_r(z, z);',
+        '}',
+        '',
+        'cross_vec3_r(x, up, z);',
+        'unit_vec3_r(x, x);',
+        'if (!x.every(Number.isFinite)) {',
+        'orthogonal_vec3_r(x, z);',
+        '}',
+        'cross_vec3_r(y, z, x);'
+    ].map(x => ind + x).join('\n');
+
+    const components = [
+        'x[0]',
+        'x[1]',
+        'x[2]',
+        '0',
+        'y[0]',
+        'y[1]',
+        'y[2]',
+        '0',
+        'z[0]',
+        'z[1]',
+        'z[2]',
+        '0',
+        '0',
+        '0',
+        '0',
+        '1',
+    ].filter((x, i) => {
+        const col_index = Math.floor(i / 4);
+        const row_index = i % 4;
+        return matrix_layout.template[row_index][col_index] === s;
+    });
+
+    const body = [
+        preamble,
+        gen_output(use_result_arg, mat_name, components)
+    ].join('\n\n');
+
+    return gen_fn(fn_name, signature, body, use_result_arg);
+}
+
+export const gen_look_target_to_mat = (matrix_layout) => (use_result_arg) => {
+    const mat_type_name = gen_type_name(matrix_layout);
+
+    const mat_name = mat_type_name.toLowerCase();
+
+    const fn_name = `look_target_to_${mat_name}`;
+    const signature = gen_signature(use_result_arg, sig(mat_type_name, `origin: Vec3, target: Vec3, up: Vec3`));
+    const get_idx = get_idx_fn(matrix_layout);
+
+    const body = [
+        // const direction = new Vector3().fromVector(target).subtractVector(origin);
+        'const direction = sub_vec3(target, origin);',
+        use_result_arg
+            ? `look_direction_to_${mat_name}_r(result, direction, up);`
+            : `const result = look_direction_to_${mat_name}(direction, up);`,
+        `result[${get_idx(0, 3)}] = origin[0];`,
+        `result[${get_idx(1, 3)}] = origin[1];`,
+        `result[${get_idx(2, 3)}] = origin[2];`,
+        ...(use_result_arg
+            ? []
+            : ['return result;']
+        )
+    ].map(x => ind + x).join('\n');
+
+    return gen_fn(fn_name, signature, body, use_result_arg);
+}
+
 export const gen_mat_module = () => {
     const module_code = [
-        `import {Vec3, vec3} from './vec3.gen'`,
+        `import {Vec3, vec3, vec3_dirty, unit_vec3_r, orthogonal_vec3_r, negate_vec3_r, cross_vec3_r, sub_vec3} from './vec3.gen'`,
         `import {Quat} from './quat.gen'`,
         `import { run_hook } from '../utils';`,
         gen_mat_preamble(lin),
@@ -633,7 +784,17 @@ export const gen_mat_module = () => {
 
             gen_trs_to_mat(lin),
             gen_trs_to_mat(aff),
-            gen_trs_to_mat(hom)
+            gen_trs_to_mat(hom),
+
+            gen_gl_asymmetric_perspective_projection,
+            gen_gl_perspective_projection,
+
+            gen_look_direction_to_mat(lin),
+            gen_look_direction_to_mat(aff),
+            gen_look_direction_to_mat(hom),
+
+            gen_look_target_to_mat(aff),
+            gen_look_target_to_mat(hom),
         ].flatMap(f => [f(false), f(true)])
     ].join('\n\n') + '\n';
 
