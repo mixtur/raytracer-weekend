@@ -42,7 +42,6 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
     for (let thread_id = 0; thread_id < load.length; thread_id++) {
         const worker = workers[thread_id];
         let event_count = 0;
-        // note: tried to use transferables explicitly, but it seems Chrome doesn't care. It even makes things slightly slower.
         worker.postMessage({
             aspect_ratio,
             image_width,
@@ -54,6 +53,9 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
 
         const tmp_color = color(0, 0, 0);
         promises.push(new Promise<void>(resolve => {
+            // note: tried Atomics+SharedArrayBuffer for output pixels.
+            // - it didn't make things faster (though I should've probably implemented more sophisticated scheme with ring buffers, instead of just locking)
+            // - there is no Atomics.waitAsync on Firefox
             worker.onmessage = (ev: MessageEvent): void => {
                 event_count++;
                 const tiles = ev.data as TileResult[];
