@@ -22,7 +22,8 @@ onmessage = (ev: MessageEvent<InitRenderWorkerParameters>) => {
     render(ev.data);
 };
 
-const BATCH_THRESHOLD = 100;
+const BATCH_MIN_TIME = 100;
+const BATCH_MAX_SIZE = 4;
 function render(
     {
         aspect_ratio,
@@ -40,14 +41,14 @@ function render(
     let work_so_far = 0;
     const max_tile_size = work.reduce((max_size, tile) => Math.max(max_size, tile.width * tile.height), 0);
     const output_allocators: ArenaVec3Allocator[] = [];
+    for (let i = 0; i < BATCH_MAX_SIZE; i++) {
+        output_allocators.push(new ArenaVec3Allocator(max_tile_size));
+    }
     const tile_report: TileResult[] = [];
     let t0 = 0;
     for (let i = 0; i < work.length; i++) {
         if (tile_report.length === 0) {
             t0 = performance.now();
-        }
-        if (output_allocators[tile_report.length] === undefined) {
-            output_allocators[tile_report.length] = new ArenaVec3Allocator(max_tile_size);
         }
         const output_allocator = output_allocators[tile_report.length];
         const tile = work[i];
@@ -65,7 +66,7 @@ function render(
             progress: work_so_far / full_work
         });
         const dt = performance.now() - t0;
-        if (dt > BATCH_THRESHOLD) {
+        if (dt > BATCH_MIN_TIME || tile_report.length >= BATCH_MAX_SIZE) {
             postMessage(tile_report);
             tile_report.length = 0;
         }

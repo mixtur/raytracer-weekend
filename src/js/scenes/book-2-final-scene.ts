@@ -29,7 +29,7 @@ import { create_noise_texture } from '../texture/noise_texture';
 
 export const create = async (): Promise<Scene> => {
     return async_run_with_hooks(async (): Promise<Scene> => {
-        use_vec3_allocator(new ArenaVec3Allocator(1024 * 6));
+        use_vec3_allocator(new ArenaVec3Allocator(1024 * 6, true));
 
         const objects = create_hittable_list([]);
 

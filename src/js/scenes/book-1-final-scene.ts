@@ -28,7 +28,7 @@ import { create_bvh_node } from '../hittable/bvh';
 
 function create_lots_of_spheres(): Hittable {
     return run_with_hooks(() => {
-        use_vec3_allocator(new ArenaVec3Allocator(1024 * 1024))
+        use_vec3_allocator(new ArenaVec3Allocator(1024 * 4, true))
         const world_objects: Hittable[] = [];
         const ground_material = create_lambertian(create_checker_3d_texture(solid_color(0.2, 0.3, 0.1), solid_color(0.9, 0.9, 0.9)));
         world_objects.push(create_sphere(point3(0, -1000, 0), 1000, ground_material));
