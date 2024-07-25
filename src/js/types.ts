@@ -19,3 +19,5 @@ export interface InitRenderWorkerParameters {
     max_depth: number,
     scene: Scene
 }
+
+export type TypedArray = Uint8Array | Uint8ClampedArray | Uint16Array | Uint32Array | Int8Array | Int16Array | Int32Array | Float32Array;

@@ -10,3 +10,4 @@ import './sphere';
 import './transform';
 import './triangle';
 import './zx-grid';
+import './triangle_reference';

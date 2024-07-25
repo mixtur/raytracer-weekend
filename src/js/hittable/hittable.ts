@@ -1,5 +1,5 @@
 import { Ray } from "../math/ray";
-import { dot_vec3, point3, Point3, vec3, Vec3 } from '../math/vec3.gen';
+import { dot_vec3, point3, Point3, vec3, Vec3, vec3_dirty } from '../math/vec3.gen';
 import { AABB } from '../math/aabb';
 import { create_mega_material, MegaMaterial } from '../materials/megamaterial';
 import { TriangleVec2 } from './triangle';
@@ -13,6 +13,33 @@ export interface HitRecord {
     u: number;
     v: number;
     tex_channels: TriangleVec2[];
+}
+
+const copy_triangle_vec2 = (t: TriangleVec2): TriangleVec2 => {
+    const A = vec3_dirty();
+    const B = vec3_dirty();
+    const C = vec3_dirty();
+
+    A.set(t[0])
+    B.set(t[1])
+    C.set(t[2])
+
+    return [A, B, C];
+}
+
+export const assign_tex_channels = (hit: HitRecord, tex_channels: TriangleVec2[]) => {
+    for (let i = 0; i < tex_channels.length; i++){
+        const hit_channel = hit.tex_channels[i];
+        if (hit_channel === undefined) {
+            hit.tex_channels[i] = copy_triangle_vec2(tex_channels[i]);
+        }
+        else {
+            for (let j = 0; j < 3; j++) {
+                const vec = tex_channels[i][j];
+                hit_channel[j].set(vec);
+            }
+        }
+    }
 }
 
 export const create_empty_hit_record = (): HitRecord => {

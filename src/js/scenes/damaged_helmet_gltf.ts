@@ -4,9 +4,11 @@ import { point3, vec3 } from '../math/vec3.gen';
 import { create_camera } from '../camera';
 import { load_rgbe } from '../texture/image-parsers/rgbe_image_parser';
 import { Skybox } from '../hittable/skybox';
+import { load_gltf_light } from '../gltf_loader/light_weight_loader';
 
 export const create = async (): Promise<Scene> => {
-    const scene = await load_gltf('gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', 1024000, 1024, 25);
+    // const scene = await load_gltf('gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', 1024000, 1024, 25);
+    const scene = await load_gltf_light('gltf/DamagedHelmet/glTF/DamagedHelmet.gltf', 1024000, 1024, 25);
     const [env] = await load_rgbe(2000, 'hdr/Cannon_Exterior.hdr');
     const skybox = Skybox.create_hdr(env);
 

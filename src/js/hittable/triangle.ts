@@ -3,12 +3,12 @@ import {
     create_empty_hit_record, create_hittable_type,
     HitRecord,
     hittable_types,
-    set_face_normal
+    set_face_normal, assign_tex_channels
 } from './hittable';
 import {
     cross_vec3,
     cross_vec3_r,
-    div_vec3_s,
+    div_vec3_s, div_vec3_s_r,
     dot_vec3,
     fma_vec3_s_s_r,
     fma_vec3_s_vec3,
@@ -34,13 +34,17 @@ const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray_dirty();
 const tmp_cross = vec3_dirty();
 
-export type INormalStrategy = {
+export type IConstantNormalStrategy = {
     type: 'constant';
     normal: Vec3;
-} | {
+};
+
+export type IInterpolatedNormalStrategy = {
     type: 'interpolated';
     normals: TriangleVec3;
-} | {
+};
+
+export type INormalMapNormalStrategy = {
     type: 'normal-map';
     uvs: TriangleVec2;
     normals: TriangleVec3;
@@ -48,7 +52,9 @@ export type INormalStrategy = {
     tangents: TriangleVec3;
     tangent_ws: Vec3;
     normal_map: Texture;
-} | {
+};
+
+export type INormalStrategy = IConstantNormalStrategy | IInterpolatedNormalStrategy | INormalMapNormalStrategy | {
     type: 'unknown'// to make typescript happier in the default case
 }
 
@@ -162,6 +168,28 @@ export interface ITriangle extends Hittable {
     tex_coords: TriangleVec2[];
 }
 
+export const triangle_set_vertex_positions = (triangle: ITriangle, vertex_positions: TriangleVec3) => {
+    const a = vertex_positions[0];
+    const b = vertex_positions[1];
+    const c = vertex_positions[2];
+    const {q, u, v, normal, w, aabb} = triangle;
+
+    q.set(a);
+    sub_vec3_r(u, b, a);
+    sub_vec3_r(v, c, a);
+
+    cross_vec3_r(normal, u, v);
+    triangle.area = len_vec3(normal) / 2;
+    div_vec3_s_r(w, normal, dot_vec3(normal, normal));
+    unit_vec3_r(normal, normal);
+    triangle.d = dot_vec3(a, normal);
+    aabb.min.set(a);
+    aabb.max.set(a);
+    union_aabb_point_r(aabb, aabb, b);
+    union_aabb_point_r(aabb, aabb, c);
+    expand_aabb_r(aabb, aabb, 0.0001);
+};
+
 export const create_triangle = (vertex_positions: TriangleVec3, normal_strategy: INormalStrategy, tex_coords: TriangleVec2[], mat: MegaMaterial): ITriangle => {
     const a = vertex_positions[0];
     const b = vertex_positions[1];
@@ -247,7 +275,8 @@ hittable_types.triangle = create_hittable_type({
         hit.normal.set(normal);
         hit.p.set(intersection);
         hit.material = triangle.mat;
-        hit.tex_channels = triangle.tex_coords;
+        assign_tex_channels(hit, triangle.tex_coords);
+        // hit.tex_channels = triangle.tex_coords;
         set_face_normal(hit, r, triangle.normal, normal);
 
         return true;

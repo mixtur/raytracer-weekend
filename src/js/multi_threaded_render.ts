@@ -41,7 +41,7 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
 
     for (let thread_id = 0; thread_id < load.length; thread_id++) {
         const worker = workers[thread_id];
-        let event_count = 0;
+        let tiles_processed = 0;
         const init_message: InitRenderWorkerParameters = {
             aspect_ratio,
             image_width,
@@ -59,9 +59,9 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
             // - it didn't make things faster (though I should've probably implemented more sophisticated scheme with ring buffers, instead of just locking)
             // - there is no Atomics.waitAsync on Firefox
             worker.onmessage = (ev: MessageEvent): void => {
-                event_count++;
                 const tiles = ev.data as TileResult[];
                 for (let i = 0; i < tiles.length; i++){
+                    tiles_processed++;
                     const {tile_index, x, y, width, height, pixels, samples_per_pixel, progress} = tiles[i];
                     rays_casted_per_tile[tile_index] += samples_per_pixel;
 
@@ -80,7 +80,7 @@ export async function multi_threaded_render({render_parameters, thread_count, wr
                     const dt = performance.now() - t0;
                     progress_reporter.report(thread_id, progress, samples_per_pixel * width * height, total_rays, dt);
 
-                    if (event_count === load[thread_id].length) {
+                    if (tiles_processed === load[thread_id].length) {
                         progress_reporter.report_thread_done(thread_id);
                         worker.terminate();
                         resolve();
