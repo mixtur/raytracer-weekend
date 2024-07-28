@@ -13,6 +13,7 @@ import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3_dirty } from '../mat
 import { Texture } from '../texture/texture';
 import { TypedArray } from '../types';
 import { run_with_hooks } from '../utils';
+import { LRUCache } from '../lru';
 
 export interface ITriangleReference extends Hittable {
     type: 'triangle_reference';
@@ -45,7 +46,7 @@ export interface TriangleRefPrimitive {
 }
 
 export const triangle_type_ids = new Map<string, number>();
-const triangles_by_type: Record<number, { id: number, triangle_view: ITriangle }> = {};
+const triangles_by_type: Record<number, LRUCache<number, ITriangle, ITriangleReference>> = {};
 
 const tmp_triangle: TriangleVec3 = [ vec3_dirty(), vec3_dirty(), vec3_dirty() ];
 const load_vec4_w = (vec: Vec3, view: TypedArray, stride: number, index_a: number, index_b: number, index_c: number) => {
@@ -97,24 +98,8 @@ const create_triangle_view_for_primitive = (primitive: TriangleRefPrimitive): IT
     })
 };
 
-export const unpack_triangle = (triangle_ref: ITriangleReference): ITriangle => {
-    const primitive = triangle_ref.primitive;
-
-    //todo: cache more than just 1 element
-    let triangle_record = triangles_by_type[primitive.triangle_type_id];
-    if (triangle_record === undefined) {
-        triangle_record = triangles_by_type[primitive.triangle_type_id] = {
-            id: -1,
-            triangle_view: create_triangle_view_for_primitive(primitive)
-        };
-    }
-    const id = triangle_ref.triangle_id;
-    const triangle_view = triangle_record.triangle_view;
-    if (id === triangle_record.id) {
-        return triangle_view;
-    }
-    triangle_record.id = id;
-
+const actually_unpack = (triangle_view: ITriangle, triangle_ref: ITriangleReference) => {
+    const { primitive, triangle_id: id } = triangle_ref;
     let index_a, index_b, index_c;
     if (primitive.indices !== undefined) {
         index_a = primitive.indices[id];
@@ -166,8 +151,21 @@ export const unpack_triangle = (triangle_ref: ITriangleReference): ITriangle => 
                 break;
         }
     }
+};
 
-    return triangle_view;
+export const unpack_triangle = (triangle_ref: ITriangleReference): ITriangle => {
+    const primitive = triangle_ref.primitive;
+
+    let cache = triangles_by_type[primitive.triangle_type_id];
+    if (cache === undefined) {
+        cache = triangles_by_type[primitive.triangle_type_id] = new LRUCache<number, ITriangle, ITriangleReference>(
+            32,
+            () => create_triangle_view_for_primitive(primitive),
+            actually_unpack
+        )
+    }
+
+    return cache.get(triangle_ref.triangle_id, triangle_ref);
 };
 
 hittable_types.triangle_reference = create_hittable_type({
