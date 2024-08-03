@@ -4,6 +4,7 @@ import { multi_threaded_render } from '../multi_threaded_render';
 import { ConsoleProgressReporter, MultipleReporters, ProgressBar, ProgressText } from '../ui/progress-reporters';
 import { ACES, apply_gamma, clip_to_unit_range, compose_color_flow, expose } from '../color-flow';
 import { scenes } from '../scenes/index';
+import { create_debug_helper } from '../ui/debug_helper';
 
 const aspect_ratio = 4/3;
 const image_width = 1260;
@@ -52,6 +53,10 @@ const color_flow = compose_color_flow([
     ACES,
     apply_gamma(1 / 2.2),
 ]);
+
+if (DEBUG) {
+    create_debug_helper(writer.canvas);
+}
 
 multi_threaded_render({
     thread_count,

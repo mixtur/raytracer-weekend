@@ -28,6 +28,9 @@ export const get_esbuild_config = (outdir, prod) => {
         splitting: true,
         loader: {
             '.jpg': 'file'
+        },
+        define: {
+            DEBUG: dev.toString()
         }
     });
 };

@@ -8,7 +8,11 @@ export interface ColorWriter {
     write_color: (x: number, y: number, pixelColor: Color, samples_per_pixel: number, color_flow: ColorFlowItem) => void;
 }
 
-export const create_canvas_color_writer = (container: HTMLElement, image_width: number, image_height: number): ColorWriter => {
+export interface CanvasColorWriter extends ColorWriter {
+    canvas: HTMLCanvasElement;
+}
+
+export const create_canvas_color_writer = (container: HTMLElement, image_width: number, image_height: number): CanvasColorWriter => {
     const canvas = document.createElement('canvas');
     const _ctx = canvas.getContext('2d');
     if (_ctx === null) {
@@ -24,6 +28,7 @@ export const create_canvas_color_writer = (container: HTMLElement, image_width: 
     const output_color = color_dirty();
 
     return {
+        canvas,
         write_color: (x: number, y: number, pixel_color: Color, samples_per_pixel: number, color_flow: ColorFlowItem): void => {
             mul_vec3_s_r(output_color, pixel_color, 1 / samples_per_pixel);
             color_flow(output_color, output_color);
