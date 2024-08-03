@@ -1,4 +1,4 @@
-import { point3, Point3, vec3 } from './vec3.gen';
+import { point3, Point3, vec3, vec3_dirty } from './vec3.gen';
 import { Ray } from './ray';
 
 export interface AABB {
@@ -11,6 +11,64 @@ export const create_aabb = (min: Point3, max: Point3) => {
         min, max
     };
 };
+
+export const quantize_aabb = (aabb: AABB, parent_aabb: AABB) => {
+    aabb.min[0] = parent_aabb.min[0] + Math.floor((aabb.min[0] - parent_aabb.min[0]) / (parent_aabb.max[0] - parent_aabb.min[0]) * 255) / 255 * (parent_aabb.max[0] - parent_aabb.min[0]);
+    aabb.min[1] = parent_aabb.min[1] + Math.floor((aabb.min[1] - parent_aabb.min[1]) / (parent_aabb.max[1] - parent_aabb.min[1]) * 255) / 255 * (parent_aabb.max[1] - parent_aabb.min[1]);
+    aabb.min[2] = parent_aabb.min[2] + Math.floor((aabb.min[2] - parent_aabb.min[2]) / (parent_aabb.max[2] - parent_aabb.min[2]) * 255) / 255 * (parent_aabb.max[2] - parent_aabb.min[2]);
+    aabb.max[0] = parent_aabb.min[0] +  Math.ceil((aabb.max[0] - parent_aabb.min[0]) / (parent_aabb.max[0] - parent_aabb.min[0]) * 255) / 255 * (parent_aabb.max[0] - parent_aabb.min[0]);
+    aabb.max[1] = parent_aabb.min[1] +  Math.ceil((aabb.max[1] - parent_aabb.min[1]) / (parent_aabb.max[1] - parent_aabb.min[1]) * 255) / 255 * (parent_aabb.max[1] - parent_aabb.min[1]);
+    aabb.max[2] = parent_aabb.min[2] +  Math.ceil((aabb.max[2] - parent_aabb.min[2]) / (parent_aabb.max[2] - parent_aabb.min[2]) * 255) / 255 * (parent_aabb.max[2] - parent_aabb.min[2]);
+
+    if (aabb.min[0] === aabb.max[0]) {
+        aabb.min[0] -= (aabb.min[0] - parent_aabb.min[0]) / (parent_aabb.max[0] - parent_aabb.min[0]) / 255;
+        aabb.max[0] += (aabb.min[0] - parent_aabb.min[0]) / (parent_aabb.max[0] - parent_aabb.min[0]) / 255;
+    }
+
+    if (aabb.min[1] === aabb.max[1]) {
+        aabb.min[1] -= (aabb.min[1] - parent_aabb.min[1]) / (parent_aabb.max[1] - parent_aabb.min[1]) / 255;
+        aabb.max[1] += (aabb.min[1] - parent_aabb.min[1]) / (parent_aabb.max[1] - parent_aabb.min[1]) / 255;
+    }
+
+    if (aabb.min[2] === aabb.max[2]) {
+        aabb.min[2] -= (aabb.min[2] - parent_aabb.min[2]) / (parent_aabb.max[2] - parent_aabb.min[2]) / 255;
+        aabb.max[2] += (aabb.min[2] - parent_aabb.min[2]) / (parent_aabb.max[2] - parent_aabb.min[2]) / 255;
+    }
+}
+
+
+export const pack_aabb = (packed_aabbs: Uint8ClampedArray, byte_offset: number, aabb: AABB, parent_aabb: AABB) => {
+    packed_aabbs[byte_offset + 0] = (aabb.min[0] - parent_aabb.min[0]) / (parent_aabb.max[0] - parent_aabb.min[0]) * 255;
+    packed_aabbs[byte_offset + 1] = (aabb.min[1] - parent_aabb.min[1]) / (parent_aabb.max[1] - parent_aabb.min[1]) * 255;
+    packed_aabbs[byte_offset + 2] = (aabb.min[2] - parent_aabb.min[2]) / (parent_aabb.max[2] - parent_aabb.min[2]) * 255;
+    packed_aabbs[byte_offset + 3] = Math.ceil((aabb.max[0] - parent_aabb.min[0]) / (parent_aabb.max[0] - parent_aabb.min[0]) * 255);
+    packed_aabbs[byte_offset + 4] = Math.ceil((aabb.max[1] - parent_aabb.min[1]) / (parent_aabb.max[1] - parent_aabb.min[1]) * 255);
+    packed_aabbs[byte_offset + 5] = Math.ceil((aabb.max[2] - parent_aabb.min[2]) / (parent_aabb.max[2] - parent_aabb.min[2]) * 255);
+
+    if (packed_aabbs[byte_offset + 0] === packed_aabbs[byte_offset + 3]) {
+        packed_aabbs[byte_offset + 0]--;
+        packed_aabbs[byte_offset + 3]++;
+    }
+
+    if (packed_aabbs[byte_offset + 1] === packed_aabbs[byte_offset + 4]) {
+        packed_aabbs[byte_offset + 1]--;
+        packed_aabbs[byte_offset + 4]++;
+    }
+
+    if (packed_aabbs[byte_offset + 2] === packed_aabbs[byte_offset + 5]) {
+        packed_aabbs[byte_offset + 2]--;
+        packed_aabbs[byte_offset + 5]++;
+    }
+}
+
+export const unpack_aabb = (packed_aabbs: Uint8ClampedArray, byte_offset: number, aabb: AABB, parent_aabb: AABB) => {
+    aabb.min[0] = parent_aabb.min[0] + packed_aabbs[byte_offset + 0] / 255 * (parent_aabb.max[0] - parent_aabb.min[0]);
+    aabb.min[1] = parent_aabb.min[1] + packed_aabbs[byte_offset + 1] / 255 * (parent_aabb.max[1] - parent_aabb.min[1]);
+    aabb.min[2] = parent_aabb.min[2] + packed_aabbs[byte_offset + 2] / 255 * (parent_aabb.max[2] - parent_aabb.min[2]);
+    aabb.max[0] = parent_aabb.min[0] + packed_aabbs[byte_offset + 3] / 255 * (parent_aabb.max[0] - parent_aabb.min[0]);
+    aabb.max[1] = parent_aabb.min[1] + packed_aabbs[byte_offset + 4] / 255 * (parent_aabb.max[1] - parent_aabb.min[1]);
+    aabb.max[2] = parent_aabb.min[2] + packed_aabbs[byte_offset + 5] / 255 * (parent_aabb.max[2] - parent_aabb.min[2]);
+}
 
 export const hit_aabb = (aabb: AABB, r: Ray, t_min: number, t_max: number): boolean => {
     let t0_0 = (aabb.min[0] - r.origin[0]) * r.inv_dir[0];

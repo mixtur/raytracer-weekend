@@ -4,6 +4,7 @@ import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
 import { INormalStrategy } from '../hittable/triangle';
 import {
+    ArenaMat3Allocator,
     ArenaMat3x4Allocator,
     mat3,
     mat3x4,
@@ -11,7 +12,7 @@ import {
     mat4,
     mat4_to_mat3x4,
     mul_mat3x4,
-    trs_to_mat3x4,
+    trs_to_mat3x4, use_mat3_allocator,
     use_mat3x4_allocator
 } from '../math/mat3.gen';
 import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec3.gen';
@@ -27,12 +28,12 @@ import { create_hittable_list } from '../hittable/hittable_list';
 import { create_image_texture } from '../texture/image_texture';
 import { create_texture_transform } from '../texture/texture_transform';
 import {
-    create_triangle_reference,
     triangle_type_ids,
     TriangleRefAttribute,
     TriangleRefAttributeSemantic,
     TriangleRefPrimitive
 } from '../hittable/triangle_reference';
+import { create_packed_bvh } from '../hittable/packed_bvh_triangles';
 
 const gltf_components_per_element = {
     SCALAR: 1,
@@ -63,7 +64,8 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
 
     return run_with_hooks(() => {
         use_vec3_allocator(new ArenaVec3Allocator(vec3_arena_size, true));
-        use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size));
+        use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size, true));
+        use_mat3_allocator(new ArenaMat3Allocator(mat_arena_size, true));
 
         const buffer_views = (gltf.bufferViews ?? []).map(b => {
             const buffer = buffers[b.buffer];
@@ -177,6 +179,7 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
             return create_burley_pbr_separate(albedo, metallic_roughness, metallic_roughness, normal_map, emissive_map);
         });
 
+        let next_primitive_index = 0;
         const parse_indexed_primitive = (gltf_primitive: GLTF2.Primitive) => {
             const indices = accessors[gltf_primitive.indices!];
             const position_components = accessors[gltf_primitive.attributes.POSITION];
@@ -271,19 +274,14 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
             }
 
             const primitive: TriangleRefPrimitive = {
+                id: next_primitive_index++,
                 attributes: triangle_ref_attributes,
                 indices,
                 material,
                 triangle_type_id
             };
 
-            const triangles = [];
-            for (let i = 0; i < indices.length; i += 3) {
-                triangles.push(create_triangle_reference(primitive, i));
-            }
-
-            return create_bvh_node(triangles, 0, 0);
-            // return create_bih_root(triangles, 0, 0);
+            return create_packed_bvh(primitive);
         };
 
         const meshes = (gltf.meshes ?? []).map(m => {

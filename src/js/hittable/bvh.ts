@@ -125,7 +125,7 @@ hittable_types.bvh_node = create_hittable_type({
         }
 
         const first_is_hit = hittable_types[first_child.type].hit(first_child, r, t_min, t_max, hit);
-        const second_is_hit = (first_is_hit && first_child === second_child)
+        const second_is_hit = first_is_hit && (first_child === second_child)
             ? true
             : hittable_types[second_child.type].hit(second_child, r, t_min, first_is_hit ? hit.t : t_max, hit);
 

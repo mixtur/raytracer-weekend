@@ -8,13 +8,14 @@ import {
     TriangleVec3
 } from '../hittable/triangle';
 import {
+    ArenaMat3Allocator,
     ArenaMat3x4Allocator, mat3,
     mat3x4,
     Mat3x4,
     mat4,
     mat4_to_mat3x4,
     mul_mat3x4,
-    trs_to_mat3x4,
+    trs_to_mat3x4, use_mat3_allocator,
     use_mat3x4_allocator
 } from '../math/mat3.gen';
 import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec3.gen';
@@ -28,7 +29,6 @@ import { create_bvh_node } from '../hittable/bvh';
 import { create_transform } from '../hittable/transform';
 import { create_hittable_list } from '../hittable/hittable_list';
 import { create_image_texture } from '../texture/image_texture';
-import { create_bih_root } from '../hittable/bih';
 import { create_texture_transform } from '../texture/texture_transform';
 
 const gltf_components_per_element = {
@@ -53,7 +53,8 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
 
     return run_with_hooks(() => {
         use_vec3_allocator(new ArenaVec3Allocator(vec3_arena_size, true));
-        use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size));
+        use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size, true));
+        use_mat3_allocator(new ArenaMat3Allocator(mat_arena_size, true));
 
         const buffer_views = (gltf.bufferViews ?? []).map(b => {
             const buffer = buffers[b.buffer];

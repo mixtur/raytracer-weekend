@@ -39,6 +39,7 @@ export interface TriangleRefAttribute {
 }
 
 export interface TriangleRefPrimitive {
+    id: number;
     triangle_type_id: number;//this field is set while loading model. But actual triangle caches are created on render
     attributes: TriangleRefAttribute[];
     indices?: TypedArray;
@@ -49,19 +50,19 @@ export const triangle_type_ids = new Map<string, number>();
 const triangles_by_type: Record<number, LRUCache<number, ITriangle, ITriangleReference>> = {};
 
 const tmp_triangle: TriangleVec3 = [ vec3_dirty(), vec3_dirty(), vec3_dirty() ];
-const load_vec4_w = (vec: Vec3, view: TypedArray, stride: number, index_a: number, index_b: number, index_c: number) => {
+export const load_vec4_w = (vec: Vec3, view: TypedArray, stride: number, index_a: number, index_b: number, index_c: number) => {
     vec[0] = view[index_a * stride + 3];
     vec[1] = view[index_b * stride + 3];
     vec[2] = view[index_c * stride + 3];
 };
 
-const load_vec3 = (vec: Vec3, view: TypedArray, stride: number, index: number) => {
+export const load_vec3 = (vec: Vec3, view: TypedArray, stride: number, index: number) => {
     vec[0] = view[index * stride];
     vec[1] = view[index * stride + 1];
     vec[2] = view[index * stride + 2];
 };
 
-const load_vec2 = (vec: Vec3, view: TypedArray, stride: number, index: number) => {
+export const load_vec2 = (vec: Vec3, view: TypedArray, stride: number, index: number) => {
     vec[0] = view[index * stride];
     vec[1] = view[index * stride + 1];
 };
@@ -99,7 +100,7 @@ const create_triangle_view_for_primitive = (primitive: TriangleRefPrimitive): IT
 };
 
 const actually_unpack = (triangle_view: ITriangle, triangle_ref: ITriangleReference) => {
-    const { primitive, triangle_id: id } = triangle_ref;
+    const { triangle_id: id, primitive } = triangle_ref;
     let index_a, index_b, index_c;
     if (primitive.indices !== undefined) {
         index_a = primitive.indices[id];
@@ -153,40 +154,44 @@ const actually_unpack = (triangle_view: ITriangle, triangle_ref: ITriangleRefere
     }
 };
 
-export const unpack_triangle = (triangle_ref: ITriangleReference): ITriangle => {
-    const primitive = triangle_ref.primitive;
+const tmp_primitive: Partial<ITriangleReference> = {};
+export const unpack_triangle = (primitive: TriangleRefPrimitive, triangle_id: number): ITriangle => {
 
     let cache = triangles_by_type[primitive.triangle_type_id];
     if (cache === undefined) {
         cache = triangles_by_type[primitive.triangle_type_id] = new LRUCache<number, ITriangle, ITriangleReference>(
-            32,
+            6,
             () => create_triangle_view_for_primitive(primitive),
             actually_unpack
         )
     }
 
-    return cache.get(triangle_ref.triangle_id, triangle_ref);
+    const key = triangle_id << 20 | primitive.id;
+    tmp_primitive.triangle_id = triangle_id;
+    tmp_primitive.primitive = primitive;
+
+    return cache.get(key, tmp_primitive as ITriangleReference);
 };
 
 hittable_types.triangle_reference = create_hittable_type({
     hit: (hittable, r, t_min, t_max, hit) => {
         const triangle_ref = hittable as ITriangleReference;
-        const triangle = unpack_triangle(triangle_ref);
+        const triangle = unpack_triangle(triangle_ref.primitive, triangle_ref.triangle_id);
         return hittable_types.triangle.hit(triangle, r, t_min, t_max, hit);
     },
     get_bounding_box: (hittable, time0, time1, aabb) => {
         const triangle_ref = hittable as ITriangleReference;
-        const triangle = unpack_triangle(triangle_ref);
+        const triangle = unpack_triangle(triangle_ref.primitive, triangle_ref.triangle_id);
         return hittable_types.triangle.get_bounding_box(triangle, time0, time1, aabb);
     },
     random: (hittable, origin) => {
         const triangle_ref = hittable as ITriangleReference;
-        const triangle = unpack_triangle(triangle_ref);
+        const triangle = unpack_triangle(triangle_ref.primitive, triangle_ref.triangle_id);
         return hittable_types.triangle.random(triangle, origin);
     },
     pdf_value: (hittable, origin, direction) => {
         const triangle_ref = hittable as ITriangleReference;
-        const triangle = unpack_triangle(triangle_ref);
+        const triangle = unpack_triangle(triangle_ref.primitive, triangle_ref.triangle_id);
         return hittable_types.triangle.pdf_value(triangle, origin, direction);
     }
 });

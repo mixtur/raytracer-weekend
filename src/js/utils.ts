@@ -23,26 +23,53 @@ export const format_time = (ms: number): string => {
     return `${pad_start(h, 2)}:${pad_start(m % 60, 2)}:${pad_start(s % 60, 2)}.${pad_start(ms % 1000, 3)}`;
 };
 
-const teardowns: Array<() => void> = [];
+type TeardownPoolItem = (() => void)[];
+const teardowns_pool: TeardownPoolItem[] = [];
+const alloc_teardown_list = () => {
+    const list = teardowns_pool.pop();
+    if (list === undefined) {
+        return [];
+    }
+    list.length = 0;
+    return list;
+}
+
+const free_teardown_list = (list: TeardownPoolItem) => {
+    teardowns_pool.push(list);
+}
+let current_teardowns: TeardownPoolItem | undefined;
 export const run_with_hooks = <T>(f: () => T): T => {
-    teardowns.length = 0;
+    const prev_teardowns = current_teardowns;
+    const teardowns = alloc_teardown_list();
+    current_teardowns = teardowns;
     const result = f();
     for (let i = 0; i < teardowns.length; i++){
         teardowns[i]();
     }
+    free_teardown_list(teardowns);
+    current_teardowns = prev_teardowns;
     return result;
 };
 
 
 export const async_run_with_hooks = async <T>(f: () => Promise<T>): Promise<T> => {
-    teardowns.length = 0;
+    const prev_teardowns = current_teardowns;
+    const teardowns = alloc_teardown_list();
+    current_teardowns = teardowns;
     try {
         return await f();
     } finally {
         for (let i = 0; i < teardowns.length; i++){
             teardowns[i]();
         }
+        free_teardown_list(teardowns);
+        current_teardowns = prev_teardowns;
     }
 };
 
-export const run_hook = (f: () => () => void) => teardowns.push(f());
+export const run_hook = (f: () => () => void) => {
+    if (current_teardowns === undefined) {
+        throw new Error(`hooks must be run either inside run_with_hooks or async_run_with_hooks`);
+    }
+    current_teardowns.push(f())
+};
