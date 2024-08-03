@@ -5,8 +5,8 @@ import { ConsoleProgressReporter, MultipleReporters, ProgressBar, ProgressText }
 import { ACES, apply_gamma, clip_to_unit_range, compose_color_flow, expose } from '../color-flow';
 import { scenes } from '../scenes/index';
 
-const aspect_ratio = 1;
-const image_width = 840;
+const aspect_ratio = 4/3;
+const image_width = 1260;
 const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 100;
 const max_depth = 50;

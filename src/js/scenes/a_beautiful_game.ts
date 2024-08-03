@@ -8,19 +8,19 @@ import { load_gltf_light } from '../gltf_loader/light_weight_loader';
 
 export const create = async (): Promise<Scene> => {
     // const scene = await load_gltf('gltf/ABeautifulGame/glTF/ABeautifulGame.gltf', 2 ** 24, 2 ** 12, 25);
-    const scene = await load_gltf_light('gltf/ABeautifulGame/glTF/ABeautifulGame.gltf', 2 ** 21, 2 ** 12, 25);
+    const scene = await load_gltf_light('gltf/ABeautifulGame/glTF/ABeautifulGame.gltf', 2 ** 14, 2 ** 11, 25);
     const [env] = await load_rgbe(2000, 'hdr/Cannon_Exterior.hdr');
     const skybox = Skybox.create_hdr(env);
 
     return create_scene({
         // light: skybox,
         camera: create_camera({
-            look_from: point3(1.1, 0.4, 0.6),
+            look_from: point3(0.65, 0.4, -0.3),
             look_at: point3(0, 0, 0),
             y_up: vec3(0, 1, 0),
-            focus_dist: 1.32,
-            aperture: 0.01,
-            y_fov: 35,
+            focus_dist: 0.7,
+            aperture: 0.0025,
+            y_fov: 45,
             time0: 0,
             time1: 1
         }),

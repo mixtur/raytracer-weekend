@@ -31,7 +31,7 @@ export interface IPackedBVH extends Hittable {
     // 31 bits right + 1 bit triangle flag
     nodes: Uint32Array; // 3 * 4 bytes per triangle
     packed_aabbs: Uint8ClampedArray; // 6 bytes per triangle
-    aabb_stack: AABB[];
+    aabb_stack: AABB[];// note: this is shared
 }
 
 const UINTS_PER_PACKED_BVH_NODE = 3;
@@ -39,11 +39,19 @@ const BYTES_PER_AABB = 6;
 const A = vec3_dirty();
 const B = vec3_dirty();
 const C = vec3_dirty();
+
+const aabb_stack: AABB[] = [];
+const aabb_allocator = new ArenaVec3Allocator(2 ** 7 * 6);
 export const create_packed_bvh = (primitive: TriangleRefPrimitive): IPackedBVH => {
     const triangles_count = (primitive.indices ? (primitive.indices.length) : (primitive.attributes[0].view.length / primitive.attributes[0].stride)) / 3;
-    //todo: shared array buffer
-    const packed_nodes = new Uint32Array(triangles_count * UINTS_PER_PACKED_BVH_NODE);
-    const packed_aabbs = new Uint8ClampedArray(triangles_count * BYTES_PER_AABB);
+
+    const packed_nodes_buffer = new SharedArrayBuffer(triangles_count * UINTS_PER_PACKED_BVH_NODE * Uint32Array.BYTES_PER_ELEMENT);
+    const packed_aabbs_buffer = new SharedArrayBuffer(triangles_count * BYTES_PER_AABB);
+
+    //todo: can use smaller integers for smaller meshes
+    const packed_nodes = new Uint32Array(packed_nodes_buffer);
+    const packed_aabbs = new Uint8ClampedArray(packed_aabbs_buffer);
+
     let max_depth = 1;
     let next_node_offset = 0;
     let next_aabb_byte_offset = 0;
@@ -110,7 +118,14 @@ export const create_packed_bvh = (primitive: TriangleRefPrimitive): IPackedBVH =
         let left: number;
         let right: number;
         let axis = 0;
-        const aabb = create_aabb(vec3_dirty(), vec3_dirty());
+        while (aabb_stack.length <= depth) {
+            aabb_stack.push(create_aabb(
+                aabb_allocator.alloc_dirty(),
+                aabb_allocator.alloc_dirty(),
+            ))
+        }
+
+        const aabb = aabb_stack[depth];
 
         switch (size) {
             case 0:
@@ -195,18 +210,6 @@ export const create_packed_bvh = (primitive: TriangleRefPrimitive): IPackedBVH =
         ? pack_bvh_node(1, 0, create_triangle_index(0), create_triangle_index(0), full_aabb, full_aabb)
         : create_index(triangle_indices, full_aabb, 1);
 
-    const aabb_stack: AABB[] = [];
-    //note: this is explicitly non-shared, because this is not actually a part of a model
-    //todo: make max_depth global, allocate one aabb_stack for all BVHs
-    const aabb_allocator = new ArenaVec3Allocator(max_depth * 2, false);
-    for (let i = 0; i < max_depth; i++) {
-        aabb_stack.push(
-            create_aabb(
-                aabb_allocator.alloc_dirty(),
-                aabb_allocator.alloc_dirty()
-            )
-        );
-    }
 
     return {
         type: 'packed_bvh',
