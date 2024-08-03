@@ -1,5 +1,5 @@
 import { GLTF2 } from './gltf_spec';
-import { GLDataType, GLPrimitiveMode, GLTextureFilter } from './gl_types';
+import { GLPrimitiveMode } from './gl_types';
 import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
 import {
@@ -9,7 +9,7 @@ import {
 } from '../hittable/triangle';
 import {
     ArenaMat3Allocator,
-    ArenaMat3x4Allocator, mat3,
+    ArenaMat3x4Allocator,
     mat3x4,
     Mat3x4,
     mat4,
@@ -19,28 +19,17 @@ import {
     use_mat3x4_allocator
 } from '../math/mat3.gen';
 import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec3.gen';
-import { axis_angle_to_quat, quat } from '../math/quat.gen';
+import { quat } from '../math/quat.gen';
 import { run_with_hooks } from '../utils';
-import { create_burley_pbr_separate } from '../materials/burley-pbr-separate';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Texture } from '../texture/texture';
 import { Hittable } from '../hittable/hittable';
 import { create_bvh_node } from '../hittable/bvh';
 import { create_transform } from '../hittable/transform';
 import { create_hittable_list } from '../hittable/hittable_list';
-import { create_image_texture } from '../texture/image_texture';
-import { create_texture_transform } from '../texture/texture_transform';
 import { create_material_parser } from './parse_material';
-
-const gltf_components_per_element = {
-    SCALAR: 1,
-    VEC2: 2,
-    VEC3: 3,
-    VEC4: 4,
-    MAT2: 4,
-    MAT3: 9,
-    MAT4: 16
-}
+import { create_accessor_parser } from './parse_accessor';
+import { create_parse_alpha_mode_parser } from './parse_alpha_mode';
 
 export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_size: number, emissive_scale: number = 20): Promise<Hittable> => {
     const base_url = new URL(url, location.href);
@@ -62,19 +51,9 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             return new Uint8Array(buffer, b.byteOffset ?? 0, b.byteLength);
         });
 
-        const accessors = (gltf.accessors ?? []).map(a => {
-            const buffer_view = buffer_views[a.bufferView ?? 0];
-            switch (a.componentType) {
-                case GLDataType.FLOAT:
-                    return new Float32Array(buffer_view.buffer, (buffer_view.byteOffset ?? 0) + (a.byteOffset ?? 0), a.count * gltf_components_per_element[a.type ?? 'SCALAR']);
-                case GLDataType.UNSIGNED_SHORT:
-                    return new Uint16Array(buffer_view.buffer, (buffer_view.byteOffset ?? 0) + (a.byteOffset ?? 0), a.count * gltf_components_per_element[a.type ?? 'SCALAR']);
-                case GLDataType.UNSIGNED_INT:
-                    return new Uint32Array(buffer_view.buffer, (buffer_view.byteOffset ?? 0) + (a.byteOffset ?? 0), a.count * gltf_components_per_element[a.type ?? 'SCALAR']);
-                default:
-                    throw new Error(`unknown component type: ${GLDataType[a.componentType]}`);
-            }
-        });
+        const accessors = (gltf.accessors ?? []).map(create_accessor_parser({
+            buffer_views
+        }));
 
         const textures = (gltf.textures ?? []).map(t => ({
             image: images[t.source!],
@@ -200,10 +179,12 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             // return create_bih_root(triangles, 0, 0);
         };
 
+        const parse_alpha_mode = create_parse_alpha_mode_parser({textures});
         const meshes = (gltf.meshes ?? []).map(m => {
             return m.primitives.map((p) => {
                 if (p.indices !== undefined) {
-                    return parse_indexed_primitive(p);
+                    const material = p.material === undefined ? undefined : (gltf.materials ?? [])[p.material];
+                    return parse_alpha_mode(material, parse_indexed_primitive(p));
                 } else {
                     throw new Error(`un-indexed primitives are not supported`);
                 }

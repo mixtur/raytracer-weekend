@@ -30,6 +30,7 @@ import { HitRecord } from '../hittable/hittable';
 import { interpolate_vec2_r } from '../hittable/triangle';
 import { solid_color } from '../texture/solid_color';
 import { is_image_texture } from '../texture/image_texture';
+import { update_uv } from '../uv';
 
 const chi_plus = (x: number) => x < 0 ? 0 : 1;
 
@@ -197,20 +198,6 @@ pdf_types.specular_burley_pdf = create_reflection_pdf_type<'specular_burley_pdf'
     }
 })
 
-const uv = vec3_dirty();
-const barycentric_weights = vec3_dirty();
-const update_uv = (hit: HitRecord) => {
-    const { u, v } = hit;
-    if (hit.tex_channels.length > 0) {
-        //todo: un-hardcode tex channel
-        set_vec3(barycentric_weights, 1 - u - v, u, v);
-        interpolate_vec2_r(uv, barycentric_weights, hit.tex_channels[0]);
-    } else {
-        uv[0] = u;
-        uv[1] = v;
-    }
-}
-
 export interface IBurleyPDF extends PDF {
     type: 'burley_pdf',
     pdf1: ICosinePDF;
@@ -255,7 +242,7 @@ pdf_types.burley_pdf = {
 
 const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, scattered) => {
     const mixture_pdf = material.scattering_pdf as IBurleyPDF;
-    update_uv(hit);
+    const uv = update_uv(hit);
     const albedo = texture_get_value[material.albedo.type](material.albedo, uv[0], uv[1], hit.p);
     let metallic = 1, roughness = 1;
     if (material.metallic === material.roughness) {
@@ -292,6 +279,7 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 
     //todo: roughness is sampled twice now. Once here and another time in attenuation
     //      we'd better avoid it.
+    const uv = update_uv(hit);
     const roughness = texture_get_value[material.roughness.type](material.roughness, uv[0], uv[1], hit.p)[1];
     const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
     set_specular_ggx_pdf_alpha(specular_pdf, _roughness);
@@ -303,7 +291,7 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 
 const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
     if (is_image_texture(material.emissive)) {
-        update_uv(hit);
+        const uv = update_uv(hit);
         return texture_get_value[material.emissive.type](material.emissive, uv[0], uv[1], uv);
     }
 

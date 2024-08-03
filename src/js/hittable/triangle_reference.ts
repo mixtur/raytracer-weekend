@@ -112,7 +112,7 @@ const actually_unpack = (triangle_view: ITriangle, triangle_ref: ITriangleRefere
         index_c = id + 2;
     }
 
-    //note: even if the assertions are wrong, corresponding case just won't trigger.
+    //note: the assertions are wrong
     const { normal } = triangle_view.normal_strategy as (IConstantNormalStrategy);
     const { normals } = triangle_view.normal_strategy as (IInterpolatedNormalStrategy | INormalMapNormalStrategy)
     const { tangents, tangent_ws } = triangle_view.normal_strategy as INormalMapNormalStrategy;
@@ -135,11 +135,13 @@ const actually_unpack = (triangle_view: ITriangle, triangle_ref: ITriangleRefere
                 load_vec3(normals[2], view, stride, index_c);
                 break;
             case TriangleRefAttributeSemantic.TANGENT:
-                load_vec3(tangents[0], view, stride, index_a);
-                load_vec3(tangents[1], view, stride, index_b);
-                load_vec3(tangents[2], view, stride, index_c);
-                load_vec4_w(tangent_ws, view, stride, index_a, index_b, index_c);
-                (triangle_view.normal_strategy as INormalMapNormalStrategy).normal_map = primitive.material.normal_map as Texture;
+                if (tangents) {
+                    load_vec3(tangents[0], view, stride, index_a);
+                    load_vec3(tangents[1], view, stride, index_b);
+                    load_vec3(tangents[2], view, stride, index_c);
+                    load_vec4_w(tangent_ws, view, stride, index_a, index_b, index_c);
+                    (triangle_view.normal_strategy as INormalMapNormalStrategy).normal_map = primitive.material.normal_map as Texture;
+                }
                 break;
 
             case TriangleRefAttributeSemantic.TEX_COORD_0:

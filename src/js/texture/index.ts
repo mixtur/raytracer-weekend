@@ -4,3 +4,4 @@ import './image_texture';
 import './noise_texture';
 import './solid_color';
 import './texture_transform';
+import './alpha_image_texture';

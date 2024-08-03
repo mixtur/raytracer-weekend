@@ -12,3 +12,5 @@ import './triangle';
 import './zx-grid';
 import './triangle_reference';
 import './packed_bvh_triangles';
+import './alpha_blend';
+import './alpha_mask';

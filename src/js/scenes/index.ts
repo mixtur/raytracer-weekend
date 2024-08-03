@@ -11,5 +11,6 @@ export const scenes: [string, string, () => Promise<Scene>][] = [
     ['simple.gltf',               'gltf',  () => import('../scenes/simple_gltf').then(({create}) => create())],
     ['DamagedHelmet.gltf',        'gltf',  () => import('../scenes/damaged_helmet_gltf').then(({create}) => create())],
     ['TextureTransformTest.gltf', 'gltf',  () => import('../scenes/texture_transform_test').then(({create}) => create())],
+    ['AlphaBlendModeTest.gltf',   'gltf',  () => import('../scenes/alpha_blend_mode_test').then(({create}) => create())],
     ['[WIP] ABeautifulGame.gltf', 'gltf',  () => import('../scenes/a_beautiful_game').then(({create}) => create())],
 ];
