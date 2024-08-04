@@ -63,6 +63,18 @@ export const create_empty_hit_record = (): HitRecord => {
     };
 };
 
+export const set_hit_r = (result: HitRecord, copy_src: HitRecord): void => {
+    result.t = copy_src.t;
+    result.u = copy_src.u;
+    result.v = copy_src.v;
+    result.front_face = copy_src.front_face;
+    result.material = copy_src.material;
+
+    result.p.set(copy_src.p);
+    result.normal.set(copy_src.normal);
+    assign_tex_channels(result, copy_src.tex_channels);
+}
+
 export const set_face_normal = (hit: HitRecord, r: Ray, outward_normal: Vec3, rendering_normal: Vec3): void => {
     hit.front_face = dot_vec3(r.direction, outward_normal) < 0;
     if (hit.front_face) {

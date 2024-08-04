@@ -237,6 +237,19 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
             (s.nodes ?? []).forEach((n_index) => collect_hittables(nodes[n_index], mat3x4(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)));
 
             return create_bvh_node(hittables, 0, 1);
+
+            // return create_bvh_node([
+            //     hittables[0], // arrows
+            //     hittables[1], // ??
+            //     hittables[2], // plates
+            //     hittables[3], // #5
+            //     hittables[4], // #4
+            //     hittables[5], // #3
+            //     hittables[6], // #2
+            //     hittables[7], // #1
+            //     hittables[8] // background
+            // ], 0, 1);
+
         });
 
         return scenes[0];

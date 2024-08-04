@@ -112,6 +112,8 @@ const actually_unpack = (triangle_view: ITriangle, triangle_ref: ITriangleRefere
         index_c = id + 2;
     }
 
+    triangle_view.mat = primitive.material;
+
     //note: the assertions are wrong
     const { normal } = triangle_view.normal_strategy as (IConstantNormalStrategy);
     const { normals } = triangle_view.normal_strategy as (IInterpolatedNormalStrategy | INormalMapNormalStrategy)

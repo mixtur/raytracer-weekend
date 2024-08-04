@@ -246,9 +246,6 @@ hittable_types.packed_bvh = create_hittable_type({
             const aabb = bvh.aabb_stack[depth];
             const aabb_offset = node_offset_to_aabb_offset(node_offset);
             unpack_aabb(bvh.packed_aabbs, aabb_offset, aabb, parent_aabb);
-            // if (globalThis._debug) {
-            //     debugger;
-            // }
             if (!hit_aabb(aabb, r, t_min, t_max)) {
                 return false;
             }
@@ -263,8 +260,8 @@ hittable_types.packed_bvh = create_hittable_type({
             }
 
             const first_is_hit = hit_child_id(first_child, aabb, t_max, depth + 1);
-            const second_is_hit = first_is_hit && (first_child === second_child)
-                ? true
+            const second_is_hit = first_child === second_child
+                ? first_is_hit
                 : hit_child_id(second_child, aabb, first_is_hit ? hit.t : t_max, depth + 1);
 
             return first_is_hit || second_is_hit;
