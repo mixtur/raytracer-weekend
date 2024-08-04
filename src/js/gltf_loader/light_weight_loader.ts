@@ -5,17 +5,17 @@ import { solid_color } from '../texture/solid_color';
 import { INormalStrategy } from '../hittable/triangle';
 import {
     ArenaMat3Allocator,
-    ArenaMat3x4Allocator,
+    ArenaMat3x4Allocator, is_identity_mat3x4,
     mat3x4,
     Mat3x4,
-    mat4,
+    mat4_dirty,
     mat4_to_mat3x4,
     mul_mat3x4,
     trs_to_mat3x4, use_mat3_allocator,
     use_mat3x4_allocator
 } from '../math/mat3.gen';
-import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec3.gen';
-import { quat } from '../math/quat.gen';
+import { ArenaVec3Allocator, use_vec3_allocator, vec3, vec3_dirty } from '../math/vec3.gen';
+import { quat, quat_dirty } from '../math/quat.gen';
 import { run_with_hooks } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Hittable } from '../hittable/hittable';
@@ -33,6 +33,10 @@ import { create_material_parser } from './parse_material';
 import { create_accessor_parser } from './parse_accessor';
 import { create_parse_alpha_mode_parser } from './parse_alpha_mode';
 
+const tmp_mat4 = mat4_dirty();
+const tmp_scale = vec3_dirty();
+const tmp_translation = vec3_dirty();
+const tmp_quat = quat_dirty();
 export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_arena_size: number, emissive_scale: number = 20): Promise<Hittable> => {
     const base_url = new URL(url, location.href);
     const gltf = await fetch(url).then(res => res.json()) as GLTF2.Root;
@@ -183,7 +187,7 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
 
         const parse_alpha_mode = create_parse_alpha_mode_parser({textures});
         const meshes = (gltf.meshes ?? []).map(m => {
-            return m.primitives.map((p) => {
+            const hittables = m.primitives.map((p) => {
                 if (p.indices !== undefined) {
                     const material = p.material === undefined ? undefined : (gltf.materials ?? [])[p.material];
                     return parse_alpha_mode(material, parse_indexed_primitive(p));
@@ -191,27 +195,33 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
                     throw new Error(`un-indexed primitives are not supported`);
                 }
             });
+
+            if (hittables.length === 1) {
+                return hittables[0];
+            }
+            return create_hittable_list(hittables);
         });
 
         interface Node {
             matrix: Mat3x4;
-            mesh: Hittable[],
+            mesh: Hittable | null,
             child_indices: number[],
             children: Node[]
         }
 
         const nodes = (gltf.nodes ?? []).map(n => {
+            // noinspection CommaExpressionJS
             const matrix = n.matrix
-                ? mat4_to_mat3x4(mat4(...n.matrix))
+                ? mat4_to_mat3x4((tmp_mat4.set(n.matrix), tmp_mat4))
                 : trs_to_mat3x4(
-                    vec3(...(n.translation ?? [0, 0, 0])),
-                    quat(...(n.rotation ?? [0, 0, 0, 1])),
-                    vec3(...(n.scale ?? [1, 1, 1]))
+                    (tmp_translation.set(n.translation ?? [0, 0, 0]), tmp_translation),
+                    (tmp_quat.set(n.rotation ?? [0, 0, 0, 1]), tmp_quat),
+                    (tmp_scale.set(n.scale ?? [1, 1, 1]), tmp_scale)
                 );
 
             return {
                 matrix,
-                mesh: n.mesh === undefined ? [] : meshes[n.mesh],
+                mesh: n.mesh === undefined ? null : meshes[n.mesh],
                 child_indices: n.children ?? [],
                 children: []
             } as Node;
@@ -227,7 +237,11 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
             const collect_hittables = (n: Node, parent_matrix: Mat3x4) => {
                 const child_matrix = mul_mat3x4(parent_matrix, n.matrix);
                 if (n.mesh !== null) {
-                    hittables.push(create_transform(child_matrix, create_hittable_list(n.mesh)));
+                    if (is_identity_mat3x4(child_matrix)) {
+                        hittables.push(n.mesh);
+                    } else {
+                        hittables.push(create_transform(child_matrix, n.mesh));
+                    }
                 }
                 for (const child of n.children) {
                     collect_hittables(child, child_matrix);
@@ -236,20 +250,10 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
 
             (s.nodes ?? []).forEach((n_index) => collect_hittables(nodes[n_index], mat3x4(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)));
 
+            if (hittables.length === 1) {
+                return hittables[0];
+            }
             return create_bvh_node(hittables, 0, 1);
-
-            // return create_bvh_node([
-            //     hittables[0], // arrows
-            //     hittables[1], // ??
-            //     hittables[2], // plates
-            //     hittables[3], // #5
-            //     hittables[4], // #4
-            //     hittables[5], // #3
-            //     hittables[6], // #2
-            //     hittables[7], // #1
-            //     hittables[8] // background
-            // ], 0, 1);
-
         });
 
         return scenes[0];

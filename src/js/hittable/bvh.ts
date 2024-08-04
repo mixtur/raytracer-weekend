@@ -78,6 +78,11 @@ export const create_bvh_node = (objects: Hittable[], time0: number, time1: numbe
                         best_score = score;
                         best_split = i + 1;
                         axis = candidate_axis;
+                    } else if (score === best_score) {
+                        if (Math.abs(i + 1 - size / 2) < Math.abs(best_split - size / 2)) {
+                            best_split = i + 1;
+                            axis = candidate_axis;
+                        }
                     }
                 }
             }

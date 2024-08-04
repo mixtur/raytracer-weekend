@@ -8,7 +8,7 @@ import { load_gltf_light } from '../gltf_loader/light_weight_loader';
 
 export const create = async (): Promise<Scene> => {
     // const scene = await load_gltf('gltf/simple/model.gltf', 102400, 1024);
-    const scene = await load_gltf_light('gltf/simple/model.gltf', 102400, 1024);
+    const scene = await load_gltf_light('gltf/simple/model.gltf', 256, 128);
     const [env] = await load_rgbe(2048, 'hdr/street.hdr');
     const skybox = Skybox.create_hdr(env);
 

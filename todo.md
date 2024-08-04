@@ -1,7 +1,6 @@
 - **bug** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case.
-- **bug** Something is wrong with rendering AlphaBlendModeTest model. Opaque check-mark is not visible.  
-- when there is a tie when computing SAH - prefer more even split
-- hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. This may also help with messy UV/vertex-normals related code.
+- hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. Grid patches could be faster
+- when sampling skybox, sample normal-oriented hemisphere, not entire sphere
 - pdf mixer with explicit weights. When using image based importance sampling with PBR material, specular/diffuse rays will get only quarter priority instead of one third. More general mixer may fix that.
 - configuration UI
 - work stealing

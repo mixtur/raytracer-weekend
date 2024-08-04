@@ -91,6 +91,23 @@ export const create_packed_bvh = (primitive: TriangleRefPrimitive): IPackedBVH =
             position_attribute.view[position_attribute.stride * index_c + axis],
         )
     }
+
+    const unpack_aabb_max_axis = (triangle_index: number, axis: number) => {
+        let index_a = triangle_index + 0;
+        let index_b = triangle_index + 1;
+        let index_c = triangle_index + 2;
+        if (primitive.indices) {
+            index_a = primitive.indices[index_a];
+            index_b = primitive.indices[index_b];
+            index_c = primitive.indices[index_c];
+        }
+        return Math.max(
+            position_attribute.view[position_attribute.stride * index_a + axis],
+            position_attribute.view[position_attribute.stride * index_b + axis],
+            position_attribute.view[position_attribute.stride * index_c + axis],
+        )
+    }
+
     const unpack_triangle_aabb = (triangle_index: number, aabb: AABB) => {
         let index_a = triangle_index + 0;
         let index_b = triangle_index + 1;
@@ -144,10 +161,15 @@ export const create_packed_bvh = (primitive: TriangleRefPrimitive): IPackedBVH =
                 let best_split = -1;// Math.floor(size / 2);
                 // axis = Math.floor(Math.random() * 3)
 
+                const compare_on_axis = (axis: number) => (a: number, b: number) => {
+                    return unpack_aabb_min_axis(a, axis) - unpack_aabb_min_axis(b, axis)
+                        || unpack_aabb_max_axis(a, axis) - unpack_aabb_max_axis(b, axis)
+                        || unpack_aabb_min_axis(a, (axis + 1) % 3) - unpack_aabb_min_axis(b, (axis + 1) % 3)
+                        || unpack_aabb_min_axis(a, (axis + 2) % 3) - unpack_aabb_min_axis(b, (axis + 2) % 3);
+                };
+
                 for (let candidate_axis = 0; candidate_axis < 3; candidate_axis++) {
-                    triangle_indices.sort((a, b) => {
-                        return unpack_aabb_min_axis(a, candidate_axis) - unpack_aabb_min_axis(b, candidate_axis);
-                    });
+                    triangle_indices.sort(compare_on_axis(candidate_axis));
 
                     aabb_set_empty(current_right_aabb);
                     const right_areas = [];
@@ -178,14 +200,17 @@ export const create_packed_bvh = (primitive: TriangleRefPrimitive): IPackedBVH =
                             best_score = score;
                             best_split = i + 1;
                             axis = candidate_axis;
+                        } else if (score === best_score) {
+                            if (Math.abs(i + 1 - triangle_indices.length / 2) < Math.abs(best_split - triangle_indices.length / 2)) {
+                                best_split = i + 1;
+                                axis = candidate_axis;
+                            }
                         }
                     }
                 }
 
                 if (axis !== 2) {
-                    triangle_indices.sort((a, b) => {
-                        return unpack_aabb_min_axis(a, axis) - unpack_aabb_min_axis(b, axis);
-                    });
+                    triangle_indices.sort(compare_on_axis(axis));
                 }
 
                 left = create_index(triangle_indices.subarray(0, best_split), aabb, depth + 1);
