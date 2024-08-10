@@ -40,6 +40,7 @@ export interface TriangleRefAttribute {
 
 export interface TriangleRefPrimitive {
     id: number;
+    double_sided: boolean;
     triangle_type_id: number;//this field is set while loading model. But actual triangle caches are created on render
     attributes: TriangleRefAttribute[];
     indices?: TypedArray;
@@ -95,7 +96,7 @@ const create_triangle_view_for_primitive = (primitive: TriangleRefPrimitive): IT
                 ? create_normal_map(normals, tangents, tangent_ws, uvs[0], primitive.material.normal_map as Texture)
                 : create_interpolated_normal(normals);
 
-        return create_triangle(vertex_positions, normal_strategy, uvs, primitive.material);
+        return create_triangle(vertex_positions, normal_strategy, uvs, primitive.double_sided, primitive.material);
     })
 };
 

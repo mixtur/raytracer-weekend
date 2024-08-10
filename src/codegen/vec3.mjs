@@ -45,7 +45,7 @@ export class ArenaVec3Allocator {
     }
 }
 
-export const default_allocator = new ArenaVec3Allocator(1024)
+export const default_allocator = new ArenaVec3Allocator(2048)
 
 let allocator = default_allocator;
 

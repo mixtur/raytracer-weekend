@@ -40,6 +40,10 @@ export const create_image_texture = (pixels_data: PixelsData, config: ImageConfi
 
 const mirror = (x: number) => x >= 0 ? x : (-1 - x);
 
+const mod = (a, b) => {
+    return a - Math.floor(a / b) * b;
+}
+
 function _wrap(mode: GLWrappingMode, size: number, flip: boolean, coord: number): number {
     if (flip) {
         coord = 1 - coord;
@@ -47,8 +51,8 @@ function _wrap(mode: GLWrappingMode, size: number, flip: boolean, coord: number)
     coord *= size - 1;
     switch (mode) {
         case GLWrappingMode.CLAMP_TO_EDGE: return clamp(coord, 0, size - 1);
-        case GLWrappingMode.REPEAT: return coord % size;
-        case GLWrappingMode.MIRRORED_REPEAT: return (size - 1) - mirror(coord % (2 * size) - size);
+        case GLWrappingMode.REPEAT: return mod(coord, size);
+        case GLWrappingMode.MIRRORED_REPEAT: return (size - 1) - mirror(mod(coord, (2 * size)) - size);
     }
     throw new Error(`Unknown wrapping mode ${mode}`);
 }

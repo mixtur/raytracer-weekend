@@ -163,6 +163,7 @@ export interface ITriangle extends Hittable {
     w: Vec3;
     d: number;
     area: number;
+    double_sided: boolean;
     normal_strategy: INormalStrategy;
     //todo: Vec2
     tex_coords: TriangleVec2[];
@@ -190,7 +191,7 @@ export const triangle_set_vertex_positions = (triangle: ITriangle, vertex_positi
     expand_aabb_r(aabb, aabb, 0.0001);
 };
 
-export const create_triangle = (vertex_positions: TriangleVec3, normal_strategy: INormalStrategy, tex_coords: TriangleVec2[], mat: MegaMaterial): ITriangle => {
+export const create_triangle = (vertex_positions: TriangleVec3, normal_strategy: INormalStrategy, tex_coords: TriangleVec2[], double_sided: boolean, mat: MegaMaterial): ITriangle => {
     const a = vertex_positions[0];
     const b = vertex_positions[1];
     const c = vertex_positions[2];
@@ -214,6 +215,7 @@ export const create_triangle = (vertex_positions: TriangleVec3, normal_strategy:
 
     return {
         type: 'triangle',
+        double_sided,
         q, u, v, w, d,
         normal,
         area,
@@ -246,6 +248,10 @@ hittable_types.triangle = create_hittable_type({
     hit(hittable, r: Ray, t_min: number, t_max: number, hit: HitRecord): boolean {
         const triangle = hittable as ITriangle;
         const denom = dot_vec3(triangle.normal, r.direction);
+
+        if (!triangle.double_sided && (denom > -1e-8)) {
+            return false;
+        }
 
         if (Math.abs(denom) < 1e-8) {
             return false;

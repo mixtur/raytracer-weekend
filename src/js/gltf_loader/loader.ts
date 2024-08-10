@@ -67,9 +67,9 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             emissive_scale
         }));
 
-        const parse_indexed_primitive = (p: GLTF2.Primitive) => {
-            const indices = accessors[p.indices!];
-            const position_components = accessors[p.attributes.POSITION];
+        const parse_indexed_primitive = (gltf_primitive: GLTF2.Primitive) => {
+            const indices = accessors[gltf_primitive.indices!];
+            const position_components = accessors[gltf_primitive.attributes.POSITION];
             const positions = [];
             //todo: strided attributes
             for (let i = 0; i < position_components.length; i += 3) {
@@ -80,9 +80,9 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 ));
             }
             const normals = [];
-            const has_normals = 'NORMAL' in p.attributes;
+            const has_normals = 'NORMAL' in gltf_primitive.attributes;
             if (has_normals) {
-                const normals_components = accessors[p.attributes.NORMAL];
+                const normals_components = accessors[gltf_primitive.attributes.NORMAL];
                 for (let i = 0; i < normals_components.length; i += 3) {
                     normals.push(
                         vec3(
@@ -96,9 +96,9 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
 
             const tangents = [];
             const tangents_ws = [];
-            const has_tangents = 'TANGENT' in p.attributes;
+            const has_tangents = 'TANGENT' in gltf_primitive.attributes;
             if (has_tangents) {
-                const tangents_components = accessors[p.attributes.TANGENT];
+                const tangents_components = accessors[gltf_primitive.attributes.TANGENT];
                 for (let i = 0; i < tangents_components.length; i += 4) {
                     tangents.push(
                         vec3(
@@ -116,11 +116,11 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
             let uv_index = 0;
             while (true) {
                 const uv_name = `TEXCOORD_${uv_index}`;
-                const has_uv = uv_name in p.attributes;
+                const has_uv = uv_name in gltf_primitive.attributes;
                 if (!has_uv) break;
                 const uv_vectors: Vec3[] = [];
                 uv_layers.push(uv_vectors);
-                const uv_components = accessors[p.attributes[uv_name]];
+                const uv_components = accessors[gltf_primitive.attributes[uv_name]];
                 for (let i = 0; i < uv_components.length; i += 2) {
                     uv_vectors.push(
                         vec3(
@@ -134,12 +134,12 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 uv_index++;
             }
 
-            const mode = p.mode ?? GLPrimitiveMode.TRIANGLES;
+            const mode = gltf_primitive.mode ?? GLPrimitiveMode.TRIANGLES;
             if (mode !== GLPrimitiveMode.TRIANGLES) {
                 throw new Error(`don't know how to parse primitive mode ${GLPrimitiveMode[mode]}`)
             }
             const triangles = [];
-            const material = p.material === undefined ? default_material : materials[p.material];
+            const material = gltf_primitive.material === undefined ? default_material : materials[gltf_primitive.material];
             const get_normal_strategy = (positions: TriangleVec3, vertex_normals: TriangleVec3 | null, vertex_tangents: TriangleVec3 | null, tangents_ws: Vec3 | null, uvs: TriangleVec2 | null, normal_map: Texture | null) => {
                 if (!vertex_normals) {
                     return create_constant_normal(positions);
@@ -160,6 +160,9 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 }
             }
 
+            const gltf_material = gltf_primitive.material ? (gltf.materials ?? [])[gltf_primitive.material] : {};
+            const double_sided = gltf_material.doubleSided ?? false;
+
             for (let i = 0; i < indices.length; i += 3) {
                 const vertex_positions: TriangleVec3 = [positions[indices[i]], positions[indices[i + 1]], positions[indices[i + 2]]];
 
@@ -172,7 +175,7 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 ]);
 
                 const normal_strategy = get_normal_strategy(vertex_positions, vertex_normals, vertex_tangents, vertex_tangents_ws, uv_channels[0] ?? null, material.normal_map);
-                triangles.push(create_triangle(vertex_positions, normal_strategy, uv_channels, material));
+                triangles.push(create_triangle(vertex_positions, normal_strategy, uv_channels, double_sided, material));
             }
 
             return create_bvh_node(triangles, 0, 0);

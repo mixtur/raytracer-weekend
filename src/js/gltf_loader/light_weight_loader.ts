@@ -141,6 +141,7 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
             if (mode !== GLPrimitiveMode.TRIANGLES) {
                 throw new Error(`don't know how to parse primitive mode ${GLPrimitiveMode[mode]}`)
             }
+            const gltf_material = gltf_primitive.material ? (gltf.materials ?? [])[gltf_primitive.material] : {};
             const material = gltf_primitive.material === undefined ? default_material : materials[gltf_primitive.material];
             const get_normal_strategy = (has_normals: boolean, has_tangents: boolean, uvs_count: number, has_normal_map: boolean) : INormalStrategy['type'] => {
                 if (!has_normals) {
@@ -162,8 +163,11 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
                 }
             }
 
+            const double_sided = gltf_material.doubleSided ?? false;
+
             const key = [
                 get_normal_strategy(has_normals, has_tangents, uv_index, material.normal_map !== null),
+                double_sided,
                 uv_index,
                 gltf_primitive.material ?? -1
             ].join(':');
@@ -176,6 +180,7 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
 
             const primitive: TriangleRefPrimitive = {
                 id: next_primitive_index++,
+                double_sided,
                 attributes: triangle_ref_attributes,
                 indices,
                 material,

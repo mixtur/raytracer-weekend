@@ -13,7 +13,7 @@ import {
     Point3,
     rand_vec3_in_unit_disk,
     sub_vec3,
-    sub_vec3_r,
+    sub_vec3_r, unit_vec3_r,
     Vec3
 } from './math/vec3.gen';
 import { Ray, ray_dirty, ray_set } from './math/ray';
@@ -104,6 +104,7 @@ export const get_ray = (camera: Camera, u: number, v: number): Ray => {
     //transform origin and dir to world_space
     mul_mat3x4_vec3_r(origin, camera.world_matrix, origin);
     mul_mat3_vec3_r(dir, camera.world_matrix, dir);//note: we abuse the fact that matrices are column-major, therefore we can interpret Mat3x4 as Mat3 in this case.
+    unit_vec3_r(dir, dir);
 
     ray_set(
         ray,

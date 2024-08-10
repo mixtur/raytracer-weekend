@@ -10,7 +10,7 @@ const aspect_ratio = 4/3;
 const image_width = 1260;
 const image_height = Math.round(image_width / aspect_ratio);
 const samples_per_pixel = 100;
-const max_depth = 50;
+const max_depth = 150;
 
 const thread_count = globalThis?.navigator?.hardwareConcurrency
     ? globalThis?.navigator?.hardwareConcurrency - 1

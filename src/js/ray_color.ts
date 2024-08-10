@@ -9,7 +9,7 @@ const bounce = create_bounce_record();
 const hit_stack: HitRecord[] = [];
 const bounce_stack: BounceRecord[] = [];
 const ray_stack: Ray[] = [];
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 200; i++) {
     hit_stack.push(create_empty_hit_record());
     bounce_stack.push(create_bounce_record());
     ray_stack.push(ray_dirty());
