@@ -48,7 +48,7 @@ export interface TriangleRefPrimitive {
 }
 
 export const triangle_type_ids = new Map<string, number>();
-const triangles_by_type: Record<number, LRUCache<number, ITriangle, ITriangleReference>> = {};
+const triangles_by_type: Record<number, LRUCache<bigint, ITriangle, ITriangleReference>> = {};
 
 const tmp_triangle: TriangleVec3 = [ vec3_dirty(), vec3_dirty(), vec3_dirty() ];
 export const load_vec4_w = (vec: Vec3, view: TypedArray, stride: number, index_a: number, index_b: number, index_c: number) => {
@@ -164,14 +164,14 @@ export const unpack_triangle = (primitive: TriangleRefPrimitive, triangle_id: nu
 
     let cache = triangles_by_type[primitive.triangle_type_id];
     if (cache === undefined) {
-        cache = triangles_by_type[primitive.triangle_type_id] = new LRUCache<number, ITriangle, ITriangleReference>(
-            6,
+        cache = triangles_by_type[primitive.triangle_type_id] = new LRUCache<bigint, ITriangle, ITriangleReference>(
+            32,
             () => create_triangle_view_for_primitive(primitive),
             actually_unpack
         )
     }
 
-    const key = triangle_id << 20 | primitive.id;
+    const key = BigInt(triangle_id) << 20n | BigInt(primitive.id);
     tmp_primitive.triangle_id = triangle_id;
     tmp_primitive.primitive = primitive;
 
