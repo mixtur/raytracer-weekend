@@ -71,7 +71,7 @@ export const create = (): Scene => {
 
     return create_scene({
         root_hittable: hittables.root,
-        light: hittables.light,
+        importance_sampling_target: hittables.light,
         camera: create_camera({
             look_from: point3(278, 278, -800),
             look_at: point3(278, 278, 0),

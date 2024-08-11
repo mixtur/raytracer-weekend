@@ -44,7 +44,7 @@ export const render_tile = (tile: TileScheduleItem, scene: Scene, color_allocato
                     const u = (x + x_random) * x_px_step;
                     const v = (y + y_random) * y_px_step;
                     const ray = get_ray(scene.camera, u, v);
-                    const color = ray_color(ray, scene.background, scene.root_hittable, scene.light, config.max_depth);
+                    const color = ray_color(ray, scene.background, scene.root_hittable, scene.importance_sampling_target, scene.importance_sampling_weight, config.max_depth);
                     add_vec3_r(px_color, px_color, color);
                 }
             }

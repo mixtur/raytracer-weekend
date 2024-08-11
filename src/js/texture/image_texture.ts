@@ -40,7 +40,7 @@ export const create_image_texture = (pixels_data: PixelsData, config: ImageConfi
 
 const mirror = (x: number) => x >= 0 ? x : (-1 - x);
 
-const mod = (a, b) => {
+const mod = (a: number, b: number) => {
     return a - Math.floor(a / b) * b;
 }
 

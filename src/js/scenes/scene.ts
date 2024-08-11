@@ -7,7 +7,8 @@ import { ExposureConfig } from '../color-flow';
 
 export interface Scene {
     root_hittable: Hittable;
-    light: Hittable | null;
+    importance_sampling_target: Hittable | null;
+    importance_sampling_weight: number;
     camera: Camera;
     background: Hittable;
     exposure_config: ExposureConfig;
@@ -16,7 +17,8 @@ export interface Scene {
 export const create_scene = (config: Partial<Scene>): Scene => {
     return {
         root_hittable: config.root_hittable ?? create_hittable_list([]),
-        light: config.light ?? null,
+        importance_sampling_target: config.importance_sampling_target ?? null,
+        importance_sampling_weight: config.importance_sampling_weight ?? 0.25,
         camera: config.camera ?? create_camera({
             look_from: point3(13, 2, 3),
             look_at: point3(0, 0, 0),

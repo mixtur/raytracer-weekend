@@ -23,7 +23,7 @@ export const create = (): Scene => {
             light1,
             light2
         ]),
-        light: create_hittable_list([
+        importance_sampling_target: create_hittable_list([
             light1,
             light2
         ]),

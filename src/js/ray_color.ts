@@ -15,10 +15,10 @@ for (let i = 0; i < 200; i++) {
     ray_stack.push(ray_dirty());
 }
 
-const light_pdf = create_hittable_pdf();
+const importance_sampling_pdf = create_hittable_pdf();
 const mix_pdf = create_mixture_pdf();
 
-export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights: Hittable | null, depth: number): Color => {
+export const ray_color = (r: Ray, background: Hittable, world: Hittable, importance_sampling_target: Hittable | null, importance_sampling_weight: number, depth: number): Color => {
     const scattered = ray_stack[depth];
     const hit = hit_stack[depth];
     const bounce = bounce_stack[depth];
@@ -42,10 +42,11 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
     if (bounce.skip_pdf) {
         ray_set(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
     } else {
-        if (lights !== null) {
-            light_pdf.hittable = lights;
-            light_pdf.origin = hit.p;
-            mix_pdf.pdf1 = light_pdf;
+        if (importance_sampling_target !== null) {
+            importance_sampling_pdf.hittable = importance_sampling_target;
+            importance_sampling_pdf.origin = hit.p;
+            mix_pdf.pdf1_weight = importance_sampling_weight;
+            mix_pdf.pdf1 = importance_sampling_pdf;
             mix_pdf.pdf2 = pdf;
             pdf = mix_pdf;
         }
@@ -61,11 +62,12 @@ export const ray_color = (r: Ray, background: Hittable, world: Hittable, lights:
     material_type.attenuate(hit.material, r, hit, bounce, scattered);
     mul_vec3_s_r(bounce.attenuation, bounce.attenuation, pdf_factor);
 
-    const bounce_color = ray_color(scattered, background, world, lights, depth - 1);
+    const bounce_color = ray_color(scattered, background, world, importance_sampling_target, importance_sampling_weight, depth - 1);
     return fma_vec3(bounce_color, bounce.attenuation, emitted);
 }
 
-export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittable, lights: Hittable | null, depth: number): Color => {
+export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittable, importance_sampling_target: Hittable | null, importance_sampling_weight: number, depth: number): Color => {
+    mix_pdf.pdf1_weight = importance_sampling_weight;
     const scattered = ray_stack[0];
     const total_emission = color(0, 0, 0);
     const total_attenuation = color(1, 1, 1);
@@ -86,10 +88,10 @@ export const ray_color_iterative = (r: Ray, background: Hittable, world: Hittabl
             ray_set(scattered, bounce.skip_pdf_ray.origin, bounce.skip_pdf_ray.direction, bounce.skip_pdf_ray.time);
         } else {
             let pdf = hit.material.scattering_pdf;
-            if (lights !== null) {
-                light_pdf.hittable = lights;
-                light_pdf.origin = hit.p;
-                mix_pdf.pdf1 = light_pdf;
+            if (importance_sampling_target !== null) {
+                importance_sampling_pdf.hittable = importance_sampling_target;
+                importance_sampling_pdf.origin = hit.p;
+                mix_pdf.pdf1 = importance_sampling_pdf;
                 mix_pdf.pdf2 = pdf;
                 pdf = mix_pdf;
             }

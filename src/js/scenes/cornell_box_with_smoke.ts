@@ -61,7 +61,7 @@ export const create = () => {
                 )
             ], 0, 1),
 
-            light: light_hittable,
+            importance_sampling_target: light_hittable,
 
             camera: create_camera({
                 look_from: point3(278, 278, -800),

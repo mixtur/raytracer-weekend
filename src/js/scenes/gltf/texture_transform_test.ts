@@ -13,7 +13,7 @@ export const create = async (): Promise<Scene> => {
     const skybox = Skybox.create_hdr(env);
 
     return create_scene({
-        light: skybox,
+        importance_sampling_target: skybox,
         camera: create_camera({
             look_from: point3(0, 0, 5),
             look_at: point3(0, 0, 0),

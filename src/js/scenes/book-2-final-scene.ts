@@ -99,7 +99,7 @@ export const create = async (): Promise<Scene> => {
         return create_scene({
             root_hittable: objects,
             // light: light_hittable,
-            light: create_hittable_list([
+            importance_sampling_target: create_hittable_list([
                 light_hittable,
                 subsurface_scattering_sphere
             ]),

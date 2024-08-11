@@ -128,6 +128,7 @@ pdf_types.hittable = {
 
 export interface IMixturePDF {
     type: 'mixture';
+    pdf1_weight: number;
     pdf1: PDF;
     pdf2: PDF;
 }
@@ -135,6 +136,7 @@ export interface IMixturePDF {
 export const create_mixture_pdf = (): IMixturePDF => {
     return {
         type: 'mixture',
+        pdf1_weight: 0.5,
         pdf1: { type: 'dummy-pdf'},
         pdf2: { type: 'dummy-pdf'}
     };
@@ -142,16 +144,16 @@ export const create_mixture_pdf = (): IMixturePDF => {
 
 pdf_types.mixture = {
     value(pdf: PDF, direction: Vec3): number {
-        const {pdf1, pdf2} = pdf as IMixturePDF;
+        const {pdf1_weight, pdf1, pdf2} = pdf as IMixturePDF;
         return (
-            pdf_types[pdf1.type].value(pdf1, direction) +
-            pdf_types[pdf2.type].value(pdf2, direction)
-        ) / 2;
+            pdf_types[pdf1.type].value(pdf1, direction) * pdf1_weight +
+            pdf_types[pdf2.type].value(pdf2, direction) * (1 - pdf1_weight)
+        );
     },
 
     generate(pdf: PDF): Vec3 {
-        const {pdf1, pdf2} = pdf as IMixturePDF;
-        const use_pdf1 = Math.random() < 0.5;
+        const {pdf1_weight, pdf1, pdf2} = pdf as IMixturePDF;
+        const use_pdf1 = Math.random() < pdf1_weight;
         return use_pdf1
             ? pdf_types[pdf1.type].generate(pdf1)
             : pdf_types[pdf2.type].generate(pdf2);
