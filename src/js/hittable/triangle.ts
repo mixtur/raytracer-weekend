@@ -20,7 +20,7 @@ import {
     sq_len_vec3,
     sub_vec3,
     sub_vec3_r,
-    unit_vec3_r,
+    unit_vec3_r, Vec2, vec2_dirty,
     Vec3,
     vec3_dirty
 } from '../math/vec.gen';
@@ -28,7 +28,7 @@ import { MegaMaterial } from '../materials/megamaterial';
 import { AABB, union_aabb_point_r, create_empty_aabb, expand_aabb_r } from '../math/aabb';
 import { ray_dirty, Ray, ray_set, ray_at_r } from '../math/ray';
 import { Texture, texture_get_value } from '../texture/texture';
-import { columns_to_mat3_r, mat3_dirty, mul_mat3_vec3_r, transpose_mat3, transpose_mat3_r } from '../math/mat3.gen';
+import { columns_to_mat3_r, mat3_dirty, mul_mat3_vec3_r, transpose_mat3, transpose_mat3_r } from '../math/mat.gen';
 
 const tmp_hit = create_empty_hit_record();
 const tmp_ray = ray_dirty();
@@ -110,9 +110,8 @@ export const get_normal = (normal_strategy: INormalStrategy, barycentric_weights
         mul_vec3_s_r(bitangent, bitangent, w);
         unit_vec3_r(bitangent, bitangent);
 
-        //todo: Vec2
-        const uvs = vec3_dirty();
-        interpolate_vec3_r(uvs, barycentric_weights, normal_strategy.uvs);
+        const uvs = vec2_dirty();
+        interpolate_vec2_r(uvs, barycentric_weights, normal_strategy.uvs);
 
         columns_to_mat3_r(tangent_space_transform, vertex_tangent, bitangent, vertex_normal);
 
@@ -126,14 +125,14 @@ export const get_normal = (normal_strategy: INormalStrategy, barycentric_weights
     throw new Error(`unknown normal strategy ${normal_strategy.type}`);
 }
 
-export type TriangleVec2 = [Vec3, Vec3, Vec3];
+export type TriangleVec2 = [Vec2, Vec2, Vec2];
 export type TriangleVec3 = [Vec3, Vec3, Vec3];
 
 export const interpolate_scalar = (barycentric_weights: Vec3, scalars: Vec3) => {
     return scalars[0] * barycentric_weights[0] + scalars[1] * barycentric_weights[1] + scalars[2] * barycentric_weights[2];
 }
 
-export const interpolate_vec2_r = (result: Vec3, barycentric_weights: Vec3, vec2s: TriangleVec2): Vec3 => {
+export const interpolate_vec2_r = (result: Vec2, barycentric_weights: Vec3, vec2s: TriangleVec2): Vec2 => {
     result[0] = vec2s[0][0] * barycentric_weights[0] + vec2s[1][0] * barycentric_weights[1] + vec2s[2][0] * barycentric_weights[2];
     result[1] = vec2s[0][1] * barycentric_weights[0] + vec2s[1][1] * barycentric_weights[1] + vec2s[2][1] * barycentric_weights[2];
     return result;
@@ -165,7 +164,6 @@ export interface ITriangle extends Hittable {
     area: number;
     double_sided: boolean;
     normal_strategy: INormalStrategy;
-    //todo: Vec2
     tex_coords: TriangleVec2[];
 }
 

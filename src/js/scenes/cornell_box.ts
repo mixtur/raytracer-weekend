@@ -7,7 +7,7 @@ import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_metal } from '../materials/metal';
 import { create_dielectric } from '../materials/dielectric';
 import { degrees_to_radians, run_with_hooks } from '../utils';
-import { trs_to_mat3x4 } from '../math/mat3.gen';
+import { trs_to_mat3x4 } from '../math/mat.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { Skybox } from '../hittable/skybox';
 import { create_quad } from '../hittable/quad';

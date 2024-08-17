@@ -9,7 +9,15 @@ import {
     triangle_set_vertex_positions, TriangleVec2,
     TriangleVec3
 } from './triangle';
-import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3_dirty } from '../math/vec.gen';
+import {
+    ArenaVec2Allocator,
+    ArenaVec3Allocator, use_vec2_allocator,
+    use_vec3_allocator,
+    Vec2,
+    vec2_dirty,
+    Vec3,
+    vec3_dirty
+} from '../math/vec.gen';
 import { Texture } from '../texture/texture';
 import { TypedArray } from '../types';
 import { run_with_hooks } from '../utils';
@@ -63,7 +71,7 @@ export const load_vec3 = (vec: Vec3, view: TypedArray, stride: number, index: nu
     vec[2] = view[index * stride + 2];
 };
 
-export const load_vec2 = (vec: Vec3, view: TypedArray, stride: number, index: number) => {
+export const load_vec2 = (vec: Vec2, view: TypedArray, stride: number, index: number) => {
     vec[0] = view[index * stride];
     vec[1] = view[index * stride + 1];
 };
@@ -79,13 +87,14 @@ export const create_triangle_reference = (primitive: TriangleRefPrimitive, trian
 const create_triangle_view_for_primitive = (primitive: TriangleRefPrimitive): ITriangle => {
     return run_with_hooks(() => {
         use_vec3_allocator(new ArenaVec3Allocator(32));
+        use_vec2_allocator(new ArenaVec2Allocator(16));
 
         const vertex_positions: TriangleVec3 = [vec3_dirty(), vec3_dirty(), vec3_dirty()];
         const normals: TriangleVec3 = [vec3_dirty(), vec3_dirty(), vec3_dirty()];
         const tangents: TriangleVec3 = [vec3_dirty(), vec3_dirty(), vec3_dirty()];
         const tangent_ws = vec3_dirty();
         const uvs: TriangleVec2[] = primitive.attributes.filter(a => TriangleRefAttributeSemantic.TEX_COORD_0 <= a.semantic && a.semantic <= TriangleRefAttributeSemantic.TEX_COORD_3)
-            .map(() => [vec3_dirty(), vec3_dirty(), vec3_dirty()]);
+            .map(() => [vec2_dirty(), vec2_dirty(), vec2_dirty()]);
         const has_normals = primitive.attributes.some(attr => attr.semantic === TriangleRefAttributeSemantic.NORMAL);
         const has_tangent = primitive.attributes.some(attr => attr.semantic === TriangleRefAttributeSemantic.TANGENT);
         const has_normal_map = primitive.material.normal_map !== null;
@@ -171,7 +180,7 @@ export const unpack_triangle = (primitive: TriangleRefPrimitive, triangle_id: nu
         )
     }
 
-    const key = BigInt(triangle_id) << 20n | BigInt(primitive.id);
+    const key = (BigInt(triangle_id) << 20n) | BigInt(primitive.id);
     tmp_primitive.triangle_id = triangle_id;
     tmp_primitive.primitive = primitive;
 

@@ -7,7 +7,7 @@ import {
     mat3x4_to_mat3,
     mul_mat3_vec3, mul_mat3_vec3_r,
     mul_mat3x4_vec3, mul_mat3x4_vec3_r, transpose_mat3
-} from '../math/mat3.gen';
+} from '../math/mat.gen';
 import { Ray, ray_dirty, ray_set } from '../math/ray';
 import { AABB, union_aabb_point_r, create_empty_aabb } from '../math/aabb';
 import { point3_dirty, set_vec3, Vec3 } from '../math/vec.gen';

@@ -1,11 +1,10 @@
-import { set_vec3, Vec3, vec3_dirty } from './math/vec.gen';
+import { set_vec3, Vec2, vec2_dirty, vec3_dirty } from './math/vec.gen';
 import { HitRecord } from './hittable/hittable';
 import { interpolate_vec2_r } from './hittable/triangle';
 
-//todo: vec2
-const uv = vec3_dirty();
+const uv = vec2_dirty();
 const barycentric_weights = vec3_dirty();
-export const update_uv = (hit: HitRecord): Vec3 => {
+export const update_uv = (hit: HitRecord): Vec2 => {
     const { u, v } = hit;
     if (hit.tex_channels.length > 0) {
         //todo: un-hardcode tex channel

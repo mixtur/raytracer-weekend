@@ -79,13 +79,13 @@ const gen_vec_preamble = (components_count) => {
         `export const point${components_count} = ${vec_name};`,
         `export const point${components_count}_dirty = ${vec_name}_dirty;`,
         ``,
-        ind + `export const set_${vec_name} = (result: ${vec_type_name}, ${component_names_decl}): void => {`,
-        ...component_names.map((arg, i) => ind + ind + `result[${i}] = ${arg};`),
-        ind + `};`,
+        `export const set_${vec_name} = (result: ${vec_type_name}, ${component_names_decl}): void => {`,
+        ...component_names.map((arg, i) => ind + `result[${i}] = ${arg};`),
+        `};`,
         '',
-        ind + `export const dot_${vec_name} = (a: ${vec_type_name}, b: ${vec_type_name}) => {`,
-        ind + ind + `return ${indices(components_count).map(i => `a[${i}] * b[${i}]`).join(' + ')};`,
-        ind + `};`,
+        `export const dot_${vec_name} = (a: ${vec_type_name}, b: ${vec_type_name}) => {`,
+        ind + `return ${indices(components_count).map(i => `a[${i}] * b[${i}]`).join(' + ')};`,
+        `};`,
     ].join('\n');
 };
 

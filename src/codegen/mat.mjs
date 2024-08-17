@@ -85,7 +85,27 @@ export const s = 's';
 
 const el = (template_el, sym) => (template_el === s) ? sym : template_el;
 
-const lin = {
+const lin2 = {
+    rows: 2,
+    cols: 2,
+    template: [
+        [s, s, 0],
+        [s, s, 0],
+        [0, 0, 1],
+    ]
+}
+
+const aff2 = {
+    rows: 2,
+    cols: 3,
+    template: [
+        [s, s, s],
+        [s, s, s],
+        [0, 0, 1],
+    ]
+}
+
+const lin3 = {
     rows: 3,
     cols: 3,
     template: [
@@ -96,7 +116,7 @@ const lin = {
     ]
 };
 
-const aff = {
+const aff3 = {
     rows: 3,
     cols: 4,
     template: [
@@ -107,7 +127,7 @@ const aff = {
     ]
 };
 
-const hom = {
+const hom3 = {
     rows: 4,
     cols: 4,
     template: [
@@ -138,7 +158,39 @@ export const gen_is_identity = (matrix_layout) => {
     return gen_fn(name, signature, `return ${checks.join(' && ')};`);
 }
 
-export const gen_mul_mat_vec = (matrix_layout) => (use_result_arg) => {
+export const gen_mul_mat_vec2 = (matrix_layout) => (use_result_arg) => {
+    const {template} = matrix_layout;
+    const mat_type_name = gen_type_name(matrix_layout);
+
+    const mat_name = mat_type_name.toLowerCase();
+
+    const fn_name = `mul_${mat_name}_vec2`;
+    const signature = gen_signature(use_result_arg, sig('Vec2', `mat: ${mat_type_name}, vec: Vec2`));
+
+    const mat_idx = get_idx_fn(matrix_layout);
+    const component = (row_index) => gen_expr(optimize_expr(
+        ['+', ...template[row_index].map((x, i) => {
+            return [
+                '*',
+                el(x, `mat[${mat_idx(row_index, i)}]`),
+                i === 2 ? 1 : 'xy'[i]
+            ];
+        })]
+    ));
+
+    const x = component(0);
+    const y = component(1);
+
+    const body = [
+        ind + 'const x = vec[0];',
+        ind + 'const y = vec[1];',
+        gen_output(use_result_arg, 'vec2', [x, y])
+    ].join('\n');
+
+    return gen_fn(fn_name, signature, body, use_result_arg);
+};
+
+export const gen_mul_mat_vec3 = (matrix_layout) => (use_result_arg) => {
     const {rows, cols, template} = matrix_layout;
     const mat_type_name = gen_type_name(matrix_layout);
 
@@ -470,7 +522,7 @@ export const gen_inv_mat4 = (use_result_arg) => {
     return gen_fn(name, signature, body, use_result_arg);
 }
 
-export const gen_trs_to_mat = (mat_layout) => (use_result_arg) => {
+export const gen_trs_to_mat_3d = (mat_layout) => (use_result_arg) => {
     const code = [
         `const im_x = rotation[0];`,
         `const im_y = rotation[1];`,
@@ -506,7 +558,7 @@ export const gen_trs_to_mat = (mat_layout) => (use_result_arg) => {
         `const r22 = sql - (xx2 + yy2);`,
     ].map(x => ind + x);
 
-    if (mat_layout === lin) {
+    if (mat_layout === lin3) {
         const components = [
             `sx * r00`,
             `sx * r10`,
@@ -527,7 +579,7 @@ export const gen_trs_to_mat = (mat_layout) => (use_result_arg) => {
         ].join('\n');
         return gen_fn(name, signature, body, use_result_arg);
     }
-    if (mat_layout === aff) {
+    if (mat_layout === aff3) {
         const components = [
             `sx * r00`,
             `sx * r10`,
@@ -551,7 +603,7 @@ export const gen_trs_to_mat = (mat_layout) => (use_result_arg) => {
         ].join('\n');
         return gen_fn(name, signature, body, use_result_arg);
     }
-    if (mat_layout === hom) {
+    if (mat_layout === hom3) {
         const components = [
             `sx * r00`,
             `sx * r10`,
@@ -576,6 +628,52 @@ export const gen_trs_to_mat = (mat_layout) => (use_result_arg) => {
         const body = [
             code.join('\n'),
             gen_output(use_result_arg, 'mat4', components)
+        ].join('\n');
+        return gen_fn(name, signature, body, use_result_arg);
+    }
+
+    throw new Error(`Unknown matrix layout`);
+}
+
+export const gen_trs_to_mat_2d = (mat_layout) => (use_result_arg) => {
+    const code = [
+        `const re = rotation[0];`,
+        `const im = rotation[1];`,
+        `const sx = scaling[0];`,
+        `const sy = scaling[1];`,
+    ].map(x => ind + x);
+
+    if (mat_layout === lin2) {
+        const components = [
+            `re * sx`,
+            `im * sx`,
+            `-im * sy`,
+            `re * sy`,
+        ];
+
+        const name = `rs_to_mat2`;
+        const signature = gen_signature(use_result_arg, sig('Mat2', 'rotation: Complex, scaling: Vec2'));
+        const body = [
+            code.join('\n'),
+            gen_output(use_result_arg, 'mat2', components)
+        ].join('\n');
+        return gen_fn(name, signature, body, use_result_arg);
+    }
+    if (mat_layout === aff2) {
+        const components = [
+            `re * sx`,
+            `im * sx`,
+            `-im * sy`,
+            `re * sy`,
+            `translation[0]`,
+            `translation[1]`
+        ];
+
+        const name = `trs_to_mat2x3`
+        const signature = gen_signature(use_result_arg, sig('Mat2x3', 'translation: Vec2, rotation: Complex, scaling: Vec2'));
+        const body = [
+            code.join('\n'),
+            gen_output(use_result_arg, 'mat2x3', components)
         ].join('\n');
         return gen_fn(name, signature, body, use_result_arg);
     }
@@ -760,70 +858,77 @@ export const gen_look_target_to_mat = (matrix_layout) => (use_result_arg) => {
 
 export const gen_mat_module = () => {
     const module_code = [
-        `import {Vec3, vec3, vec3_dirty, unit_vec3_r, orthogonal_vec3_r, negate_vec3_r, cross_vec3_r, sub_vec3} from './vec.gen'`,
-        `import {Quat} from './quat.gen'`,
+        `import { Vec2, vec2, Vec3, vec3, vec3_dirty, unit_vec3_r, orthogonal_vec3_r, negate_vec3_r, cross_vec3_r, sub_vec3 } from './vec.gen'`,
+        `import { Quat } from './quat.gen'`,
+        `import { Complex } from './complex.gen'`,
         `import { run_hook } from '../utils';`,
-        gen_mat_preamble(lin),
-        gen_mat_preamble(aff),
-        gen_mat_preamble(hom),
+        gen_mat_preamble(lin2),
+        gen_mat_preamble(aff2),
+        gen_mat_preamble(lin3),
+        gen_mat_preamble(aff3),
+        gen_mat_preamble(hom3),
 
-        gen_is_identity(lin),
-        gen_is_identity(aff),
-        gen_is_identity(hom),
+        gen_is_identity(lin3),
+        gen_is_identity(aff3),
+        gen_is_identity(hom3),
 
         ...[
-            gen_columns_to_mat(lin),
-            gen_columns_to_mat(aff),
+            gen_columns_to_mat(lin3),
+            gen_columns_to_mat(aff3),
 
-            gen_mat_conversion(lin, aff),
-            gen_mat_conversion(lin, hom),
+            gen_mat_conversion(lin3, aff3),
+            gen_mat_conversion(lin3, hom3),
 
-            gen_mat_conversion(aff, lin),
-            gen_mat_conversion(aff, hom),
+            gen_mat_conversion(aff3, lin3),
+            gen_mat_conversion(aff3, hom3),
 
-            gen_mat_conversion(hom, lin),
-            gen_mat_conversion(hom, aff),
+            gen_mat_conversion(hom3, lin3),
+            gen_mat_conversion(hom3, aff3),
 
-            gen_mul_mat_vec(lin),
-            gen_mul_mat_vec(aff),
-            gen_mul_mat_vec(hom),
+            gen_mul_mat_vec2(lin2),
+            gen_mul_mat_vec2(aff2),
+            gen_mul_mat_vec3(lin3),
+            gen_mul_mat_vec3(aff3),
+            gen_mul_mat_vec3(hom3),
 
-            gen_mul_mat(lin, lin, lin),
-            gen_mul_mat(lin, aff, aff),
-            gen_mul_mat(lin, hom, hom),
+            gen_mul_mat(lin3, lin3, lin3),
+            gen_mul_mat(lin3, aff3, aff3),
+            gen_mul_mat(lin3, hom3, hom3),
 
-            gen_mul_mat(aff, lin, aff),
-            gen_mul_mat(aff, aff, aff),
-            gen_mul_mat(aff, hom, hom),
+            gen_mul_mat(aff3, lin3, aff3),
+            gen_mul_mat(aff3, aff3, aff3),
+            gen_mul_mat(aff3, hom3, hom3),
 
-            gen_mul_mat(hom, lin, hom),
-            gen_mul_mat(hom, aff, hom),
-            gen_mul_mat(hom, hom, hom),
+            gen_mul_mat(hom3, lin3, hom3),
+            gen_mul_mat(hom3, aff3, hom3),
+            gen_mul_mat(hom3, hom3, hom3),
 
             gen_inv_mat3,
             gen_inv_mat3x4,
             gen_inv_mat4,
 
-            gen_transpose(lin),
-            gen_transpose(hom),
+            gen_transpose(lin3),
+            gen_transpose(hom3),
 
-            gen_trs_to_mat(lin),
-            gen_trs_to_mat(aff),
-            gen_trs_to_mat(hom),
+            gen_trs_to_mat_2d(lin2),
+            gen_trs_to_mat_2d(aff2),
+            gen_trs_to_mat_3d(lin3),
+            gen_trs_to_mat_3d(aff3),
+            gen_trs_to_mat_3d(hom3),
 
             gen_gl_asymmetric_perspective_projection,
             gen_gl_perspective_projection,
 
-            gen_look_direction_to_mat(lin),
-            gen_look_direction_to_mat(aff),
-            gen_look_direction_to_mat(hom),
+            gen_look_direction_to_mat(lin3),
+            gen_look_direction_to_mat(aff3),
+            gen_look_direction_to_mat(hom3),
 
-            gen_look_target_to_mat(aff),
-            gen_look_target_to_mat(hom),
+            gen_look_target_to_mat(aff3),
+            gen_look_target_to_mat(hom3),
         ].flatMap(f => [f(false), f(true)])
     ].join('\n\n') + '\n';
 
     const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
     const math_path = path.join(__dirname, '../js/math');
-    fs.writeFileSync(path.join(math_path, 'mat3.gen.ts'), module_code);
+    fs.writeFileSync(path.join(math_path, 'mat.gen.ts'), module_code);
 }

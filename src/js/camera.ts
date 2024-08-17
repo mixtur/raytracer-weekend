@@ -5,7 +5,7 @@ import {
     Mat3x4, mat3x4_dirty,
     Mat4, mat4_dirty, mul_mat3_vec3_r, mul_mat3x4_vec3_r,
     mul_mat4_vec3_r
-} from './math/mat3.gen';
+} from './math/mat.gen';
 import {
     add_vec3_r,
     mul_vec3_s_r,

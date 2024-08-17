@@ -1,5 +1,14 @@
 import { Ray } from "../math/ray";
-import { ArenaVec3Allocator, dot_vec3, point3, Point3, vec3, Vec3, vec3_dirty } from '../math/vec.gen';
+import {
+    ArenaVec2Allocator,
+    ArenaVec3Allocator,
+    dot_vec3,
+    point3,
+    Point3,
+    vec3,
+    Vec3,
+    vec3_dirty
+} from '../math/vec.gen';
 import { AABB } from '../math/aabb';
 import { create_mega_material, MegaMaterial } from '../materials/megamaterial';
 import { TriangleVec2 } from './triangle';
@@ -15,7 +24,7 @@ export interface HitRecord {
     tex_channels: TriangleVec2[];
 }
 
-const tex_channel_allocator = new ArenaVec3Allocator(1024);
+const tex_channel_allocator = new ArenaVec2Allocator(1024);
 
 const copy_triangle_vec2 = (t: TriangleVec2): TriangleVec2 => {
     const A = tex_channel_allocator.alloc_dirty();

@@ -17,8 +17,8 @@ import {
     mul_mat3x4,
     trs_to_mat3x4, use_mat3_allocator,
     use_mat3x4_allocator
-} from '../math/mat3.gen';
-import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3 } from '../math/vec.gen';
+} from '../math/mat.gen';
+import { ArenaVec3Allocator, use_vec3_allocator, vec2, Vec2, Vec3, vec3 } from '../math/vec.gen';
 import { quat } from '../math/quat.gen';
 import { run_with_hooks } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
@@ -111,22 +111,20 @@ export const load_gltf = async (url: string, vec3_arena_size: number, mat_arena_
                 }
             }
 
-            //todo: Vec2
-            const uv_layers: Vec3[][] = [];
+            const uv_layers: Vec2[][] = [];
             let uv_index = 0;
             while (true) {
                 const uv_name = `TEXCOORD_${uv_index}`;
                 const has_uv = uv_name in gltf_primitive.attributes;
                 if (!has_uv) break;
-                const uv_vectors: Vec3[] = [];
+                const uv_vectors: Vec2[] = [];
                 uv_layers.push(uv_vectors);
                 const uv_components = accessors[gltf_primitive.attributes[uv_name]];
                 for (let i = 0; i < uv_components.length; i += 2) {
                     uv_vectors.push(
-                        vec3(
+                        vec2(
                             uv_components[i],
-                            uv_components[i + 1],
-                            0
+                            uv_components[i + 1]
                         )
                     );
                 }

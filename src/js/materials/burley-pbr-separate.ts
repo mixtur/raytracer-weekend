@@ -292,7 +292,7 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
 const uv_aware_emit: EmitFunction = (material, r_in, hit) => {
     if (is_image_texture(material.emissive)) {
         const uv = update_uv(hit);
-        return texture_get_value[material.emissive.type](material.emissive, uv[0], uv[1], uv);
+        return texture_get_value[material.emissive.type](material.emissive, uv[0], uv[1], hit.p);
     }
 
     return texture_get_value[material.emissive.type](material.emissive, hit.u, hit.v, hit.p);

@@ -2,7 +2,13 @@ import { TileScheduleItem } from './work-scheduling';
 import { Scene } from './scenes/scene';
 import { get_ray } from './camera';
 import { ray_color } from './ray_color';
-import { add_vec3_r, ArenaVec3Allocator, use_vec3_allocator } from './math/vec.gen';
+import {
+    add_vec3_r,
+    ArenaVec2Allocator,
+    ArenaVec3Allocator,
+    use_vec2_allocator,
+    use_vec3_allocator
+} from './math/vec.gen';
 import { ArenaQuatAllocator, use_quat_allocator } from './math/quat.gen';
 import { run_with_hooks } from './utils';
 import { RenderParameters } from './types';
@@ -16,10 +22,12 @@ export const render_tile = (tile: TileScheduleItem, scene: Scene, color_allocato
         const y_px_step = 1 / config.image_height;
         const stratification_step = 1 / stratification_grid_size;
 
-        const vec3_allocator = new ArenaVec3Allocator(8192);
+        const vec3_allocator = new ArenaVec3Allocator(4096);
+        const vec2_allocator = new ArenaVec2Allocator(4096);
         const quat_allocator = new ArenaQuatAllocator(640);
 
         use_vec3_allocator(vec3_allocator);
+        use_vec2_allocator(vec2_allocator);
         use_quat_allocator(quat_allocator);
 
         for (let y = tile.y; y < tile.y + tile.height; y++) {
@@ -27,6 +35,7 @@ export const render_tile = (tile: TileScheduleItem, scene: Scene, color_allocato
                 const px_color = color_allocator.alloc(0, 0, 0);
                 let s = tile.stratification_offset;
                 for (let i = 0; i < tile.sample_count; i++) {
+                    vec2_allocator.reset();
                     vec3_allocator.reset();
                     quat_allocator.reset();
                     let x_random = 0;

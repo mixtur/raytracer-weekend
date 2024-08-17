@@ -4,11 +4,12 @@ import { GLTextureFilter } from './gl_types';
 import { create_burley_pbr_separate } from '../materials/burley-pbr-separate';
 import { GLTF2 } from './gltf_spec';
 import { Texture } from '../texture/texture';
-import { mat3, trs_to_mat3x4 } from '../math/mat3.gen';
-import { vec3 } from '../math/vec.gen';
+import { mat2x3, mat3, trs_to_mat2x3, trs_to_mat3x4 } from '../math/mat.gen';
+import { vec2, vec3 } from '../math/vec.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { create_texture_transform } from '../texture/texture_transform';
 import { PixelsData } from '../texture/image-parsers/types';
+import { angle_to_complex } from '../math/complex.gen';
 
 const parse_texture_transform = (material_texture: GLTF2.TextureInfo, tex: Texture): Texture => {
     interface KHR_texture_transform {
@@ -26,17 +27,12 @@ const parse_texture_transform = (material_texture: GLTF2.TextureInfo, tex: Textu
             scale = [1, 1]
         } = extensions.KHR_texture_transform;
 
-        const affine_matrix3 = trs_to_mat3x4(
-            vec3(offset[0], offset[1], 0),
-            axis_angle_to_quat(vec3(0, 0, -1), rotation),
-            vec3(scale[0], scale[1], 1)
+        //todo: tmp vectors/complexes etc
+        const matrix = trs_to_mat2x3(
+            vec2(offset[0], offset[1]),
+            angle_to_complex(rotation),
+            vec2(scale[0], scale[1])
         );
-
-        const matrix = mat3(
-            affine_matrix3[0], affine_matrix3[1], affine_matrix3[2],
-            affine_matrix3[3], affine_matrix3[4], affine_matrix3[5],
-            affine_matrix3[9], affine_matrix3[10], affine_matrix3[11]
-        )
 
         return create_texture_transform(matrix, tex);
     }

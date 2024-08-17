@@ -12,7 +12,7 @@ import { create_lambertian } from '../materials/lambertian';
 import { async_run_with_hooks, degrees_to_radians } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Skybox } from '../hittable/skybox';
-import { trs_to_mat3x4 } from '../math/mat3.gen';
+import { trs_to_mat3x4 } from '../math/mat.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { create_hittable_list } from '../hittable/hittable_list';
 import { create_zx_grid, zx_grid_add_hittable } from '../hittable/zx-grid';

@@ -5,7 +5,6 @@
 - configuration UI
 - work stealing
 - scene creation progress ui
-- 2d math for textures
 - glTF
   - loading progress
   - combine factors with textures

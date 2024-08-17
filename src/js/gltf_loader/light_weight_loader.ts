@@ -13,9 +13,15 @@ import {
     mul_mat3x4,
     trs_to_mat3x4, use_mat3_allocator,
     use_mat3x4_allocator
-} from '../math/mat3.gen';
-import { ArenaVec3Allocator, use_vec3_allocator, vec3, vec3_dirty } from '../math/vec.gen';
-import { quat, quat_dirty } from '../math/quat.gen';
+} from '../math/mat.gen';
+import {
+    ArenaVec2Allocator,
+    ArenaVec3Allocator,
+    use_vec2_allocator,
+    use_vec3_allocator,
+    vec3_dirty
+} from '../math/vec.gen';
+import { quat_dirty } from '../math/quat.gen';
 import { run_with_hooks } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';
 import { Hittable } from '../hittable/hittable';
@@ -55,6 +61,7 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
     ]);
 
     return run_with_hooks(() => {
+        use_vec2_allocator(new ArenaVec2Allocator(vec3_arena_size, true));
         use_vec3_allocator(new ArenaVec3Allocator(vec3_arena_size, true));
         use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size, true));
         use_mat3_allocator(new ArenaMat3Allocator(mat_arena_size, true));
@@ -115,7 +122,6 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
                 });
             }
 
-            //todo: Vec2
             let uv_index = 0;
             while (true) {
                 const uv_name = `TEXCOORD_${uv_index}`;

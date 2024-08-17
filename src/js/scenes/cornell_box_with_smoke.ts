@@ -6,7 +6,7 @@ import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_lambertian } from '../materials/lambertian';
 import { create_isotropic_phase_function } from '../materials/isotropic_phase_function';
 import { Skybox } from '../hittable/skybox';
-import { trs_to_mat3x4 } from '../math/mat3.gen';
+import { trs_to_mat3x4 } from '../math/mat.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { degrees_to_radians, run_with_hooks } from '../utils';
 import { create_quad } from '../hittable/quad';
