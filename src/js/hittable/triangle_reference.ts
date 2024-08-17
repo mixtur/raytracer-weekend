@@ -9,7 +9,7 @@ import {
     triangle_set_vertex_positions, TriangleVec2,
     TriangleVec3
 } from './triangle';
-import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3_dirty } from '../math/vec3.gen';
+import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3_dirty } from '../math/vec.gen';
 import { Texture } from '../texture/texture';
 import { TypedArray } from '../types';
 import { run_with_hooks } from '../utils';

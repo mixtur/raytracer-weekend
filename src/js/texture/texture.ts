@@ -1,4 +1,4 @@
-import { Color, Point3 } from '../math/vec3.gen';
+import { Color, Point3 } from '../math/vec.gen';
 
 export interface Texture {
     type: string;

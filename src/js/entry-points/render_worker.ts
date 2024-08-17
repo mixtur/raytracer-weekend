@@ -1,4 +1,4 @@
-import { ArenaVec3Allocator } from '../math/vec3.gen';
+import { ArenaVec3Allocator } from '../math/vec.gen';
 import { InitRenderWorkerParameters } from '../types';
 import { configure_camera } from '../camera';
 

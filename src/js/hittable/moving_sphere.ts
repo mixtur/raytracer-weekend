@@ -1,5 +1,5 @@
 import { Ray, ray_at_r } from '../math/ray';
-import { div_vec3_s_r, dot_vec3, mix_vec3_r, Point3, sub_vec3_r, vec3, Vec3 } from '../math/vec3.gen';
+import { div_vec3_s_r, dot_vec3, mix_vec3_r, Point3, sub_vec3_r, vec3, Vec3 } from '../math/vec.gen';
 import { Hittable, create_hittable_type, HitRecord, hittable_types, set_face_normal } from "./hittable";
 import { AABB } from '../math/aabb';
 import { get_sphere_uv } from './sphere';

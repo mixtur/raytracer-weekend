@@ -23,7 +23,7 @@ import {
     unit_vec3_r,
     Vec3,
     vec3_dirty
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB, union_aabb_point_r, create_empty_aabb, expand_aabb_r } from '../math/aabb';
 import { ray_dirty, Ray, ray_set, ray_at_r } from '../math/ray';

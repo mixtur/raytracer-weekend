@@ -1,4 +1,4 @@
-import { set_vec3, Vec3, vec3_dirty } from './math/vec3.gen';
+import { set_vec3, Vec3, vec3_dirty } from './math/vec.gen';
 import { HitRecord } from './hittable/hittable';
 import { interpolate_vec2_r } from './hittable/triangle';
 

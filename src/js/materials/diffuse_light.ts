@@ -6,7 +6,7 @@ import {
     MegaMaterial,
     ScatterFunction
 } from './megamaterial';
-import { color } from '../math/vec3.gen';
+import { color } from '../math/vec.gen';
 
 export const diffuse_light_scatter: ScatterFunction = () => false;
 export const black = color(0, 0, 0);

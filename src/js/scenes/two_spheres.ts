@@ -1,5 +1,5 @@
 import { create_scene, Scene } from './scene';
-import { point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec.gen';
 import { create_camera } from '../camera';
 import { Hittable } from '../hittable/hittable';
 import { solid_color } from '../texture/solid_color';

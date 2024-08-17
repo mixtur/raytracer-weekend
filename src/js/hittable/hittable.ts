@@ -1,5 +1,5 @@
 import { Ray } from "../math/ray";
-import { ArenaVec3Allocator, dot_vec3, point3, Point3, vec3, Vec3, vec3_dirty } from '../math/vec3.gen';
+import { ArenaVec3Allocator, dot_vec3, point3, Point3, vec3, Vec3, vec3_dirty } from '../math/vec.gen';
 import { AABB } from '../math/aabb';
 import { create_mega_material, MegaMaterial } from '../materials/megamaterial';
 import { TriangleVec2 } from './triangle';

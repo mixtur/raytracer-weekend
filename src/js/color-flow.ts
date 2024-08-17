@@ -5,7 +5,7 @@ import {
     fma_vec3_s_s_r,
     mul_vec3_r, mul_vec3_s_r,
     sub_vec3_s_r
-} from './math/vec3.gen';
+} from './math/vec.gen';
 import { clamp } from './utils';
 import { mat3, mul_mat3_vec3_r, transpose_mat3 } from './math/mat3.gen';
 

@@ -1,6 +1,6 @@
 import { Texture, texture_get_value } from './texture';
 import { PixelsData } from './image-parsers/types';
-import { Color, mix_vec3, mix_vec3_r, set_vec3, vec3_dirty } from '../math/vec3.gen';
+import { Color, mix_vec3, mix_vec3_r, set_vec3, vec3_dirty } from '../math/vec.gen';
 import { clamp } from '../utils';
 import { GLWrappingMode } from '../gltf_loader/gl_types';
 

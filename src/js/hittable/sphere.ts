@@ -5,7 +5,7 @@ import {
     Point3, rand_vec3_unit, sq_len_vec3, sub_vec3, sub_vec3_r,
     vec3,
     Vec3
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import {
     Hittable,
     create_empty_hit_record, create_hittable_type,

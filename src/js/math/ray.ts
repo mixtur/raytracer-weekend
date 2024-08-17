@@ -1,4 +1,4 @@
-import { ArenaVec3Allocator, Point3, use_vec3_allocator, vec3, Vec3, vec3_dirty } from './vec3.gen';
+import { ArenaVec3Allocator, Point3, use_vec3_allocator, vec3, Vec3, vec3_dirty } from './vec.gen';
 import { run_with_hooks } from '../utils';
 
 export type Ray = {

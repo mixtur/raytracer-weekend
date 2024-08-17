@@ -1,6 +1,6 @@
 import { create_hittable_type, Hittable, hittable_types } from './hittable';
 import { AABB, create_empty_aabb, union_aabb_r } from '../math/aabb';
-import { mul_vec3, sub_vec3 } from '../math/vec3.gen';
+import { mul_vec3, sub_vec3 } from '../math/vec.gen';
 
 //note: this one is not exactly Hittable. It can only be hit by hitting the root node. Which is an actual hittable.
 export interface BIHNode extends Hittable {

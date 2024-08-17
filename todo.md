@@ -1,4 +1,5 @@
-- **bug** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case.
+- **BUG** Sometimes according to normal-map or/and vertex normals, combined with micro-facets distribution, reflected ray must go below the surface. This is currently rendered as black. Should probably do something smarter in that case.
+- **BUG** Debug coordinates are wrong when canvas is scaled down
 - hitting bvh with triangles is too slow. Need more efficient in-memory structure after loading gltf. Grid patches could be faster
 - when sampling skybox, sample normal-oriented hemisphere, not entire sphere
 - configuration UI

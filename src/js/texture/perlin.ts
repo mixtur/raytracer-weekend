@@ -5,7 +5,7 @@ import {
     Point3, rand_vec3_min_max, use_vec3_allocator,
     vec3,
     Vec3
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import { run_with_hooks } from '../utils';
 
 const POINT_COUNT = 256;

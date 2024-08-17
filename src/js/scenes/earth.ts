@@ -1,5 +1,5 @@
 import { create_scene, Scene } from './scene';
-import { point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec.gen';
 import earthUrl from './earthmap.jpg';
 import { create_camera } from '../camera';
 import { create_lambertian } from '../materials/lambertian';

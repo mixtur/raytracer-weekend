@@ -9,7 +9,7 @@ import {
     Vec3,
     orthogonal_vec3_r,
     unit_vec3_r
-} from './vec3.gen';
+} from './vec.gen';
 import { run_hook } from '../utils';
 
 export type Quat = Float64Array;

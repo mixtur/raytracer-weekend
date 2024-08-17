@@ -1,5 +1,5 @@
 import { columns_to_mat3_r, Mat3, mat3, mat3_dirty, mul_mat3_vec3_r } from '../../math/mat3.gen';
-import { mul_vec3_s_r, set_vec3, vec3, Vec3, vec3_dirty } from '../../math/vec3.gen';
+import { mul_vec3_s_r, set_vec3, vec3, Vec3, vec3_dirty } from '../../math/vec.gen';
 import { PixelsData } from './types';
 
 export interface RGBEImporterOptions {

@@ -760,7 +760,7 @@ export const gen_look_target_to_mat = (matrix_layout) => (use_result_arg) => {
 
 export const gen_mat_module = () => {
     const module_code = [
-        `import {Vec3, vec3, vec3_dirty, unit_vec3_r, orthogonal_vec3_r, negate_vec3_r, cross_vec3_r, sub_vec3} from './vec3.gen'`,
+        `import {Vec3, vec3, vec3_dirty, unit_vec3_r, orthogonal_vec3_r, negate_vec3_r, cross_vec3_r, sub_vec3} from './vec.gen'`,
         `import {Quat} from './quat.gen'`,
         `import { run_hook } from '../utils';`,
         gen_mat_preamble(lin),

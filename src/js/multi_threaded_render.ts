@@ -1,7 +1,7 @@
 import { InitRenderWorkerParameters, RenderParameters } from './types';
 import { ColorWriter } from './ui/color-writers';
 import { TileResult } from './entry-points/render_worker';
-import { color } from './math/vec3.gen';
+import { color } from './math/vec.gen';
 import { ProgressReporter } from './ui/progress-reporters';
 import { ColorFlowItem } from './color-flow';
 import { schedule_tiles, TILES_COUNT } from './work-scheduling';

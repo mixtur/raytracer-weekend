@@ -7,7 +7,7 @@ import {
 } from './hittable';
 import { AABB } from '../math/aabb';
 import { Ray, ray_at_r } from '../math/ray';
-import { len_vec3, set_vec3 } from '../math/vec3.gen';
+import { len_vec3, set_vec3 } from '../math/vec.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 
 const hit1 = create_empty_hit_record();

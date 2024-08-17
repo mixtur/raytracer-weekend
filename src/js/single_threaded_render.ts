@@ -1,5 +1,5 @@
 import { RenderParameters } from './types';
-import { ArenaVec3Allocator, color_dirty } from './math/vec3.gen';
+import { ArenaVec3Allocator, color_dirty } from './math/vec.gen';
 import { ray_color_iterative } from './ray_color';
 import { ColorWriter } from './ui/color-writers';
 import { async_run_with_hooks } from './utils';

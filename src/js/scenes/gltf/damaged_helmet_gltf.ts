@@ -1,6 +1,6 @@
 import { load_gltf } from '../../gltf_loader/loader';
 import { create_scene, Scene } from '../scene';
-import { point3, vec3 } from '../../math/vec3.gen';
+import { point3, vec3 } from '../../math/vec.gen';
 import { create_camera } from '../../camera';
 import { load_rgbe } from '../../texture/image-parsers/rgbe_image_parser';
 import { Skybox } from '../../hittable/skybox';

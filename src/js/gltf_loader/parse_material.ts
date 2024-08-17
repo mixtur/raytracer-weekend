@@ -5,7 +5,7 @@ import { create_burley_pbr_separate } from '../materials/burley-pbr-separate';
 import { GLTF2 } from './gltf_spec';
 import { Texture } from '../texture/texture';
 import { mat3, trs_to_mat3x4 } from '../math/mat3.gen';
-import { vec3 } from '../math/vec3.gen';
+import { vec3 } from '../math/vec.gen';
 import { axis_angle_to_quat } from '../math/quat.gen';
 import { create_texture_transform } from '../texture/texture_transform';
 import { PixelsData } from '../texture/image-parsers/types';

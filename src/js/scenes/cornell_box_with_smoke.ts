@@ -1,7 +1,7 @@
 import { create_scene } from './scene';
 import { create_camera } from '../camera';
 import { solid_color } from '../texture/solid_color';
-import { ArenaVec3Allocator, point3, use_vec3_allocator, vec3 } from '../math/vec3.gen';
+import { ArenaVec3Allocator, point3, use_vec3_allocator, vec3 } from '../math/vec.gen';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { create_lambertian } from '../materials/lambertian';
 import { create_isotropic_phase_function } from '../materials/isotropic_phase_function';

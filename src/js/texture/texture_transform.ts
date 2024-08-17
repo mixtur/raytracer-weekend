@@ -1,6 +1,6 @@
 import { Texture, texture_get_value } from './texture';
 import { Mat3, Mat3x4, mul_mat3_vec3_r } from '../math/mat3.gen';
-import { set_vec3, vec3_dirty } from '../math/vec3.gen';
+import { set_vec3, vec3_dirty } from '../math/vec.gen';
 
 export interface TextureTransform extends Texture {
     type: 'transform';

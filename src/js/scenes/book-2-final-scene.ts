@@ -1,5 +1,5 @@
 import { create_scene, Scene } from './scene';
-import { add_vec3, ArenaVec3Allocator, point3, rand_vec3_min_max, use_vec3_allocator, vec3 } from '../math/vec3.gen';
+import { add_vec3, ArenaVec3Allocator, point3, rand_vec3_min_max, use_vec3_allocator, vec3 } from '../math/vec.gen';
 import { solid_color } from '../texture/solid_color';
 import { random_min_max } from '../math/random';
 import earthUrl from './earthmap.jpg';

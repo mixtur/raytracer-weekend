@@ -10,7 +10,7 @@ import {
     cross_vec3, cross_vec3_r, div_vec3_s, dot_vec3, fma_vec3_s_vec3, fma_vec3_s_vec3_r, len_vec3,
     Point3, sq_len_vec3, sub_vec3, sub_vec3_r, unit_vec3_r, vec3,
     Vec3
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import { MegaMaterial } from '../materials/megamaterial';
 import { AABB, union_aabb_point_r, create_empty_aabb, expand_aabb_r } from '../math/aabb';
 import { Ray, ray_at, ray_dirty, ray_set } from '../math/ray';

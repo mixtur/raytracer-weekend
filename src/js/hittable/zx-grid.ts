@@ -1,5 +1,5 @@
 import { Hittable, create_hittable_type, HitRecord, hittable_types } from './hittable';
-import { add_vec3, vec3, Vec3 } from '../math/vec3.gen';
+import { add_vec3, vec3, Vec3 } from '../math/vec.gen';
 import { Ray } from '../math/ray';
 import { AABB, create_aabb } from '../math/aabb';
 

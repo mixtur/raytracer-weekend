@@ -10,7 +10,7 @@ import {
 } from '../math/mat3.gen';
 import { Ray, ray_dirty, ray_set } from '../math/ray';
 import { AABB, union_aabb_point_r, create_empty_aabb } from '../math/aabb';
-import { point3_dirty, set_vec3, Vec3 } from '../math/vec3.gen';
+import { point3_dirty, set_vec3, Vec3 } from '../math/vec.gen';
 
 export interface ITransform extends Hittable {
     type: 'transform';

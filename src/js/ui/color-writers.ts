@@ -1,4 +1,4 @@
-import { Color, color_dirty, mul_vec3_s_r } from '../math/vec3.gen';
+import { Color, color_dirty, mul_vec3_s_r } from '../math/vec.gen';
 import { ColorFlowItem } from '../color-flow';
 
 export interface ColorWriter {

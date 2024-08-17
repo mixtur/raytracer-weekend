@@ -1,5 +1,5 @@
 import { Texture, texture_get_value } from './texture';
-import { color, Color, mul_vec3_s, Point3 } from '../math/vec3.gen';
+import { color, Color, mul_vec3_s, Point3 } from '../math/vec.gen';
 import { create_perlin, Perlin, perlin_turb } from './perlin';
 
 export interface INoiseTexture extends Texture {

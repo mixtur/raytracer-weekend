@@ -8,7 +8,7 @@ import {
     sub_vec3,
     use_vec3_allocator,
     vec3
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import { create_checker_3d_texture } from '../texture/checker_3d_texture';
 import { create_solid_color, solid_color } from '../texture/solid_color';
 import { random, random_min_max } from '../math/random';

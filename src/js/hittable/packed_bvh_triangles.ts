@@ -9,7 +9,7 @@ import {
     union_aabb_r, unpack_aabb
 } from '../math/aabb';
 import { Ray } from '../math/ray';
-import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3_dirty } from '../math/vec3.gen';
+import { ArenaVec3Allocator, use_vec3_allocator, Vec3, vec3_dirty } from '../math/vec.gen';
 import { load_vec3, TriangleRefAttributeSemantic, TriangleRefPrimitive, unpack_triangle } from './triangle_reference';
 import { run_with_hooks } from '../utils';
 import { LRUCache } from '../lru';

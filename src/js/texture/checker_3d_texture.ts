@@ -1,5 +1,5 @@
 import { Texture, texture_get_value } from './texture';
-import { Color, Point3 } from '../math/vec3.gen';
+import { Color, Point3 } from '../math/vec.gen';
 
 export interface IChecker3DTexture extends Texture {
     type: 'checker3d';

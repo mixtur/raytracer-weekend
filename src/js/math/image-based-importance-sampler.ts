@@ -2,7 +2,7 @@ import { PixelsData } from '../texture/image-parsers/types';
 import { PDF, pdf_types } from './pdf';
 import { convert_XYZ_to_xyY, RGB_TO_XYZ } from '../texture/image-parsers/rgbe_image_parser';
 import { mul_mat3_vec3_r } from './mat3.gen';
-import { set_vec3, unit_vec3, Vec3, vec3, vec3_dirty } from './vec3.gen';
+import { set_vec3, unit_vec3, Vec3, vec3, vec3_dirty } from './vec.gen';
 
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

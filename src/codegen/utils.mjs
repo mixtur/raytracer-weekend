@@ -36,13 +36,6 @@ export const gen_signature = (use_result_arg, base_signature) => {
     return base_signature;
 }
 
-export const extract_fn_body = (fn) => {
-    const full_code = fn.toString();
-    const first_curly_index = full_code.indexOf('{');
-    const last_curly_index = full_code.lastIndexOf('}');
-    return full_code.substring(first_curly_index + 1, last_curly_index).trim();
-}
-
 export const optimize_expr = (ast) => {
     if (typeof ast === 'number') return ast;
     if (typeof ast === 'string') return ast;

@@ -5,7 +5,7 @@ import {
     hittable_types,
     set_face_normal
 } from './hittable';
-import { len_vec3, Point3, sq_len_vec3, sub_vec3, Vec3, vec3 } from '../math/vec3.gen';
+import { len_vec3, Point3, sq_len_vec3, sub_vec3, Vec3, vec3 } from '../math/vec.gen';
 import { Ray, ray_at_r } from '../math/ray';
 import { MegaMaterial } from '../materials/megamaterial';
 import { random_min_max } from '../math/random';

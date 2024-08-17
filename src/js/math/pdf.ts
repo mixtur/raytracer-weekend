@@ -4,7 +4,7 @@ import {
     rand_vec3_on_unit_hemisphere,
     rand_vec3_unit, reflect_incident_vec3, reflect_incident_vec3_r, reflect_vec3, unit_vec3, unit_vec3_r,
     Vec3, vec3_dirty
-} from './vec3.gen';
+} from './vec.gen';
 import {
     invert_quat,
     invert_quat_r,

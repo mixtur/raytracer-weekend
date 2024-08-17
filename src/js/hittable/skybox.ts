@@ -1,7 +1,7 @@
 import { Hittable, create_hittable_type, HitRecord, hittable_types } from './hittable';
 import { Ray, ray_at_r } from '../math/ray';
 import { MegaMaterial } from '../materials/megamaterial';
-import { negate_vec3_r, unit_vec3, Vec3 } from '../math/vec3.gen';
+import { negate_vec3_r, unit_vec3, Vec3 } from '../math/vec.gen';
 import { AABB } from '../math/aabb';
 import { create_diffuse_light } from '../materials/diffuse_light';
 import { solid_color } from '../texture/solid_color';

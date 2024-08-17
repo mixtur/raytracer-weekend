@@ -15,7 +15,7 @@ import {
     sub_vec3,
     sub_vec3_r, unit_vec3_r,
     Vec3
-} from './math/vec3.gen';
+} from './math/vec.gen';
 import { Ray, ray_dirty, ray_set } from './math/ray';
 import { degrees_to_radians } from './utils';
 

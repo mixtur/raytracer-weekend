@@ -1,5 +1,5 @@
 import { Camera, create_camera } from '../camera';
-import { point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec.gen';
 import { Skybox } from '../hittable/skybox';
 import { Hittable } from '../hittable/hittable';
 import { create_hittable_list } from '../hittable/hittable_list';

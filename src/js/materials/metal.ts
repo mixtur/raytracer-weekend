@@ -4,7 +4,7 @@ import {
     add_vec3_r, dot_vec3,
     mul_vec3_s, rand_vec3_in_unit_sphere,
     reflect_incident_vec3, unit_vec3
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import {
     create_material_type,
     create_mega_material,

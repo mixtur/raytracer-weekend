@@ -1,5 +1,5 @@
 import { Texture, texture_get_value } from './texture';
-import { color, Color } from '../math/vec3.gen';
+import { color, Color } from '../math/vec.gen';
 
 export interface ISolidColor extends Texture{
     type: 'solid';

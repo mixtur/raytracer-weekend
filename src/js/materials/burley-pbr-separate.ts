@@ -23,7 +23,7 @@ import {
     sub_vec3, sub_vec3_r,
     unit_vec3, Vec3,
     vec3, vec3_dirty
-} from '../math/vec3.gen';
+} from '../math/vec.gen';
 import { clamp, remap } from '../utils';
 import { Ray } from '../math/ray';
 import { HitRecord } from '../hittable/hittable';

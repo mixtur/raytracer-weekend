@@ -1,5 +1,5 @@
 import { ray_set } from '../math/ray';
-import { dot_vec3, reflect_incident_vec3, refract_incident_vec3, unit_vec3 } from '../math/vec3.gen';
+import { dot_vec3, reflect_incident_vec3, refract_incident_vec3, unit_vec3 } from '../math/vec.gen';
 import {
     create_material_type,
     create_mega_material,

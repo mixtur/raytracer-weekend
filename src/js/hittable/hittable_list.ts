@@ -1,7 +1,7 @@
 import { Ray } from "../math/ray";
 import { Hittable, create_hittable_type, HitRecord, hittable_types } from "./hittable";
 import { AABB, union_aabb_r, create_empty_aabb } from '../math/aabb';
-import { Vec3 } from '../math/vec3.gen';
+import { Vec3 } from '../math/vec.gen';
 
 export interface IHittableList extends Hittable {
     type: 'hittable_list';

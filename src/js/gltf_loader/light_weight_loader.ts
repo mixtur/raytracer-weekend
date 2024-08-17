@@ -14,7 +14,7 @@ import {
     trs_to_mat3x4, use_mat3_allocator,
     use_mat3x4_allocator
 } from '../math/mat3.gen';
-import { ArenaVec3Allocator, use_vec3_allocator, vec3, vec3_dirty } from '../math/vec3.gen';
+import { ArenaVec3Allocator, use_vec3_allocator, vec3, vec3_dirty } from '../math/vec.gen';
 import { quat, quat_dirty } from '../math/quat.gen';
 import { run_with_hooks } from '../utils';
 import { load_dom_image } from '../texture/image-parsers/image-bitmap';

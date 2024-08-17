@@ -9,7 +9,7 @@ import {
     union_aabb_r
 } from '../math/aabb';
 import { Ray } from '../math/ray';
-import { Vec3 } from '../math/vec3.gen';
+import { Vec3 } from '../math/vec.gen';
 
 const b0 = create_empty_aabb();
 const b1 = create_empty_aabb();

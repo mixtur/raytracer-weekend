@@ -1,6 +1,6 @@
 import { create_scene, Scene } from './scene';
 import { create_camera } from '../camera';
-import { point3, vec3 } from '../math/vec3.gen';
+import { point3, vec3 } from '../math/vec.gen';
 import { create_noise_texture } from '../texture/noise_texture';
 import { solid_color } from '../texture/solid_color';
 import { create_lambertian } from '../materials/lambertian';

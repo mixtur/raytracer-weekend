@@ -1,5 +1,5 @@
 import { ray_dirty, Ray, ray_set } from './math/ray';
-import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r } from './math/vec3.gen';
+import { color, Color, fma_vec3, fma_vec3_r, mul_vec3_r, mul_vec3_s, mul_vec3_s_r } from './math/vec.gen';
 import { Hittable, create_empty_hit_record, HitRecord, hittable_types } from './hittable/hittable';
 import { BounceRecord, create_bounce_record, material_types } from './materials/megamaterial';
 import { create_hittable_pdf, create_mixture_pdf, pdf_types } from './math/pdf';
