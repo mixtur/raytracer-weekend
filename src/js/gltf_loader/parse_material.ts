@@ -4,13 +4,15 @@ import { GLTextureFilter } from './gl_types';
 import { create_burley_pbr_separate } from '../materials/burley-pbr-separate';
 import { GLTF2 } from './gltf_spec';
 import { Texture } from '../texture/texture';
-import { mat2x3, mat3, trs_to_mat2x3, trs_to_mat3x4 } from '../math/mat.gen';
-import { vec2, vec3 } from '../math/vec.gen';
-import { axis_angle_to_quat } from '../math/quat.gen';
+import { trs_to_mat2x3 } from '../math/mat.gen';
+import { set_vec2, vec2_dirty } from '../math/vec.gen';
 import { create_texture_transform } from '../texture/texture_transform';
 import { PixelsData } from '../texture/image-parsers/types';
-import { angle_to_complex } from '../math/complex.gen';
+import { angle_to_complex_r, complex_dirty } from '../math/complex.gen';
 
+const tmp_translation = vec2_dirty();
+const tmp_scaling = vec2_dirty();
+const tmp_rotation = complex_dirty();
 const parse_texture_transform = (material_texture: GLTF2.TextureInfo, tex: Texture): Texture => {
     interface KHR_texture_transform {
         offset?: [number, number],
@@ -27,11 +29,11 @@ const parse_texture_transform = (material_texture: GLTF2.TextureInfo, tex: Textu
             scale = [1, 1]
         } = extensions.KHR_texture_transform;
 
-        //todo: tmp vectors/complexes etc
+        // noinspection CommaExpressionJS
         const matrix = trs_to_mat2x3(
-            vec2(offset[0], offset[1]),
-            angle_to_complex(rotation),
-            vec2(scale[0], scale[1])
+            (set_vec2(tmp_translation, offset[0], offset[1]), tmp_translation),
+            (angle_to_complex_r(tmp_rotation, rotation), tmp_rotation),
+            (set_vec2(tmp_scaling, scale[0], scale[1]), tmp_scaling)
         );
 
         return create_texture_transform(matrix, tex);

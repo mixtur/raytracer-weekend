@@ -90,7 +90,7 @@ const gen_angle_to_complex = (use_result_arg) => {
     const signature = gen_signature(use_result_arg, sig('Complex', 'angle: number'));
     const components = [
         `Math.cos(angle)`,
-        'Math.sin(angle)'
+        '-Math.sin(angle)'
     ];
 
     const body = gen_output(use_result_arg, 'complex', components);

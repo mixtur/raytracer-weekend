@@ -235,7 +235,6 @@ const is_triangle_interior = (a: number, b: number, hit: HitRecord): boolean => 
     return true;
 };
 
-//todo: make triangles indexed (mesh-hittable?)
 hittable_types.triangle = create_hittable_type({
     get_bounding_box(hittable, time0: number, time1: number, aabb: AABB) {
         const triangle = hittable as ITriangle;

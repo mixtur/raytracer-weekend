@@ -5,8 +5,11 @@
 - configuration UI
 - work stealing
 - scene creation progress ui
+- vec4 for bitangents
 - glTF
   - loading progress
   - combine factors with textures
   - transmission
   - volume, ior
+  - compute mikktspace in app
+  - strided attributes

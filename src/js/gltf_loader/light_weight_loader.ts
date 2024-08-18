@@ -4,6 +4,7 @@ import { create_lambertian } from '../materials/lambertian';
 import { solid_color } from '../texture/solid_color';
 import { INormalStrategy } from '../hittable/triangle';
 import {
+    ArenaMat2x3Allocator,
     ArenaMat3Allocator,
     ArenaMat3x4Allocator, is_identity_mat3x4,
     mat3x4,
@@ -11,7 +12,7 @@ import {
     mat4_dirty,
     mat4_to_mat3x4,
     mul_mat3x4,
-    trs_to_mat3x4, use_mat3_allocator,
+    trs_to_mat3x4, use_mat2x3_allocator, use_mat3_allocator,
     use_mat3x4_allocator
 } from '../math/mat.gen';
 import {
@@ -61,10 +62,10 @@ export const load_gltf_light = async (url: string, vec3_arena_size: number, mat_
     ]);
 
     return run_with_hooks(() => {
-        use_vec2_allocator(new ArenaVec2Allocator(vec3_arena_size, true));
         use_vec3_allocator(new ArenaVec3Allocator(vec3_arena_size, true));
         use_mat3x4_allocator(new ArenaMat3x4Allocator(mat_arena_size, true));
         use_mat3_allocator(new ArenaMat3Allocator(mat_arena_size, true));
+        use_mat2x3_allocator(new ArenaMat2x3Allocator(mat_arena_size, true));
 
         const buffer_views = (gltf.bufferViews ?? []).map(b => {
             const buffer = buffers[b.buffer];
