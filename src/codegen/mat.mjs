@@ -762,7 +762,7 @@ export const gen_gl_perspective_projection = (use_result_arg) => {
     const body = [
         preamble,
         use_result_arg
-            ? ind + `gl_asymmetric_perspective_projection_to_mat4_r(result, -right, right, -top, top, near, far);`
+            ? ind + `return gl_asymmetric_perspective_projection_to_mat4_r(result, -right, right, -top, top, near, far);`
             : ind + `return gl_asymmetric_perspective_projection_to_mat4(-right, right, -top, top, near, far);`
     ].join('\n\n');
 
@@ -849,10 +849,7 @@ export const gen_look_target_to_mat = (matrix_layout) => (use_result_arg) => {
         `result[${get_idx(0, 3)}] = origin[0];`,
         `result[${get_idx(1, 3)}] = origin[1];`,
         `result[${get_idx(2, 3)}] = origin[2];`,
-        ...(use_result_arg
-            ? []
-            : ['return result;']
-        )
+        'return result;'
     ].map(x => ind + x).join('\n');
 
     return gen_fn(fn_name, signature, body, use_result_arg);

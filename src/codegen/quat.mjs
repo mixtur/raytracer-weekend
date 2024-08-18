@@ -78,8 +78,8 @@ const gen_unit = (use_result_arg) => {
     return gen_fn(name, signature, body, use_result_arg);
 }
 
-const gen_newz_to_quat = (use_result_arg) => {
-    const name = 'newz_to_quat';
+const gen_new_z_to_quat = (use_result_arg) => {
+    const name = 'new_z_to_quat';
     const signature = gen_signature(use_result_arg, sig('Quat', '_new_z: Vec3'));
     const body = [
         `const new_z = tmp_vec;`,
@@ -113,7 +113,7 @@ const gen_newz_to_quat = (use_result_arg) => {
         `}`,
         ``,
         `unit_quat_r(result, result);`,
-        ...(use_result_arg ? [] : [`return result;`]),
+        `return result;`,
     ].map(x => (x === '') ? x : ind + x).join('\n');
 
     return gen_fn(name, signature, body, use_result_arg);
@@ -201,7 +201,7 @@ export const gen_quat_module = () => {
         preamble,
         ...[
             gen_unit,
-            gen_newz_to_quat,
+            gen_new_z_to_quat,
             gen_mul_quat_vec,
             gen_axis_angle_to_quat,
             gen_invert_quat

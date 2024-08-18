@@ -2,16 +2,14 @@ import {
     add_vec3,
     dot_vec3, rand_vec3_cosine_unit,
     rand_vec3_on_unit_hemisphere,
-    rand_vec3_unit, reflect_incident_vec3, reflect_incident_vec3_r, reflect_vec3, unit_vec3, unit_vec3_r,
+    rand_vec3_unit, reflect_vec3, unit_vec3, unit_vec3_r,
     Vec3, vec3_dirty
 } from './vec.gen';
 import {
     invert_quat,
-    invert_quat_r,
     mul_quat_vec3,
     mul_quat_vec3_r,
-    newz_to_quat,
-    newz_to_quat_r,
+    new_z_to_quat,
     Quat,
     quat_dirty
 } from './quat.gen';
@@ -56,7 +54,7 @@ export interface IHemispherePDF extends PDF {
 export const create_hemisphere_pdf = (lobe_direction: Vec3): IHemispherePDF => {
     return {
         type: 'hemisphere',
-        quat: newz_to_quat(lobe_direction)
+        quat: new_z_to_quat(lobe_direction)
     }
 }
 
@@ -86,7 +84,7 @@ export const create_cosine_pdf = (): ICosinePDF => {
 };
 
 export const cosine_pdf_set_direction = (pdf: ICosinePDF, lobe_direction: Vec3) => {
-    pdf.quat = newz_to_quat(lobe_direction);
+    pdf.quat = new_z_to_quat(lobe_direction);
     pdf.lobe_direction = unit_vec3(lobe_direction);
 };
 
@@ -216,7 +214,7 @@ export const create_reflection_pdf_type = <T extends string>({generate_h, value_
 //note: anisotropic micro-facet distribution would require tangent, not just normal,
 //      and quaternion would be computed differently (not sure how yet)
 export const setup_reflection_pdf = <T extends string>(pdf: IReflectionPDF<T>, unit_normal: Vec3, unit_view: Vec3): void => {
-    pdf.quat = newz_to_quat(unit_normal);
+    pdf.quat = new_z_to_quat(unit_normal);
     pdf.unit_normal = unit_normal;
     pdf.inv_quat = invert_quat(pdf.quat);
     pdf.unit_view = unit_view;

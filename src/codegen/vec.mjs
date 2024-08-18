@@ -277,14 +277,9 @@ const gen_rand_vec_in_unit_sphere = (components_count) => (use_result_arg) => {
 
     const name = `rand_${vec_name}_in_unit_${area_name}`;
     const signature = gen_signature(use_result_arg, sig(vec_type_name));
-    const body = use_result_arg
-        ? [
-            ind + 'do {',
-            ind + `    rand_${vec_name}_min_max_r(result, -1, 1)`,
-            ind + `} while(sq_len_${vec_name}(result) >= 1)`,
-        ].join('\n')
-        : [
-            ind + `const result = ${vec_name}_dirty();`,
+    const body =
+        [
+            ...(use_result_arg ? [] : [ind + `const result = ${vec_name}_dirty();`]),
             ind + 'do {',
             ind + `    rand_${vec_name}_min_max_r(result, -1, 1)`,
             ind + `} while(sq_len_${vec_name}(result) >= 1)`,
@@ -396,7 +391,8 @@ const gen_reflect_incident_vec3 = (use_result_arg) => {
     const body = use_result_arg
         ? [
             ind + 'mul_vec3_s_r(result, normal, 2 * dot_vec3(incident_v, normal));',
-            ind + 'sub_vec3_r(result, incident_v, result);'
+            ind + 'sub_vec3_r(result, incident_v, result);',
+            ind + 'return result;',
         ].join('\n')
         : [
             ind + 'const result = mul_vec3_s(normal, 2 * dot_vec3(incident_v, normal));',
@@ -412,7 +408,8 @@ const gen_reflect_vec3 = (use_result_arg) => {
     const body = use_result_arg
         ? [
             ind + 'mul_vec3_s_r(result, normal, 2 * dot_vec3(v, normal));',
-            ind + 'sub_vec3_r(result, result, v);'
+            ind + 'sub_vec3_r(result, result, v);',
+            ind + 'return result;',
         ].join('\n')
         : [
             ind + 'const result = mul_vec3_s(normal, 2 * dot_vec3(v, normal));',
@@ -437,6 +434,7 @@ const gen_refract_incident_vec3 = (use_result_arg) => {
             //todo: make a tmp variable for out_y
             ind + 'const out_y = mul_vec3_s(normal, -Math.sqrt(1 - sq_len_vec3(out_x)));',
             ind + 'add_vec3_r(out_x, out_x, out_y);',
+            ind + 'return out_x;',
         ].join('\n')
         : [
             ind + 'const cos_theta = -dot_vec3(normal, incident_v);',
@@ -456,14 +454,9 @@ const gen_refract_incident_vec3 = (use_result_arg) => {
 const gen_rand_vec3_in_unit_disk = (use_result_arg) => {
     const name = 'rand_vec3_in_unit_disk';
     const signature = gen_signature(use_result_arg, sig('Vec3'));
-    const code = use_result_arg
-        ? [
-            `do {`,
-            `    set_vec3(result, random_min_max(-1, 1), random_min_max(-1, 1), 0);`,
-            `} while (sq_len_vec3(result) >= 1)`,
-        ]
-        : [
-            `const result = vec3_dirty();`,
+    const code =
+        [
+            ...(use_result_arg ? []: [`const result = vec3_dirty();`]),
             `do {`,
             `    set_vec3(result, random_min_max(-1, 1), random_min_max(-1, 1), 0);`,
             `} while (sq_len_vec3(result) >= 1)`,

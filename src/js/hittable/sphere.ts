@@ -16,7 +16,7 @@ import {
 import { AABB } from '../math/aabb';
 import { UV } from '../texture/texture';
 import { MegaMaterial } from '../materials/megamaterial';
-import { mul_quat_vec3, newz_to_quat } from '../math/quat.gen';
+import { mul_quat_vec3, new_z_to_quat } from '../math/quat.gen';
 
 
 const tmp_hit = create_empty_hit_record();
@@ -123,7 +123,7 @@ hittable_types.sphere = create_hittable_type({
         const cos_theta_max = Math.sqrt(1 - radius_2 / cone_axis_sq_len);
         const r1 = Math.random() * Math.PI * 2;
         const r2 = Math.random();
-        const quat = newz_to_quat(cone_axis);
+        const quat = new_z_to_quat(cone_axis);
         const cos_t = 1 + r2 * (cos_theta_max - 1);
         const sin_t = Math.sqrt(1 - cos_t * cos_t);
         const cos_p = Math.cos(r1);

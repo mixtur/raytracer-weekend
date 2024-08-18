@@ -1,4 +1,4 @@
-import { point3, Point3, vec3, vec3_dirty } from './vec.gen';
+import { point3, Point3, vec3 } from './vec.gen';
 import { Ray } from './ray';
 
 export interface AABB {

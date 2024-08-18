@@ -22,7 +22,6 @@ export const gen_fn = (name, signature, body, use_result_arg = false) => {
     return `export const ${name}${use_result_arg ? '_r' : ''} = (${signature.args.map(arg => arg.name + ': ' + arg.type).join(', ')}): ${signature.return_type} => {\n${body}\n}`;
 };
 
-//todo: make _r variants return the result
 export const gen_signature = (use_result_arg, base_signature) => {
     if (use_result_arg) {
         return {
@@ -30,7 +29,7 @@ export const gen_signature = (use_result_arg, base_signature) => {
                 {name: 'result', type: base_signature.return_type},
                 ...base_signature.args
             ],
-            return_type: 'void',
+            return_type: base_signature.return_type,
         };
     }
     return base_signature;
@@ -129,7 +128,7 @@ export const optimize_div = (args) => {
 
 export const gen_output = (use_result_arg, constructor_name, code_per_component, extra_ind = '') => {
     return use_result_arg
-        ? code_per_component.map((c, i) => extra_ind + ind + `result[${i}] = ${c};`).join('\n')
+        ? code_per_component.map((c, i) => extra_ind + ind + `result[${i}] = ${c};`).join('\n') + '\n' + ind + `return result;`
         : [
             extra_ind + ind + `return ${constructor_name}(`,
             code_per_component.map(c => extra_ind + ind2 + c).join(',\n'),
