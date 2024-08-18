@@ -1,5 +1,10 @@
-import { columns_to_mat3_r, Mat3, mat3, mat3_dirty, mul_mat3_vec3_r } from '../../math/mat.gen';
-import { mul_vec3_s_r, set_vec3, vec3, Vec3, vec3_dirty } from '../../math/vec.gen';
+import {
+    columns_to_mat2_r,
+    Mat2, mat2_dirty,
+    mat3,
+    mul_mat3_vec3_r
+} from '../../math/mat.gen';
+import { mul_vec3_s_r, set_vec3, vec2, vec3, Vec3, vec3_dirty } from '../../math/vec.gen';
 import { PixelsData } from './types';
 
 export interface RGBEImporterOptions {
@@ -78,7 +83,7 @@ const xyYColor = vec3_dirty();
 export interface RGBEHeader {
     string: string;
     comments: string[];
-    xy_transform: Mat3;//todo: Mat2
+    xy_transform: Mat2;
     color_corr: Vec3;
     pixel_aspect: number;
     gamma: number;
@@ -163,7 +168,7 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
         const header: RGBEHeader = {
             string: '',
             comments: [],
-            xy_transform: mat3_dirty(),
+            xy_transform: mat2_dirty(),
             color_corr: vec3(1, 1, 1),
             gamma: 1,
             pixel_aspect: 1,
@@ -247,20 +252,19 @@ export const parse_rgbe = (options: RGBEImporterOptions) => {
 
                 const mapping_column = (desc: string): Vec3 => {
                     switch (desc.toUpperCase()) {
-                        case '+X': return vec3( 1,  0, 0);
-                        case '-X': return vec3(-1,  0, 0);
-                        case '+Y': return vec3( 0,  1, 0);
-                        case '-Y': return vec3( 0, -1, 0);
+                        case '+X': return vec2( 1,  0);
+                        case '-X': return vec2(-1,  0);
+                        case '+Y': return vec2( 0,  1);
+                        case '-Y': return vec2( 0, -1);
                         default:
                             throw new Error(`Invalid dimension format ${JSON.stringify(dimension_line)}`);
                     }
                 };
 
-                columns_to_mat3_r(
+                columns_to_mat2_r(
                     header.xy_transform,
                     mapping_column(c),
-                    mapping_column(a),
-                    vec3(0, 0, 1)
+                    mapping_column(a)
                 );
 
 

@@ -316,9 +316,11 @@ export const gen_columns_to_mat = (matrix_layout) => (use_result_arg) => {
     const mat_type_name = gen_type_name(matrix_layout);
     const mat_name = mat_type_name.toLowerCase();
     const name = `columns_to_${mat_name}`;
+    const vec_type_name = `Vec${matrix_layout.rows}`;
+
     const signature = gen_signature(use_result_arg, {
         return_type: mat_type_name,
-        args: new Array(matrix_layout.cols).fill('').map((_, i) => ({ name: `col${i}`, type: 'Vec3' })),
+        args: new Array(matrix_layout.cols).fill('').map((_, i) => ({ name: `col${i}`, type: vec_type_name })),
     });
     const components = [];
     for (let col = 0; col < matrix_layout.cols; col++) {
@@ -873,6 +875,8 @@ export const gen_mat_module = () => {
         gen_is_identity(hom3),
 
         ...[
+            gen_columns_to_mat(lin2),
+            gen_columns_to_mat(aff2),
             gen_columns_to_mat(lin3),
             gen_columns_to_mat(aff3),
 
