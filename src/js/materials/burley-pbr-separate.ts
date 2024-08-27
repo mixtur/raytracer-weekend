@@ -154,7 +154,21 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
     const g = walter_g_partial(l_dot_h, l_dot_n, alpha_g_squared, tan_theta_l_squared)
             * walter_g_partial(v_dot_h, v_dot_n, alpha_g_squared, tan_theta_v_squared);
 
-    mul_vec3_s_r(bounce.attenuation, specular_weight, g * l_dot_h / v_dot_n);
+    //if we were to compute this using uniform sampling we'd have to compute this:
+    //    (specular_weight * D * g / (4 * v_dot_n * l_dot_n)) * l_dot_n =
+    //    (specular_weight * D * g) / (4 * v_dot_n)
+    // However we use sampling with the following pdf:
+    //    D / J
+    // To account for that we adjust our complete formula to be:
+    //    (specular_weight * J * g) / (4 * v_dot_n)
+    //
+    // with J=16*v_dot_h**3
+    // mul_vec3_s_r(bounce.attenuation, specular_weight, 4 * g * (v_dot_h ** 3) / v_dot_n);
+    //
+    // with J=4*v_dot_h
+    mul_vec3_s_r(bounce.attenuation, specular_weight, g * v_dot_h / v_dot_n);
+    // with J=2
+    // mul_vec3_s_r(bounce.attenuation, specular_weight, g / (2 * v_dot_n));
 }
 
 export interface ISpecularGGXPDF extends IReflectionPDF<'specular_burley_pdf'> {

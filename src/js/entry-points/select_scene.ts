@@ -18,4 +18,5 @@ const render_links = (id: string, tag: string) => {
 render_links('book1_scenes', 'book1');
 render_links('book2_scenes', 'book2');
 render_links('book3_scenes', 'book3');
+render_links('pbr', 'pbr');
 render_links('gltf_scenes', 'gltf');

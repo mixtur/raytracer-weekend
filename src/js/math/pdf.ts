@@ -2,7 +2,7 @@ import {
     add_vec3,
     dot_vec3, rand_vec3_cosine_unit,
     rand_vec3_on_unit_hemisphere,
-    rand_vec3_unit, reflect_vec3, unit_vec3, unit_vec3_r,
+    rand_vec3_unit, reflect_vec3, reflect_vec3_r, unit_vec3, unit_vec3_r,
     Vec3, vec3_dirty
 } from './vec.gen';
 import {
@@ -205,8 +205,10 @@ export const create_reflection_pdf_type = <T extends string>({generate_h, value_
             // rotate h back to local space
             mul_quat_vec3_r(h, reflection_pdf.inv_quat, h);
             // now we can compute local-space h value.
-            // (4 * h[2]) - is determinant of Jacobian of reflection operator
-            return value_h(reflection_pdf, h) / (4 * h[2]);
+            // const det_j = 16 * h[2] ** 3;// - is a Jacobian determinant of reflection operator that we derived manually
+            const det_j = 4 * h[2];// - is a Jacobian determinant of reflection operator that everyone else use
+            // const det_j = 2;// - is a Jacobian determinant of reflection operator in spherical coordinates
+            return value_h(reflection_pdf, h) / det_j;
         }
     };
 };

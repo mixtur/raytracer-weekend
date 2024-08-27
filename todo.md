@@ -6,6 +6,7 @@
 - work stealing
 - scene creation progress ui
 - vec4 for bitangents
+- figure out Jacobians, need better comments in PDFs and specular part of PBR
 - glTF
   - loading progress
   - combine factors with textures
