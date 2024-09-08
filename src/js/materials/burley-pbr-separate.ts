@@ -44,10 +44,10 @@ const burley_diffuse_partial = (f_d90: number, cos_theta_sep: number) => {
 
 const f0_vec = vec3_dirty();
 const one_vec = vec3(1, 1, 1);
-const specular_weight = vec3_dirty();
-const diffuse_weight = vec3_dirty();
+const reflection_weight = vec3_dirty();
+const refraction_weight = vec3_dirty();
 
-const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3, metallic: number, roughness: number) => {
+const burley_brdf_refract = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3, metallic: number, roughness: number) => {
     const n = unit_vec3(hit.normal);
     const v = negate_vec3(unit_vec3(r_in.direction));
     const l = unit_vec3(scattered.direction);
@@ -72,15 +72,15 @@ const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, 
 
     // we want to compute this f0 + (1 - f0) * (1 - l_dot_h) ** 5
     // except that f0 and 1 are vectors, so
-    add_vec3_r(specular_weight,
+    add_vec3_r(reflection_weight,
         f0_vec,
         mul_vec3_s(
             sub_vec3(one_vec, f0_vec),
             (1 - l_dot_h) ** 5
         )
     );
-    sub_vec3_r(diffuse_weight, one_vec, specular_weight);
-    mul_vec3_s_r(diffuse_weight, diffuse_weight, 1 - metallic);
+    sub_vec3_r(refraction_weight, one_vec, reflection_weight);
+    mul_vec3_s_r(refraction_weight, refraction_weight, 1 - metallic);
 
     //note: don't divide by PI, because CosinePDF. (implicitly multiplied by l_dot_n / PI)
     // lambert's diffuse:
@@ -92,12 +92,12 @@ const burley_brdf_diffuse = (material: MegaMaterial, r_in: Ray, hit: HitRecord, 
         * burley_diffuse_partial(fd_90, v_dot_n);
     const diffuse = mul_vec3_s(albedo, diffuse_factor);
 
-    const attenuation_value = mul_vec3(diffuse_weight, diffuse);
+    const attenuation_value = mul_vec3(refraction_weight, diffuse);
 
     bounce.attenuation.set(attenuation_value);
 }
 
-const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3, metallic: number, roughness: number) => {
+const burley_brdf_reflect = (material: MegaMaterial, r_in: Ray, hit: HitRecord, bounce: BounceRecord, scattered: Ray, albedo: Vec3, metallic: number, roughness: number) => {
     const n = unit_vec3(hit.normal);
     const v = negate_vec3(unit_vec3(r_in.direction));
     const l = unit_vec3(scattered.direction);
@@ -122,14 +122,14 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
 
     // we want to compute this f0 + (1 - f0) * (1 - l_dot_h) ** 5
     // except that f0 and 1 are vectors, so
-    add_vec3_r(specular_weight,
+    add_vec3_r(reflection_weight,
         f0_vec,
         mul_vec3_s(
             sub_vec3(one_vec, f0_vec),
             (1 - l_dot_h) ** 5
         )
     );
-    sub_vec3_r(diffuse_weight, one_vec, specular_weight);
+    sub_vec3_r(refraction_weight, one_vec, reflection_weight);
 
     //G factor
     //
@@ -155,42 +155,42 @@ const burley_brdf_specular = (material: MegaMaterial, r_in: Ray, hit: HitRecord,
             * walter_g_partial(v_dot_h, v_dot_n, alpha_g_squared, tan_theta_v_squared);
 
     //if we were to compute this using uniform sampling we'd have to compute this:
-    //    (specular_weight * D * g / (4 * v_dot_n * l_dot_n)) * l_dot_n =
-    //    (specular_weight * D * g) / (4 * v_dot_n)
+    //    (reflection_weight * D * g / (4 * v_dot_n * l_dot_n)) * l_dot_n =
+    //    (reflection_weight * D * g) / (4 * v_dot_n)
     // However we use sampling with the following pdf:
     //    D / J
     // To account for that we adjust our complete formula to be:
-    //    (specular_weight * J * g) / (4 * v_dot_n)
+    //    (reflection_weight * J * g) / (4 * v_dot_n)
     //
     // with J=16*v_dot_h**3
-    // mul_vec3_s_r(bounce.attenuation, specular_weight, 4 * g * (v_dot_h ** 3) / v_dot_n);
+    // mul_vec3_s_r(bounce.attenuation, reflection_weight, 4 * g * (v_dot_h ** 3) / v_dot_n);
     //
     // with J=4*v_dot_h
-    mul_vec3_s_r(bounce.attenuation, specular_weight, g * v_dot_h / v_dot_n);
+    mul_vec3_s_r(bounce.attenuation, reflection_weight, g * v_dot_h / v_dot_n);
     // with J=2
-    // mul_vec3_s_r(bounce.attenuation, specular_weight, g / (2 * v_dot_n));
+    // mul_vec3_s_r(bounce.attenuation, reflection_weight, g / (2 * v_dot_n));
 }
 
-export interface ISpecularGGXPDF extends IReflectionPDF<'specular_burley_pdf'> {
+export interface IReflectionGGXPDF extends IReflectionPDF<'reflection_burley_pdf'> {
     alpha_squared: number;
 }
 
-export const create_specular_ggxpdf = (): ISpecularGGXPDF => {
+export const create_reflection_ggx_pdf = (): IReflectionGGXPDF => {
     return {
-        ...create_partial_reflection_pdf('specular_burley_pdf'),
+        ...create_partial_reflection_pdf('reflection_burley_pdf'),
         alpha_squared: 0.5
     };
 };
 
-const set_specular_ggx_pdf_alpha = (pdf: ISpecularGGXPDF, alpha: number) => {
+const set_reflection_ggx_pdf_alpha = (pdf: IReflectionGGXPDF, alpha: number) => {
     pdf.alpha_squared = alpha ** 2
 };
 
-pdf_types.specular_burley_pdf = create_reflection_pdf_type<'specular_burley_pdf'>({
+pdf_types.reflection_burley_pdf = create_reflection_pdf_type<'reflection_burley_pdf'>({
     generate_h(pdf): Vec3 {
         const r1 = Math.random();
         const r2 = Math.random();
-        const { alpha_squared } = pdf as ISpecularGGXPDF;
+        const { alpha_squared } = pdf as IReflectionGGXPDF;
         const phi_h = r1 * Math.PI * 2;
         const cos_theta_h_squared = (1 - r2) / (1 + (alpha_squared - 1) * r2);
         const cos_theta_h = Math.sqrt(cos_theta_h_squared);
@@ -207,7 +207,7 @@ pdf_types.specular_burley_pdf = create_reflection_pdf_type<'specular_burley_pdf'
 
     value_h(pdf, h: Vec3): number {
         const cos_theta_h = h[2];
-        const { alpha_squared } = pdf as ISpecularGGXPDF;
+        const { alpha_squared } = pdf as IReflectionGGXPDF;
         return alpha_squared / (Math.PI * (1 + (alpha_squared - 1) * (cos_theta_h ** 2)) ** 2);
     }
 })
@@ -215,7 +215,7 @@ pdf_types.specular_burley_pdf = create_reflection_pdf_type<'specular_burley_pdf'
 export interface IBurleyPDF extends PDF {
     type: 'burley_pdf',
     pdf1: ICosinePDF;
-    pdf2: ISpecularGGXPDF;
+    pdf2: IReflectionGGXPDF;
     use_pdf1: boolean;
 }
 
@@ -223,7 +223,7 @@ export const create_burley_pdf = (): IBurleyPDF => {
     return {
         type: 'burley_pdf',
         pdf1: create_cosine_pdf(),
-        pdf2: create_specular_ggxpdf(),
+        pdf2: create_reflection_ggx_pdf(),
         use_pdf1: false
     };
 };
@@ -235,8 +235,8 @@ export const flip_burley_pdf = (pdf: IBurleyPDF): void => {
 //      Attenuation functions in materials account for use of their pdfs, so that true formula is pre-divided by pdf.
 //      When light based importance sampling is working, this pre-division becomes wrong.
 //      To fix that ray_color multiplies attenuation by material's pdf and divides by light's pdf.
-//      But the problem is that PBR actually uses 2 PDFs. One for diffuse and another for specular.
-//      If we used MixturePDF to combine the two, the fix would multiply by mixture of specular and diffuse pdfs which
+//      But the problem is that PBR actually uses 2 PDFs. One for refraction and another for reflection.
+//      If we used MixturePDF to combine the two, the fix would multiply by mixture of reflection and refraction pdfs which
 //      is wrong. To make it right again we do this:
 pdf_types.burley_pdf = {
     value(pdf, direction: Vec3): number {
@@ -273,10 +273,10 @@ const burley_attenuation: AttenuationFunction = (material, r_in, hit, bounce, sc
 
     if (mixture_pdf.use_pdf1) {
         // cosine pdf, therefore
-        burley_brdf_diffuse(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
+        burley_brdf_refract(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
     } else {
-        // specular pdf, therefore
-        burley_brdf_specular(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
+        // reflection pdf, therefore
+        burley_brdf_reflect(material, r_in, hit, bounce, scattered, albedo, _metallic, _roughness);
     }
     mul_vec3_s_r(bounce.attenuation, bounce.attenuation, 2);
     // bounce.attenuation.set(fma_vec3_s_s(hit.normal, 0.5, 0.5));
@@ -286,7 +286,7 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
     const mixture_pdf = material.scattering_pdf as IBurleyPDF;
     flip_burley_pdf(mixture_pdf);
     const diffuse_pdf = mixture_pdf.pdf1;
-    const specular_pdf = mixture_pdf.pdf2;
+    const reflection_pdf = mixture_pdf.pdf2;
     const unit_normal = unit_vec3(hit.normal);
     const unit_view = negate_vec3(unit_vec3(r_in.direction));
     cosine_pdf_set_direction(diffuse_pdf, unit_normal);
@@ -296,8 +296,8 @@ const burley_scatter: ScatterFunction = (material, r_in, hit, bounce) => {
     const uv = update_uv(hit);
     const roughness = texture_get_value[material.roughness.type](material.roughness, uv[0], uv[1], hit.p)[1];
     const _roughness = remap(clamp(roughness ?? 1, 0, 1), 0, 1, 0.001, 0.999) ** 2;
-    set_specular_ggx_pdf_alpha(specular_pdf, _roughness);
-    setup_reflection_pdf(specular_pdf, unit_normal, unit_view);
+    set_reflection_ggx_pdf_alpha(reflection_pdf, _roughness);
+    setup_reflection_pdf(reflection_pdf, unit_normal, unit_view);
 
     bounce.skip_pdf = false;
     return true;

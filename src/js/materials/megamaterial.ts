@@ -9,7 +9,7 @@ export interface MegaMaterial {
     scattering_pdf: PDF;
 
     type: string;
-    ior: number; // dielectric
+    ior: number;
     emissive: Texture;
     albedo: Texture;
     fuzz: number;// metal
